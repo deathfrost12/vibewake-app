@@ -1,0 +1,145 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# 🚨 ENHANCED MANDATORY IMPLEMENTATION PROTOCOL
+
+**CRITICAL - READ FIRST**: Before implementing ANY feature or solving ANY problem, ALWAYS follow this exact sequence:
+
+## 1️⃣ RESEARCH PHASE (MANDATORY)
+
+### When to Research
+**CRITICAL RULE:** If you are NOT 100% confident that your implementation will work correctly, you MUST perform web research first. This prevents generating non-functional code that wastes development time.
+
+### Research Triggers
+- Using unfamiliar APIs or libraries (especially expo-auth-session, third-party SDKs)
+- Implementing complex authentication flows
+- Working with platform-specific features
+- Integrating external services (Google OAuth, Stripe, etc.)
+- Any implementation where you have doubts about API usage or best practices
+
+### Research Process
+1. **Search official documentation** first (Expo docs, React Native docs, provider docs)
+2. **Look for working examples** on GitHub, StackOverflow, or official examples
+3. **Check recent issues** and discussions for known problems
+4. **Verify API compatibility** with current Expo SDK version
+5. **Find production-ready examples** from reputable sources
+
+## 2️⃣ SYSTEMATIC ANALYSIS PHASE
+
+### Data Flow Analysis
+- **Log everything** - trace data flow from start to finish
+- **Identify root cause** - don't guess, verify each step with logging
+- **Compare implementations** - how does working code differ from broken code?
+- **Document data flow** - where does data come from, how is it transformed, where does it go?
+
+### Implementation Brainstorming
+1. **Identify ALL possible approaches** - list at least 3-5 different ways to solve the problem
+2. **Analyze each approach** considering:
+   - ✅ **Pros** (benefits, performance, maintainability)
+   - ❌ **Cons** (drawbacks, complexity, technical debt)
+   - 🔧 **Implementation complexity** (time, resources needed)
+   - 📈 **Scalability** (future-proofing, growth potential)
+   - 🎯 **User experience impact**
+   - 💰 **Cost implications** (build credits, third-party services)
+
+## 3️⃣ DEBUGGING METHODOLOGY
+
+### Comprehensive Logging Strategy
+- **Add comprehensive logging** at every step of the problematic flow
+- **Log input/output** of each function call
+- **Track data transformations** (e.g., nonce → hashedNonce → verification)
+- **Compare expected vs actual values** at each step
+- **Use console.log with descriptive prefixes** (🔍, 🍎, ⚠️, ✅)
+
+### Example Logging Pattern
+```typescript
+console.log('🔍 AUTH_START:', { timestamp: new Date().toISOString() });
+console.log('🍎 APPLE_NONCE_GENERATED:', { 
+  originalNonce: nonce, 
+  hashedNonce: hashedNonce 
+});
+console.log('⚠️ SUPABASE_VERIFICATION:', { 
+  nonce: originalNonce, 
+  idToken: extractedToken 
+});
+console.log('✅ AUTH_SUCCESS:', { userId: user.id, email: user.email });
+```
+
+## 4️⃣ DECISION PROCESS
+
+### Selection Criteria
+- **Repetito's specific context** (educational app, Czech market, mobile-first)
+- **Current project constraints** (timeline, resources, technical stack)
+- **Long-term vision** (scalability, maintainability, commercial viability)
+
+### Documentation Format
+```
+## 🔍 Research Summary
+**Sources consulted:** [list of official docs, examples, GitHub repos]
+**Key findings:** [important discoveries from research]
+**Potential issues:** [known problems or limitations found]
+
+## 🧠 Implementation Analysis
+
+### Possible Approaches:
+1. **Approach A**: [description] 
+   - ✅ Pros: [list]
+   - ❌ Cons: [list]
+   
+2. **Approach B**: [description]
+   - ✅ Pros: [list] 
+   - ❌ Cons: [list]
+
+### 🎯 Selected Approach: [X]
+**Reasoning:** [detailed justification why this is optimal for Repetito]
+**Confidence Level:** [High/Medium/Low] - based on research and testing
+```
+
+## 5️⃣ MINIMAL SOLUTION APPROACH
+
+### Implementation Rules
+- **Fix root cause only** - don't over-engineer
+- **Test incrementally** - one small change, then test
+- **Verify with logs** - confirm fix works as expected
+- **Document the solution** - why this specific fix was needed
+
+## 6️⃣ VERIFICATION PROTOCOL
+
+### Testing Strategy
+- **Test the exact error scenario** that was failing
+- **Confirm logs show expected behavior**
+- **Test edge cases** and alternative flows
+- **Ensure no regression** in related functionality
+
+## ⚠️ ANTI-PATTERNS TO AVOID
+
+### Never Use "Try → Fix → Try → Fix" Approach
+❌ **Bad Approach:**
+1. Guess what might be wrong
+2. Make random changes
+3. Test and see if it works
+4. Repeat until something works
+
+✅ **Correct Approach:**
+1. **Research** → understand the problem thoroughly
+2. **Analyze** → identify root cause with logging
+3. **Debug** → trace exact data flow
+4. **Implement** → minimal fix targeting root cause
+5. **Verify** → comprehensive testing with logs
+
+## 🔄 COMMERCIAL APP DEVELOPMENT STANDARDS
+
+### Production-Ready Quality
+Always ask: "Would this approach be used in apps like Duolingo, Notion, or Spotify?"
+
+### Key Standards
+- **Error handling**: Comprehensive, user-friendly error messages in Czech
+- **Performance**: Optimize for 60fps, minimize bundle size, lazy loading
+- **Security**: Implement proper authentication, data validation, secure storage
+- **Testing**: Unit tests for critical flows, integration tests for user journeys
+- **Monitoring**: Error tracking, performance monitoring, crash reporting
+
+**REMEMBER: Log everything during debugging to understand exact data flow and transformations.**

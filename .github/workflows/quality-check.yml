@@ -1,0 +1,186 @@
+# 🧪 Universal Mobile App Quality Check Workflow
+# Template for automatic quality checks on PR and pushes
+
+name: 🧪 Quality Check
+
+# Trigger on PRs and pushes to main
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+  # Allows manual triggering
+  workflow_dispatch:
+
+jobs:
+  quality-check:
+    name: 🧪 Quality & Security Check
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📱 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📄 Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: 🔍 Run ESLint
+        run: |
+          echo "🔍 Running ESLint..."
+          npm run lint
+          echo "✅ ESLint passed!"
+
+      - name: 🏗️ TypeScript check
+        run: |
+          echo "🏗️ Running TypeScript check..."
+          npx tsc --noEmit
+          echo "✅ TypeScript check passed!"
+
+      - name: 💎 Prettier check
+        run: |
+          echo "💎 Checking code formatting..."
+          npx prettier --check .
+          echo "✅ Code formatting is correct!"
+
+      - name: 🔒 Security audit
+        run: |
+          echo "🔒 Running security audit..."
+          npm audit --audit-level moderate
+          echo "✅ No security vulnerabilities found!"
+
+      - name: 📱 Expo configuration check
+        run: |
+          echo "📱 Checking Expo configuration..."
+          npx expo config --type public > /dev/null
+          echo "✅ Expo configuration is valid!"
+
+      - name: 🧪 Environment variables check
+        run: |
+          echo "🧪 Checking environment setup..."
+
+          # Check for required files
+          if [ ! -f "app.json" ]; then
+            echo "❌ app.json not found"
+            exit 1
+          fi
+
+          if [ ! -f "eas.json" ]; then
+            echo "❌ eas.json not found"
+            exit 1
+          fi
+
+          if [ ! -f "package.json" ]; then
+            echo "❌ package.json not found"
+            exit 1
+          fi
+
+          echo "✅ Environment configuration verified!"
+
+      - name: 📊 Generate quality report
+        if: always()
+        run: |
+          echo "📊 Quality Check Report" > quality-report.md
+          echo "=======================" >> quality-report.md
+          echo "" >> quality-report.md
+          echo "**Commit:** ${{ github.sha }}" >> quality-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> quality-report.md
+          echo "**Timestamp:** $(date)" >> quality-report.md
+          echo "" >> quality-report.md
+          echo "### ✅ Checks Completed:" >> quality-report.md
+          echo "- ESLint code quality" >> quality-report.md
+          echo "- TypeScript type checking" >> quality-report.md
+          echo "- Code formatting (Prettier)" >> quality-report.md
+          echo "- Security vulnerability scan" >> quality-report.md
+          echo "- Expo configuration validation" >> quality-report.md
+          echo "- Environment setup verification" >> quality-report.md
+
+      - name: 📤 Upload quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-report-${{ github.sha }}
+          path: quality-report.md
+
+  build-test:
+    name: 🏗️ Build Test
+    runs-on: ubuntu-latest
+    needs: quality-check
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📱 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 🏗️ Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Test Expo build setup
+        run: |
+          echo "🏗️ Testing Expo build configuration..."
+
+          # Export to test build setup without actually building
+          npx expo export --output-dir ./dist-test --clear
+
+          echo "✅ Build setup test passed!"
+
+      - name: 🧹 Cleanup test build
+        run: rm -rf ./dist-test
+
+  pr-status:
+    name: 📢 PR Status Update
+    runs-on: ubuntu-latest
+    needs: [quality-check, build-test]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: ✅ Quality checks passed
+        if: needs.quality-check.result == 'success' && needs.build-test.result == 'success'
+        run: |
+          echo "✅ All quality checks passed!"
+          echo "PR is ready for review 🚀"
+
+      - name: ❌ Quality checks failed
+        if: needs.quality-check.result == 'failure' || needs.build-test.result == 'failure'
+        run: |
+          echo "❌ Quality checks failed!"
+          echo "Please fix the issues before merging"
+          exit 1
+
+# Extension notes:
+# 1. Add unit tests when implemented
+# 2. Add code coverage reporting
+# 3. Add performance testing
+# 4. Add Slack/Discord notifications
+# 5. Add automatic PR labeling

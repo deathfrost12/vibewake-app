@@ -1,0 +1,432 @@
+---
+description: "USE WHEN: Navigating the Repetito codebase, finding specific files or components, understanding project organization, making architectural decisions, refactoring directory structure, or questions about where to place new features. This rule provides comprehensive guidance on the Expo Router file-based structure and component organization."
+globs:
+alwaysApply: false
+---
+
+# Repetito Project Structure & Architecture Guide
+
+## 🏗️ **PROJECT OVERVIEW**
+Repetito je Czech educational app pro maturita exam preparation s React Native, Expo SDK 53, a spaced repetition algoritmy.
+
+**Bundle ID**: `com.danielholes.repetito.dev` (Development)  
+**Scheme**: `repetito-dev`  
+**Target Market**: Czech Republic (GDPR compliance required)
+
+**⚠️ Auto-Update Note**: This directory tree should be updated automatically or manually every major feature addition. Last updated: 2025-01-27
+
+## 📁 **ROOT DIRECTORY STRUCTURE**
+
+```
+REPETITO-APP/
+├── 🔧 Configuration
+│   ├── app.json                    # Expo configuration
+│   ├── eas.json                    # EAS Build profiles
+│   ├── package.json                # Dependencies & scripts
+│   ├── tsconfig.json               # TypeScript configuration
+│   ├── metro.config.js             # Metro bundler config
+│   ├── babel.config.js             # Babel configuration
+│   ├── tailwind.config.js          # NativeWind/Tailwind config
+│   ├── global.css                  # NativeWind CSS (base/components/utilities)
+│   ├── .cursorrules               # Legacy rules (migrating to .cursor/rules/)
+│   ├── .cursorignore              # Files ignored by Cursor AI
+│   └── nativewind-env.d.ts        # NativeWind TypeScript declarations
+│
+├── 📱 Source Code
+│   └── src/                       # Main source directory
+│
+├── 🔒 Environment & Secrets
+│   ├── .env                       # Local environment variables
+│   ├── env.example                # Environment template
+│   └── .gitignore                 # Git ignore patterns
+│
+├── 📚 Documentation
+│   ├── docs/                      # Technical documentation
+│   ├── README.md                  # Project overview
+│   ├── IMPLEMENTATION_ROADMAP.md  # Development phases
+│   └── ZAll-TUTO.md              # Quick tutorials
+│
+├── 🛠️ Scripts & Tools
+│   ├── scripts/                   # Helper scripts
+│   │   ├── ci/                    # CI/CD scripts
+│   │   └── test-screens.sh        # Screen testing utilities
+│   ├── google-oauth-checklist.md  # OAuth setup guide
+│   └── create-expo-template.sh    # Template generator
+│
+├── 📦 Build Artifacts
+│   ├── ios/                       # iOS native code (generated)
+│   ├── android/                   # Android native code (generated)
+│   └── .expo/                     # Expo build cache
+│
+├── 🗄️ External Services
+│   ├── supabase/                  # Database migrations & functions
+│   │   └── migrations/            # SQL migration files
+│   └── archive/                   # Deprecated/research files
+│
+├── 🎯 Cursor AI Configuration
+│   └── .cursor/
+│       └── rules/                 # Modern Cursor rules (*.mdc)
+│
+├── 💳 Store Configuration
+│   └── StoreKit Configuration.storekit  # iOS In-App Purchase config
+│
+└── 🎨 Assets
+    ├── assets/                    # App icons, splash screens
+    └── Uploads/                   # Development assets
+```
+
+## 📱 **SRC/ DIRECTORY STRUCTURE**
+
+```
+src/
+├── 🧭 App Router (Expo Router v5)
+│   └── app/
+│       ├── _layout.tsx            # Root layout (PostHog + Sentry + Navigation)
+│       ├── index.tsx              # Landing/Auth redirect
+│       ├── dev-menu.tsx           # Development tools menu
+│       ├── testing-screen-1.tsx   # Screen testing utilities
+│       ├── songmaker-demo.tsx     # Demo/prototype screen
+│       ├── revenuecat-demo.tsx    # RevenueCat testing screen
+│       │
+│       ├── (tabs)/                # Main app tabs
+│       │   ├── _layout.tsx        # Tab navigation layout
+│       │   ├── dashboard.tsx      # Main dashboard
+│       │   ├── library.tsx        # Study sets library
+│       │   ├── create.tsx         # Redirect to create modal
+│       │   ├── stats.tsx          # Progress statistics
+│       │   └── profile.tsx        # User profile
+│       │
+│       ├── auth/                  # Authentication screens
+│       │   ├── _layout.tsx        # Auth stack layout
+│       │   ├── login.tsx          # Login screen
+│       │   ├── register.tsx       # Registration screen
+│       │   └── forgot-password.tsx # Password reset
+│       │
+│       ├── create/                # Content creation modal
+│       │   ├── _layout.tsx        # Create modal layout
+│       │   ├── index.tsx          # Creation options
+│       │   ├── ai/                # Magic Notes (AI + OCR)
+│       │   ├── text/              # Text-based flashcards
+│       │   └── image/             # Image-based cards
+│       │
+│       └── profile/               # Profile sub-screens
+│           ├── change-password.tsx # Password change
+│           ├── edit.tsx           # Profile editing
+│           ├── privacy-policy.tsx # Privacy policy
+│           └── terms-of-service.tsx # Terms of service
+│
+├── 🧩 Components
+│   └── components/
+│       ├── ui/                    # Base UI primitives
+│       │   ├── magical-button.tsx # Primary button component
+│       │   ├── loading-skeleton.tsx # Loading states
+│       │   ├── loading-states.tsx # Loading state management
+│       │   ├── toast.tsx          # Toast notifications
+│       │   ├── paywall.tsx        # RevenueCat paywall
+│       │   └── premium-gate.tsx   # Premium feature gate
+│       ├── common/                # Shared components
+│       │   ├── error-boundary.tsx # Error handling
+│       │   ├── analytics-test.tsx # Analytics testing panel
+│       │   ├── loading-test.tsx   # Loading component testing
+│       │   ├── loading-usage-example.tsx # Loading usage examples
+│       │   ├── push-notifications-test.tsx # Push notification testing
+│       │   ├── revenuecat-provider.tsx # RevenueCat provider
+│       │   ├── toast-test.tsx     # Toast testing component
+│       │   └── toast-usage-example.tsx # Toast usage examples
+│       ├── auth/                  # Authentication components
+│       ├── dashboard/             # Dashboard-specific
+│       ├── library/               # Library-specific
+│       ├── create/                # Create flow
+│       ├── study/                 # Study session components
+│       ├── stats/                 # Statistics/progress
+│       └── profile/               # Profile components
+│
+├── 🏪 State Management
+│   └── stores/
+│       ├── auth-store.ts          # Zustand auth state
+│       └── revenuecat-store.ts    # RevenueCat subscription state
+│
+├── 🔗 Hooks
+│   └── hooks/
+│       ├── use-dev-testing.ts     # Development utilities
+│       ├── use-loading.ts         # Loading state management
+│       └── use-push-notifications.ts # Push notification hooks
+│
+├── 🌐 Services
+│   └── services/
+│       ├── auth/                  # Authentication services
+│       │   ├── google-auth.ts     # Google OAuth
+│       │   └── apple-auth.ts      # Apple Sign In
+│       ├── supabase/              # Database services
+│       │   └── client.ts          # Supabase client
+│       ├── analytics/             # Analytics integrations
+│       ├── notifications/         # Push notification services
+│       │   └── push-notifications.ts # Push notification management
+│       ├── openai/                # AI/OCR services
+│       ├── stripe/                # Payment processing
+│       ├── storage/               # File storage
+│       └── mock-data.ts           # Development data
+│
+├── 📚 Libraries & Utilities
+│   └── lib/
+│       ├── analytics.ts           # PostHog analytics
+│       ├── sentry.ts              # Error tracking
+│       └── sentry-minimal-test.ts # Sentry debugging
+│
+├── 🛠️ Utilities
+│   └── utils/
+│       ├── constants/             # App constants
+│       │   └── styles.ts          # Style constants
+│       ├── formatting/            # Data formatting
+│       ├── spaced-repetition/     # Study algorithms
+│       └── validation/            # Input validation
+│
+├── 🎨 Assets
+│   └── assets/
+│       ├── fonts/                 # Custom fonts
+│       ├── images/                # Images
+│       ├── animations/            # Lottie animations
+│       └── icon.png               # App icon
+│
+└── 📋 Types
+    └── types/
+        └── supabase.ts            # Database types
+```
+
+## 🔧 **TECH STACK INVENTORY**
+
+### **✅ INSTALLED & ACTIVE**
+- **React Native**: 0.79.4 (Latest stable)
+- **React**: 19.0.0 (New JSX transform)
+- **Expo SDK**: 53.0.12 (Managed workflow)
+- **Expo Router**: 5.1.0 (File-based navigation)
+- **NativeWind**: 4.1.23 (Tailwind CSS for RN) - **PRIMARY UI**
+- **PostHog**: 4.1.3 (Analytics - EU instance) ✅ **ACTIVE**
+- **Sentry**: 6.14.0 (Error tracking) ✅ **ACTIVE**
+- **Supabase**: 2.50.1 (Backend/Auth/DB)
+- **TanStack Query**: 5.81.2 (Server state)
+- **Zustand**: 5.0.5 (UI state)
+- **TypeScript**: 5.8.3 (Type safety)
+
+### **❌ NOT INSTALLED (Avoid Importing!)**
+- **Gluestack UI**: Not installed (causes import errors)
+- **React Native Elements**: Not installed
+- **UI Kitten**: Not installed
+- **Paper**: Not installed
+
+### **🔄 PLANNED/FUTURE**
+- **Gluestack UI v2**: For complex components (install when needed)
+- **Firebase**: Push notifications
+- **RevenueCat**: Subscription management ✅ **IN PROGRESS**
+- **Flipper**: Development debugging
+
+## 🧭 **NAVIGATION ARCHITECTURE**
+
+### **File-based Routing (Expo Router v5)**
+```typescript
+// Navigation structure based on file system
+app/
+├── (tabs)/           → Tab Navigator (Main app)
+├── auth/             → Auth Stack
+├── create/           → Modal Stack
+├── profile/          → Profile Stack
+└── [dynamic]/        → Dynamic routes
+```
+
+### **Route Patterns**
+```typescript
+// Examples:
+"/dashboard"          → app/(tabs)/dashboard.tsx
+"/auth/login"         → app/auth/login.tsx  
+"/create"             → app/create/index.tsx (modal)
+"/dev-menu"           → app/dev-menu.tsx
+"/profile/edit"       → app/profile/edit.tsx
+```
+
+## 🎨 **STYLING SYSTEM**
+
+### **NativeWind (Primary)**
+```typescript
+// Use Tailwind utility classes
+<View className="flex-1 bg-white px-4 py-6">
+  <Text className="text-lg font-semibold text-primary mb-4">
+    Repetito
+  </Text>
+</View>
+```
+
+### **Magical Green Theme**
+```typescript
+// tailwind.config.js
+colors: {
+  primary: '#14C46D',        // Magical Green
+  'primary-dark': '#0F9954', // Darker variant
+}
+```
+
+### **⚠️ CSS IMPORT RULES**
+```typescript
+// ✅ CORRECT - Import from app/_layout.tsx
+import '../../global.css';  // From src/app/_layout.tsx
+
+// ❌ WRONG - Don't import CSS in components
+import './styles.css';      // Will cause Metro errors
+```
+
+## 📊 **ANALYTICS & ERROR TRACKING**
+
+### **PostHog Analytics (Active)**
+```typescript
+// EU instance for GDPR compliance
+PostHogProvider({
+  apiKey: process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
+  host: 'https://eu.i.posthog.com'
+})
+
+// Czech educational events
+posthog?.capture('study_session_started', {
+  subject: 'Czech Maturita',
+  exam_type: 'maturita'
+});
+```
+
+### **Sentry Error Tracking (Active)**
+```typescript
+// Production-ready setup
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  environment: __DEV__ ? 'development' : 'production'
+});
+
+// App wrapped with Sentry
+export default Sentry.wrap(RootLayout);
+```
+
+## 🔒 **ENVIRONMENT CONFIGURATION**
+
+### **Required Environment Variables**
+```bash
+# .env (CRITICAL - DO NOT COMMIT)
+EXPO_PUBLIC_POSTHOG_API_KEY=phc_...
+EXPO_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+EXPO_PUBLIC_SENTRY_DSN=https://...@sentry.io/...
+EXPO_PUBLIC_SUPABASE_URL=https://...supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=...
+EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=appl_...
+```
+
+### **Development Scripts**
+```bash
+# Start development
+npm start                    # Standard start
+npm run dev                  # Development build
+npm run dev:clear           # Clear cache + start
+
+# Platform-specific
+npm run ios:dev             # iOS device
+npm run android:dev         # Android device
+
+# Debugging
+npm run debug-env           # Environment check
+npm run diagnose-network    # Network diagnostics
+```
+
+## 🚨 **COMMON PITFALLS & SOLUTIONS**
+
+### **❌ Import Errors**
+```typescript
+// ❌ WRONG - These packages are NOT installed
+import { Button } from '@gluestack-ui/themed';
+import { Card } from 'react-native-elements';
+
+// ✅ CORRECT - Use what's available
+import { Pressable, Text } from 'react-native';
+import { MagicalButton } from '../components/ui/magical-button';
+```
+
+### **❌ CSS Import Errors**
+```typescript
+// ❌ WRONG - CSS doesn't belong in React Native
+import './component.css';
+import '../styles.css';
+
+// ✅ CORRECT - Use NativeWind classes
+<View className="bg-primary px-4 py-2 rounded-lg">
+  <Text className="text-white font-semibold">Button</Text>
+</View>
+```
+
+### **❌ Path Resolution Issues**
+```typescript
+// ❌ WRONG - Complex aliases cause Metro issues
+import { Component } from '@/components/Component';
+import { utils } from '@/utils/helpers';
+
+// ✅ CORRECT - Use relative imports
+import { Component } from '../components/Component';
+import { utils } from '../../utils/helpers';
+```
+
+## 📚 **KEY FILES TO REFERENCE**
+
+### **Configuration**
+- [package.json](mdc:package.json) - Dependencies & scripts
+- [app.json](mdc:app.json) - Expo configuration
+- [tailwind.config.js](mdc:tailwind.config.js) - Styling config
+- [global.css](mdc:global.css) - NativeWind CSS
+
+### **Core App Files**
+- [src/app/_layout.tsx](mdc:src/app/_layout.tsx) - Root layout with analytics
+- [src/components/ui/magical-button.tsx](mdc:src/components/ui/magical-button.tsx) - Primary button
+- [src/stores/auth-store.ts](mdc:src/stores/auth-store.ts) - Authentication state
+- [src/stores/revenuecat-store.ts](mdc:src/stores/revenuecat-store.ts) - Subscription state
+
+### **Documentation**
+- [docs/error-tracking-analytics-setup.md](mdc:docs/error-tracking-analytics-setup.md) - Analytics setup
+- [IMPLEMENTATION_ROADMAP.md](mdc:IMPLEMENTATION_ROADMAP.md) - Development phases
+- [README.md](mdc:README.md) - Project overview
+
+## 🎯 **DEVELOPMENT PRINCIPLES**
+
+1. **Mobile-First**: No web components or responsive breakpoints
+2. **Czech Market**: GDPR compliance, Czech localization priority
+3. **Educational Focus**: Spaced repetition, maturita preparation
+4. **Performance**: 60fps, optimized for Hermes engine
+5. **Production Quality**: Commercial app standards
+6. **Type Safety**: Strict TypeScript, no `any` types
+
+## 📈 **DIRECTORY MAINTENANCE**
+
+### **Auto-Update Strategy**
+To keep this directory structure current, consider implementing:
+
+```bash
+# Generate directory tree automatically
+tree -I 'node_modules|.git|.expo|ios|android' -a > project-structure.txt
+
+# Or use custom script
+npm run generate-structure  # Custom script to update this file
+```
+
+### **Update Triggers**
+Update this structure when:
+- New major features are added (≥3 new files)
+- Directory restructuring occurs
+- New service integrations are added
+- Major dependencies change
+
+### **Validation Script**
+```bash
+# Validate structure matches reality
+npm run validate-structure  # Compare this doc with actual filesystem
+```
+
+---
+
+*Last updated: 2025-01-27 - After RevenueCat integration and enhanced Cursor rules setup*
+
+
+---
+
+*Rule created: 2025-01-03 - Project structure documented after Fáze 1 completion*

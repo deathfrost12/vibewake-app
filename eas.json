@@ -1,0 +1,74 @@
+{
+  "cli": {
+    "version": ">= 3.10.2"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium",
+        "cache": {
+          "key": "universal-app-ios-cache-2025-01-29"
+        },
+        "buildConfiguration": "Debug"
+      },
+      "env": {
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.yourcompany.yourapp",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true,
+        "buildConfiguration": "Debug"
+      },
+      "env": {
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.yourcompany.yourapp",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "cache": {
+          "key": "universal-app-ios-cache-2025-01-29"
+        }
+      },
+      "env": {
+        "APP_VARIANT": "preview",
+        "EXPO_PUBLIC_APP_ENV": "preview",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.yourcompany.yourapp",
+        "EXPO_PUBLIC_SUPABASE_URL": "$SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "$SUPABASE_ANON_KEY",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
+    },
+    "production": {
+      "node": "20.18.1",
+      "ios": {
+        "cache": {
+          "key": "universal-app-ios-cache-2025-01-29"
+        }
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.yourcompany.yourapp",
+        "EXPO_PUBLIC_SUPABASE_URL": "$SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "$SUPABASE_ANON_KEY",
+        "EXPO_PUBLIC_OPENAI_API_KEY": "$OPENAI_API_KEY",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "$STRIPE_PUBLISHABLE_KEY",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

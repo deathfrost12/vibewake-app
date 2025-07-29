@@ -1,0 +1,73 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+# ------------------------------------------------------------
+#  Universal Mobile App – .cursorignore (LLM cannot see sensitive or large files)
+#  Syntax = .gitignore; ordered from most sensitive to largest
+# ------------------------------------------------------------
+
+# 1) Sensitive configuration
+.env*
+*.p12
+*.keystore
+google-services.json
+ios/Secrets.plist
+
+# 2) Node / Yarn / Expo cache
+node_modules/
+.expo/
+.expo-shared/
+*.lock
+*.log
+
+# 3) iOS artifacts
+ios/build/
+ios/Pods/
+ios/**/*.xcuserstate
+ios/**/DerivedData/
+
+# 4) Android artifacts
+android/.gradle/
+android/.idea/
+android/app/build/
+*.keystore
+
+# 5) Web-/RN-buildy
+dist/
+build/
+web-build/
+*.apk
+*.aab
+
+# 6) Test, coverage, bundler cache
+coverage/
+.jest/
+.nyc_output/
+.parcel-cache/
+.eslintcache
+.next/
+.nuxt/
+.cache/
+.turbo/
+
+# 7) Large binaries and design assets (keep only what AI really needs)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.mp4
+*.mov
+*.zip
+*.dmg
+*.svg
+
+# 8) OS and editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# 9) Template-specific ignore patterns for auto-selection rules and context management
+*.backup
+supabase/migrations/

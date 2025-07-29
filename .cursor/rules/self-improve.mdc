@@ -1,0 +1,257 @@
+---
+description: "USE WHEN: Refactoring code, improving code quality, identifying repeated patterns, standardizing implementations, creating new development patterns, fixing bugs that could be prevented by rules, or evolving the Repetito codebase with better practices. This rule focuses on continuous improvement for Czech educational app development."
+globs:
+alwaysApply: false
+---
+
+# Self-Improvement Rules for Repetito Development
+
+## Overview
+
+This rule defines how to continuously improve development practices specifically for the **Repetito** Czech educational app. It focuses on recognizing patterns, learning from educational app best practices, and evolving our Czech maturita preparation platform.
+
+## Rule Improvement Triggers for Repetito
+
+### Educational App Patterns
+- New spaced repetition algorithm implementations across study sessions
+- Repeated user engagement patterns in Czech student behavior
+- Common accessibility issues in educational interfaces
+- RevenueCat subscription flow optimizations
+- Offline study session management patterns
+
+### Czech Market Specifics
+- GDPR compliance patterns for educational data
+- Czech localization improvements (i18next patterns)
+- Maturita exam content verification workflows
+- Czech payment method integrations (Czech bank cards, mobile payments)
+- Cultural preferences in educational UX
+
+### React Native/Expo Patterns
+- Performance optimizations for smooth 60fps study animations
+- Native module integrations for educational features (OCR, TTS)
+- EAS Build patterns and build credit optimization
+- Expo Router navigation patterns for complex educational flows
+- NativeWind + Gluestack UI combination patterns
+
+### Supabase Integration Patterns
+- Real-time progress synchronization patterns
+- RLS (Row Level Security) patterns for student data protection
+- Edge Function patterns for AI-powered features (Magic Notes)
+- Database migration patterns for educational schema evolution
+- Analytics event patterns for educational metrics
+
+## Analysis Process for Repetito
+
+### Compare New Code with Existing Rules
+- Check if new educational features follow established study session patterns
+- Verify Czech localization consistency across new components
+- Ensure analytics tracking follows PostHog educational event taxonomy
+- Validate RevenueCat integration patterns against subscription best practices
+
+### Identify Educational Patterns That Should Be Standardized
+- Student progress tracking implementations
+- Spaced repetition interval calculations
+- Offline data synchronization strategies
+- Czech maturita content validation procedures
+- Educational accessibility implementations
+
+### Look for References to Educational Documentation
+- Czech Ministry of Education curriculum standards
+- Spaced repetition research papers and algorithms
+- Educational UX best practices for mobile learning
+- GDPR educational data processing guidelines
+- Czech student study habit research
+
+### Check for Consistent Educational Error Handling Patterns
+- Study session interruption recovery
+- Network failure during progress synchronization
+- Invalid maturita content handling
+- Subscription failure graceful degradation
+- Czech language input validation
+
+### Monitor Educational Test Patterns and Coverage
+- Spaced repetition algorithm unit tests
+- Czech content validation integration tests
+- User study session flow E2E tests
+- Analytics event tracking validation
+- Subscription flow testing patterns
+
+## Rule Updates for Repetito
+
+### Add New Rules When
+- A new educational pattern is used in 3+ study components
+- Common bugs in educational features could be prevented by a rule
+- Czech market feedback repeatedly mentions the same UX issues
+- New spaced repetition or analytics patterns emerge
+- RevenueCat subscription patterns evolve
+
+### Modify Existing Rules When
+- Better educational examples exist in the codebase
+- Additional Czech localization edge cases are discovered
+- Related educational rules have been updated
+- Study session implementation details have changed
+- Analytics tracking requirements change
+
+### Educational Pattern Recognition Examples
+
+```typescript
+// If you see repeated patterns like:
+const progressData = await supabase
+  .from('study_progress')
+  .select('correct_answers, total_attempts, last_studied')
+  .eq('user_id', userId)
+  .eq('set_id', setId);
+
+// Consider adding to educational data patterns rule:
+// - Standard progress tracking queries
+// - Common study session analytics
+// - Performance optimization for study data
+```
+
+```typescript
+// If you see repeated Czech localization patterns:
+const messages = {
+  cs: {
+    study: {
+      session_complete: 'Studijní sezení dokončeno!',
+      next_review: 'Další opakování za {{interval}}',
+      maturita_prep: 'Příprava na maturity'
+    }
+  }
+};
+
+// Consider adding to Czech localization rule:
+// - Standard educational vocabulary
+// - Maturita-specific terminology
+// - Student motivation messaging
+```
+
+## Rule Quality Checks for Repetito
+
+### Educational Relevance
+- Rules should be actionable for educational app development
+- Examples should come from actual Repetito study session implementations
+- References should include Czech educational standards when applicable
+- Patterns should consider mobile learning best practices
+
+### Czech Market Alignment
+- Rules should respect Czech cultural norms and expectations
+- GDPR compliance should be built into all data handling patterns
+- Czech language patterns should be consistent and grammatically correct
+- Educational terminology should align with Czech maturita standards
+
+### Technical Excellence
+- Performance considerations for smooth study experiences
+- Offline-first patterns for uninterrupted learning
+- Analytics patterns that respect educational privacy
+- Accessibility patterns for inclusive education
+
+## Continuous Improvement for Repetito
+
+### Monitor Educational User Feedback
+- Czech student study habit insights
+- Maturita preparation effectiveness metrics
+- Teacher and parent feedback on educational value
+- Accessibility feedback from diverse learners
+
+### Track Educational Development Questions
+- Spaced repetition algorithm optimization questions
+- Czech content creation and validation workflows
+- Educational analytics and progress tracking patterns
+- Subscription conversion in educational contexts
+
+### Update Rules After Major Educational Features
+- New study modes or learning algorithms
+- Enhanced Czech content management systems
+- Improved progress tracking and analytics
+- Advanced spaced repetition implementations
+
+### Add Links to Relevant Educational Documentation
+- Czech Ministry of Education resources
+- Educational psychology research papers
+- Mobile learning best practices
+- Spaced repetition algorithm documentation
+
+### Cross-Reference Related Educational Rules
+- `@spaced-repetition` ↔ `@repetito-development`
+- `@czech-localization` ↔ `@magical-green-ui`
+- `@analytics` ↔ `@educational-privacy`
+- `@subscription-management` ↔ `@educational-content-access`
+
+## Rule Deprecation for Repetito
+
+### Mark Outdated Educational Patterns as Deprecated
+- Old spaced repetition algorithms
+- Deprecated Czech educational standards
+- Outdated analytics tracking patterns
+- Legacy subscription flow patterns
+
+### Remove Rules That No Longer Apply to Education
+- Non-educational feature patterns
+- Outdated localization approaches
+- Deprecated React Native educational libraries
+- Old Czech market compliance requirements
+
+### Document Migration Paths for Old Educational Patterns
+- From legacy spaced repetition to current algorithms
+- From old analytics to PostHog educational events
+- From deprecated UI patterns to Magical Green design system
+- From old subscription flows to RevenueCat integration
+
+## Documentation Updates for Repetito
+
+### Keep Educational Examples Synchronized with Code
+- Update spaced repetition examples when algorithms change
+- Sync Czech localization examples with i18next implementation
+- Align analytics examples with PostHog educational taxonomy
+- Update subscription examples with RevenueCat integration
+
+### Update References to External Educational Docs
+- Czech Ministry of Education curriculum updates
+- Educational psychology research advances
+- Mobile learning technology improvements
+- GDPR educational compliance changes
+
+### Maintain Links Between Related Educational Rules
+- Study session flow rules
+- Progress tracking and analytics rules
+- Czech content management rules
+- Educational accessibility rules
+
+### Document Breaking Changes in Educational Features
+- Spaced repetition algorithm updates
+- Analytics tracking schema changes
+- Czech localization structural changes
+- Subscription model modifications
+
+## Educational App Success Metrics
+
+### Student Engagement Metrics
+```typescript
+// Track educational effectiveness
+posthog?.capture('study_session_completed', {
+  duration_minutes: sessionDuration,
+  cards_studied: cardsCount,
+  accuracy_percentage: correctAnswers / totalAnswers * 100,
+  spaced_repetition_level: currentLevel,
+  subject: 'czech_maturita'
+});
+```
+
+### Czech Market Performance
+- Czech App Store education category ranking
+- Czech student retention rates
+- Maturita preparation success stories
+- Educational institution adoption rates
+
+### Technical Performance in Educational Context
+- Study session loading times
+- Offline synchronization success rates
+- Animation smoothness during study
+- Memory usage during long study sessions
+
+Follow `@cursor-rules` for proper rule formatting and structure while maintaining focus on educational excellence and Czech market success.
+
+
+Follow [cursor-rules.mdc](mdc:.cursor/rules/curs or-rules.mdc) for proper rule formatting and structure.
+

@@ -1,0 +1,86 @@
+{
+  "expo": {
+    "name": "Universal Mobile App",
+    "slug": "universal-mobile-app",
+    "version": "1.0.0",
+    "sdkVersion": "53.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6B7280"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.yourapp",
+      "jsEngine": "hermes",
+      "buildNumber": "2",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "This app needs access to photos for image features",
+        "NSCameraUsageDescription": "This app needs access to camera for photo features",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.applesignin": ["Default"],
+        "aps-environment": "development"
+      },
+      "associatedDomains": ["applinks:yourapp.com"]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6B7280"
+      },
+      "package": "com.yourcompany.yourapp",
+      "jsEngine": "hermes",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.571576096718-poh1o01vj6k96k55895i85hq9vtn8rgo"
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "note": "Use SENTRY_AUTH_TOKEN environment variable to authenticate with Sentry.",
+          "organization": "yourorg",
+          "project": "yourapp"
+        }
+      ],
+      "expo-apple-authentication",
+      "expo-notifications",
+      "expo-dev-client",
+      "expo-localization"
+    ],
+    "scheme": "yourapp",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "7bdfeec7-bfa0-4005-b90f-0466e5e753e3"
+      }
+    },
+    "owner": "danielholes"
+  }
+}

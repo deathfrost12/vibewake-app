@@ -1,0 +1,353 @@
+---
+description: "USE WHEN: Making UI/styling decisions, choosing between NativeWind vs Gluestack UI, implementing Magical Green branding, creating components, handling mobile styling, resolving import errors, or questions about available libraries and their usage patterns. This rule defines the hybrid NativeWind + Gluestack UI v2 approach for Repetito educational app."
+globs:
+alwaysApply: false
+---
+
+# Repetito Tech Stack & UI Framework Guide
+
+## Overview
+
+This rule defines the **definitive technology stack** for the Repetito Czech educational app. It resolves the NativeWind vs Gluestack UI decision with a **hybrid approach optimized for rapid development** while maintaining the signature **Magical Green** branding (#14C46D).
+
+**Key Decision**: **NativeWind (Primary) + Gluestack UI v2 (Secondary)** for maximum velocity with educational app standards.
+
+## 🎯 **PRIMARY UI FRAMEWORK: NativeWind**
+
+### **Why NativeWind is Primary**
+- ✅ **Faster development**: Utility-first CSS approach familiar to React developers
+- ✅ **Magical Green integration**: Easy custom color system with theme configuration
+- ✅ **Educational app performance**: Optimized for smooth 60fps study session animations
+- ✅ **Already integrated**: Fully configured in Repetito with custom theme
+- ✅ **Czech market ready**: Works perfectly with i18next localization
+
+### **NativeWind Usage Patterns**
+```typescript
+// ✅ PRIMARY - Use for ALL layout, spacing, colors, typography
+<View className="flex-1 bg-white px-4 py-6">
+  <Text className="text-xl font-bold text-primary mb-4">
+    Studijní sady
+  </Text>
+  <View className="bg-primary/10 rounded-lg p-4 mb-4">
+    <Text className="text-primary font-semibold">
+      Maturita z češtiny
+    </Text>
+  </View>
+</View>
+```
+
+### **Magical Green Theme Configuration**
+```javascript
+// tailwind.config.js - Already configured
+module.exports = {
+  content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#14C46D',        // Magical Green
+        'primary-dark': '#0F9954', // Darker variant for interactions
+        'primary-light': '#A7F3D0', // Light variant for backgrounds
+      }
+    }
+  }
+}
+```
+
+## 🔄 **SECONDARY UI FRAMEWORK: Gluestack UI v2**
+
+### **When to Use Gluestack UI v2**
+Use **ONLY** for complex components that require:
+- ✅ **Advanced accessibility** (screen readers, VoiceOver for Czech students)
+- ✅ **Complex interactions** (date pickers, complex forms, modals)
+- ✅ **Educational-specific patterns** (progress indicators, quiz interfaces)
+
+### **Installation Status**
+```bash
+# ❌ NOT CURRENTLY INSTALLED
+# Install only when needed for specific components
+npm install @gluestack-ui/themed @gluestack-ui/components
+```
+
+### **Planned Gluestack UI Components**
+```typescript
+// 🔄 FUTURE - Install when implementing these features
+import { 
+  Modal,           // For study session completion dialogs
+  Progress,        // For spaced repetition progress tracking
+  DatePicker,      // For study schedule planning
+  FormControl,     // For complex Czech content creation forms
+  Alert            // For educational feedback and error states
+} from '@gluestack-ui/themed';
+```
+
+## 📚 **COMPLETE TECH STACK INVENTORY**
+
+### **✅ CORE FOUNDATION (INSTALLED & ACTIVE)**
+```json
+{
+  "react": "19.0.0",
+  "react-native": "0.79.4",
+  "expo": "53.0.12",
+  "typescript": "5.8.3"
+}
+```
+
+### **✅ NAVIGATION & ROUTING (INSTALLED & ACTIVE)**
+```json
+{
+  "expo-router": "5.1.0"
+}
+```
+- **File-based routing**: `app/(tabs)/`, `app/auth/`, `app/create/`
+- **Educational flows**: Study sessions, progress tracking, content creation
+
+### **✅ UI & STYLING (INSTALLED & ACTIVE)**
+```json
+{
+  "nativewind": "4.1.23"
+}
+```
+- **Primary UI framework** for all Repetito components
+- **Magical Green theme** (#14C46D) configured
+- **Czech typography** optimized for educational content
+
+### **✅ STATE MANAGEMENT (INSTALLED & ACTIVE)**
+```json
+{
+  "zustand": "5.0.5",
+  "@tanstack/react-query": "5.81.2"
+}
+```
+- **Zustand**: UI state (theme, modals, study session state)
+- **TanStack Query**: Server state, Supabase caching, offline sync
+
+### **✅ BACKEND & DATA (INSTALLED & ACTIVE)**
+```json
+{
+  "@supabase/supabase-js": "2.50.1",
+  "zod": "latest"
+}
+```
+- **Supabase**: Auth, PostgreSQL with RLS, Storage, Edge Functions
+- **Zod**: Runtime validation for educational content and API responses
+
+### **✅ ANALYTICS & MONITORING (INSTALLED & ACTIVE)**
+```json
+{
+  "posthog-react-native": "4.1.3",
+  "@sentry/react-native": "6.14.0"
+}
+```
+- **PostHog**: Czech student behavior analytics (EU instance)
+- **Sentry**: Educational app error tracking and performance monitoring
+
+### **✅ INTERNATIONALIZATION (INSTALLED & ACTIVE)**
+```json
+{
+  "react-i18next": "latest",
+  "i18next": "latest",
+  "expo-localization": "latest"
+}
+```
+- **Czech-first localization** for educational content
+- **Maturita-specific terminology** and cultural context
+
+### **🔄 SUBSCRIPTION MANAGEMENT (IN PROGRESS)**
+```json
+{
+  "react-native-purchases": "latest"
+}
+```
+- **RevenueCat**: Premium features, Czech payment methods
+- **Status**: Currently integrating for educational content access
+
+### **❌ NOT INSTALLED (AVOID IMPORTING!)**
+```typescript
+// ❌ WRONG - These will cause import errors
+import { Button } from '@gluestack-ui/themed';
+import { Card } from 'react-native-elements';
+import { Component } from 'react-native-paper';
+import { Element } from '@ui-kitten/components';
+```
+
+### **🔮 PLANNED FUTURE ADDITIONS**
+```json
+{
+  "@gluestack-ui/themed": "future - for complex educational components",
+  "react-native-reanimated": "3.x - for smooth study animations",
+  "react-native-gesture-handler": "2.x - for intuitive educational interactions",
+  "expo-av": "latest - for Czech pronunciation audio",
+  "expo-camera": "latest - for Magic Notes OCR scanning"
+}
+```
+
+## 🎨 **UI COMPONENT STRATEGY**
+
+### **NativeWind-First Approach**
+```typescript
+// ✅ CORRECT - NativeWind for 90% of UI needs
+const StudyCard = ({ content, isCorrect }: StudyCardProps) => {
+  return (
+    <View className={cn(
+      "p-6 rounded-xl border-2 transition-colors",
+      isCorrect 
+        ? "bg-primary/10 border-primary" 
+        : "bg-gray-50 border-gray-200"
+    )}>
+      <Text className="text-lg font-medium text-gray-900 mb-2">
+        {content.question}
+      </Text>
+      <Text className="text-sm text-gray-600">
+        {content.czechTranslation}
+      </Text>
+    </View>
+  );
+};
+```
+
+### **Gluestack UI for Complex Components**
+```typescript
+// 🔄 FUTURE - Gluestack UI for advanced features
+import { Progress, Modal } from '@gluestack-ui/themed';
+
+const StudyProgress = ({ progress }: StudyProgressProps) => {
+  return (
+    <View className="p-4">
+      {/* NativeWind for layout */}
+      <Text className="text-lg font-semibold text-primary mb-2">
+        Pokrok v učení
+      </Text>
+      
+      {/* Gluestack UI for complex accessibility */}
+      <Progress value={progress} className="w-full">
+        <Progress.FilledTrack bg="$primary" />
+      </Progress>
+    </View>
+  );
+};
+```
+
+## 🚨 **CRITICAL IMPORT RULES**
+
+### **✅ CORRECT Imports**
+```typescript
+// React Native Core
+import { View, Text, Pressable, ScrollView } from 'react-native';
+
+// NativeWind Utilities
+import { cn } from '../utils/cn'; // Class name utility
+
+// Expo Modules
+import { useRouter } from 'expo-router';
+import { useFonts } from 'expo-font';
+
+// Custom Components
+import { MagicalButton } from '../components/ui/magical-button';
+
+// State Management
+import { useAuthStore } from '../stores/auth-store';
+import { useQuery } from '@tanstack/react-query';
+
+// Supabase
+import { supabase } from '../services/supabase/client';
+```
+
+### **❌ WRONG Imports (Will Cause Errors)**
+```typescript
+// ❌ DON'T DO THIS - Package not installed
+import { Button, Input } from '@gluestack-ui/themed';
+import { Card } from 'react-native-elements';
+import { Component } from 'react-native-paper';
+
+// ❌ DON'T DO THIS - Web-specific imports
+import { NextSeoProps } from 'next-seo';
+import { useMediaQuery } from 'react-responsive';
+```
+
+## 🎯 **EDUCATIONAL APP OPTIMIZATION**
+
+### **Performance for Study Sessions**
+```typescript
+// ✅ Optimized for educational content
+const StudySession = () => {
+  return (
+    <ScrollView className="flex-1 bg-white">
+      {/* Smooth animations for card flips */}
+      <View className="transition-transform duration-300">
+        {/* Educational content */}
+      </View>
+    </ScrollView>
+  );
+};
+```
+
+### **Czech Localization Integration**
+```typescript
+// ✅ NativeWind + i18next for Czech education
+const { t } = useTranslation();
+
+return (
+  <View className="p-4 bg-primary/5 rounded-lg">
+    <Text className="text-primary font-bold text-lg">
+      {t('study.session.title')} {/* "Studijní sezení" */}
+    </Text>
+  </View>
+);
+```
+
+### **Accessibility for Educational Use**
+```typescript
+// ✅ Educational accessibility with NativeWind
+<Pressable 
+  className="bg-primary p-4 rounded-lg active:bg-primary-dark"
+  accessibilityLabel={t('study.start_session')}
+  accessibilityRole="button"
+  accessibilityHint={t('study.start_session_hint')}
+>
+  <Text className="text-white font-semibold text-center">
+    {t('study.start')}
+  </Text>
+</Pressable>
+```
+
+## 🔄 **DECISION RATIONALE**
+
+### **Why This Hybrid Approach for Repetito**
+1. **Educational App Speed**: NativeWind enables rapid iteration on study interfaces
+2. **Czech Market Requirements**: Easy localization and cultural customization
+3. **Magical Green Branding**: Seamless theme integration with utility classes
+4. **Future Flexibility**: Can add Gluestack UI components as needed
+5. **Performance**: Lightweight for smooth educational animations
+
+### **When to Reconsider This Stack**
+- If Gluestack UI v2 usage exceeds 50% of components
+- If educational accessibility requirements become more complex
+- If Czech market demands specific UI patterns not available in NativeWind
+- If team velocity decreases due to utility-first approach
+
+## 📋 **IMPLEMENTATION CHECKLIST**
+
+### **For New Components**
+- [ ] ✅ Start with NativeWind classes
+- [ ] ✅ Use Magical Green theme colors
+- [ ] ✅ Add Czech localization keys
+- [ ] ✅ Include educational accessibility labels
+- [ ] 🔄 Only add Gluestack UI if NativeWind insufficient
+
+### **For Complex Features**
+- [ ] 🔄 Evaluate if Gluestack UI component needed
+- [ ] 🔄 Install Gluestack UI package if required
+- [ ] ✅ Maintain NativeWind for layout and theming
+- [ ] ✅ Document decision for future developers
+
+This tech stack decision is optimized for **Repetito's success in the Czech educational market** while maintaining development velocity and code quality standards.
+
+### NativeWind Setup
+- Install: `npm install nativewind`
+- Configure with Expo SDK 53+
+- Enable className props for React Native components
+
+### NativeWind Setup
+- Install: `npm install nativewind`
+- Configure with Expo SDK 53+
+- Enable className props for React Native components

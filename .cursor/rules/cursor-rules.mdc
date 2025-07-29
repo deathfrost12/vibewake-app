@@ -1,0 +1,191 @@
+---
+description: "USE WHEN: Creating new rules, managing rule files, organizing rule structure, understanding rule frontmatter format, handling rule dependencies, or questions about Cursor rules system. This rule defines standards for rule management for universal mobile app development."
+globs:
+alwaysApply: false
+---
+
+# Cursor Rules Management for Universal Mobile App Template
+
+## Overview
+
+This document outlines how to properly manage Cursor AI rules for the **Universal Mobile App Template** - a production-ready React Native template built with Expo and modern development practices.
+
+## Rule Storage Location
+
+All project rules must be stored in:
+```
+.cursor/rules/
+```
+
+## Naming Conventions
+
+### File Naming
+- Use **kebab-case** for rule files
+- Always use `.mdc` extension for rule files
+- Examples: `mobile-development.mdc`, `ui-components.mdc`, `universal-styling.mdc`
+
+### Rule Names
+- Use descriptive names that reflect their purpose
+- Include technology or domain when relevant
+- Examples: `@mobile-development`, `@tech-stack`, `@universal-components`
+
+## Rule Structure
+
+### Frontmatter Requirements
+All rule files must include frontmatter:
+
+```yaml
+---
+title: "Descriptive Title"
+description: "Brief description of what this rule covers"
+tags: ["expo", "react-native", "mobile", "universal"]
+version: "1.0"
+applies_to: "mobile-development"
+---
+```
+
+### Content Structure
+```markdown
+# Rule Title
+
+## Overview
+Brief explanation of the rule's purpose
+
+## Key Guidelines
+- Specific instructions
+- Code examples
+- Best practices
+
+## Universal Template Patterns
+- Mobile app considerations
+- Cross-platform requirements
+- Configurable branding system
+
+## Examples
+```typescript
+// Universal template code examples
+```
+
+## Anti-patterns
+What to avoid in universal template development
+```
+
+## Universal Template Rule Categories
+
+### 1. **Development Workflow** (`@mobile-development`)
+- EAS Build procedures with pre-build checklist
+- RevenueCat integration for subscriptions
+- Supabase backend patterns
+- Analytics (PostHog) and error tracking (Sentry)
+
+### 2. **UI/UX Standards** (`@universal-ui`)
+- Customizable theme system implementation
+- NativeWind + Gluestack UI v2 combination
+- One-handed ergonomics (actions ≤ 40pt from bottom)
+- Multi-language localization support
+
+### 3. **Technical Architecture** (`@tech-stack`)
+- React Native 0.79.5 + Expo SDK 53
+- File-based routing with Expo Router v5
+- State management: Zustand + TanStack Query
+- Type safety with TypeScript + Zod validation
+
+### 4. **App Features** (`@core-features`)
+- Subscription management with RevenueCat
+- Analytics integration (PostHog)
+- Error tracking (Sentry)
+- Authentication with Supabase
+
+## Rule Creation Guidelines
+
+### When to Create New Rules
+- New technology patterns used in 3+ files
+- Repetitive code review feedback
+- Mobile-specific business logic
+- Universal template best practices
+
+### Rule Quality Standards
+- Include real code examples from template codebase
+- Reference specific files: `src/components/ui/button.tsx`
+- Provide both ✅ correct and ❌ incorrect examples
+- Include performance considerations for mobile
+
+### Universal Template Context
+- Consider mobile-first design principles
+- Cross-platform compatibility focus
+- Production-ready standards
+- Modern development practices integration
+
+## Rule Dependencies
+
+### Core Dependencies
+- `@mobile-development` → Foundation for all development
+- `@tech-stack` → Technical decisions and constraints
+- `@project-structure` → File organization and architecture
+
+### Feature Dependencies
+- `@universal-components` depends on `@tech-stack`
+- `@mobile-optimization` depends on `@mobile-development`
+- `@cross-platform` depends on `@universal-components`
+
+## Rule Maintenance
+
+### Version Control
+- Update version number in frontmatter when making changes
+- Document breaking changes in rule content
+- Maintain backward compatibility when possible
+
+### Regular Updates
+- Review rules after major dependency updates
+- Update examples when codebase patterns change
+- Remove deprecated patterns and add new ones
+
+### Cross-Reference Management
+- Update related rules when making changes
+- Maintain links between dependent rules
+- Verify examples still work with current codebase
+
+## Integration with Development Workflow
+
+### Pre-Development
+1. Fetch relevant rules: `@mobile-development`, `@tech-stack`
+2. Review mobile requirements: `@cross-platform`
+3. Check UI standards: `@universal-components`
+
+### During Development
+- Reference rules for consistent patterns
+- Update rules when discovering new patterns
+- Document universal template solutions
+
+### Post-Development
+- Update rules with lessons learned
+- Add new examples from implemented features
+- Refine guidelines based on real usage
+
+## Best Practices for Universal Template
+
+### Mobile App Considerations
+- Prioritize offline functionality and sync
+- Implement proper analytics and user tracking
+- Consider universal user patterns and preferences
+- Ensure accessibility for all users
+
+### Commercial App Standards
+- Production-ready error handling and logging
+- Performance optimization for 60fps animations
+- Security best practices for user data
+- Scalable architecture for growth
+
+### Universal Market Focus
+- Multi-market localization and cultural adaptability
+- GDPR compliance for data protection
+- Modern app store standards alignment
+- Local payment method integration
+
+This document serves as the foundation for maintaining consistent, high-quality development practices for the Universal Mobile App Template.
+
+
+  // Implementation not following guidelines
+}
+```
+
