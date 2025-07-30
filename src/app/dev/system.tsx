@@ -93,10 +93,10 @@ export default function SystemScreen() {
               </TouchableOpacity>
             </Link>
 
-            <Link href="/(tabs)/library" asChild>
+            <Link href="/(tabs)/profile" asChild>
               <TouchableOpacity style={cardStyle}>
                 <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.primary }}>
-                  📚 Library Screen
+                  ⚙️ Settings Screen
                 </Text>
               </TouchableOpacity>
             </Link>

@@ -16,7 +16,7 @@ const THEME_STORAGE_KEY = 'theme-mode';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useColorScheme();
-  const [themeMode, setThemeModeState] = useState<ThemeMode>('light'); // Start with light mode
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark'); // VibeWake is dark-first
   const [forceUpdate, setForceUpdate] = useState(0); // Force re-render trigger
   
   // Calculate if we should use dark mode
@@ -60,11 +60,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     // For web, update the document class
     if (typeof document !== 'undefined') {
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      console.log('🎨 Updating document class, isDark:', isDark);
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(isDark ? 'dark' : 'light');
+      console.log('🎨 Document classes:', document.documentElement.className);
     }
     
     // For React Native, we'll use the context state directly

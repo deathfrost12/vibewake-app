@@ -89,22 +89,22 @@ export const useThemedStyles = () => {
     text: {
       primary: {
         color: colors.text.primary,
-        fontSize: TYPOGRAPHY.sizes.base,
+        fontSize: TYPOGRAPHY.sizes.base.fontSize,
         fontWeight: TYPOGRAPHY.weights.normal,
       },
       secondary: {
         color: colors.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.sm,
+        fontSize: TYPOGRAPHY.sizes.sm.fontSize,
         fontWeight: TYPOGRAPHY.weights.normal,
       },
       heading: {
         color: colors.text.primary,
-        fontSize: TYPOGRAPHY.sizes['3xl'],
+        fontSize: TYPOGRAPHY.sizes['3xl'].fontSize,
         fontWeight: TYPOGRAPHY.weights.bold,
       },
       subheading: {
         color: colors.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.base,
+        fontSize: TYPOGRAPHY.sizes.base.fontSize,
         fontWeight: TYPOGRAPHY.weights.medium,
       },
     },
@@ -172,7 +172,7 @@ export const useThemedText = (variant: 'primary' | 'secondary' | 'muted' | 'head
   const { colors } = useThemedStyles();
   
   const baseStyle = {
-    fontSize: TYPOGRAPHY.sizes.base,
+    fontSize: TYPOGRAPHY.sizes.base.fontSize,
     fontWeight: TYPOGRAPHY.weights.normal,
   };
   
@@ -181,27 +181,27 @@ export const useThemedText = (variant: 'primary' | 'secondary' | 'muted' | 'head
       return {
         ...baseStyle,
         color: colors.text.primary,
-        fontSize: TYPOGRAPHY.sizes['3xl'],
+        fontSize: TYPOGRAPHY.sizes['3xl'].fontSize,
         fontWeight: TYPOGRAPHY.weights.bold,
       };
     case 'subheading':
       return {
         ...baseStyle,
         color: colors.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.lg,
+        fontSize: TYPOGRAPHY.sizes.lg.fontSize,
         fontWeight: TYPOGRAPHY.weights.semibold,
       };
     case 'secondary':
       return {
         ...baseStyle,
         color: colors.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.sm,
+        fontSize: TYPOGRAPHY.sizes.sm.fontSize,
       };
     case 'muted':
       return {
         ...baseStyle,
         color: colors.text.muted,
-        fontSize: TYPOGRAPHY.sizes.sm,
+        fontSize: TYPOGRAPHY.sizes.sm.fontSize,
       };
     case 'accent':
       return {

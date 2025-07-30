@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Universal Mobile App",
-    "slug": "universal-mobile-app",
+    "name": "VibeWake - Alarm Clock",
+    "slug": "owloo",
     "version": "1.0.0",
     "sdkVersion": "53.0.0",
     "orientation": "portrait",
@@ -12,35 +12,51 @@
       "resizeMode": "contain",
       "backgroundColor": "#6B7280"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.yourapp",
+      "bundleIdentifier": "com.owlee.app",
       "jsEngine": "hermes",
       "buildNumber": "2",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to photos for image features",
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
-        "ITSAppUsesNonExemptEncryption": false
+        "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "audio",
+          "background-processing"
+        ]
       },
       "entitlements": {
-        "com.apple.developer.applesignin": ["Default"],
+        "com.apple.developer.applesignin": [
+          "Default"
+        ],
         "aps-environment": "development"
       },
-      "associatedDomains": ["applinks:yourapp.com"]
+      "associatedDomains": [
+        "applinks:yourapp.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6B7280"
       },
-      "package": "com.yourcompany.yourapp",
+      "package": "com.danielholes.vibewake",
       "jsEngine": "hermes",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE"
       ]
     },
     "web": {
@@ -64,12 +80,25 @@
           "project": "yourapp"
         }
       ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow VibeWake to access audio files for alarm sounds."
+        }
+      ],
       "expo-apple-authentication",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#5CFFF0",
+          "defaultChannel": "alarms"
+        }
+      ],
       "expo-dev-client",
       "expo-localization"
     ],
-    "scheme": "yourapp",
+    "scheme": "com.owlee.app",
     "experiments": {
       "typedRoutes": true
     },
@@ -78,7 +107,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "7bdfeec7-bfa0-4005-b90f-0466e5e753e3"
+        "projectId": "82251050-95f2-4754-b540-fc3c0517d847"
       }
     },
     "owner": "danielholes"

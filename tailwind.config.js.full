@@ -1,0 +1,243 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  // NOTE: Update this to include the paths to all files that contain NativeWind classes.
+  content: [
+    './src/app/**/*.{js,jsx,ts,tsx}',
+    './src/components/**/*.{js,jsx,ts,tsx}',
+    './src/lib/**/*.{js,jsx,ts,tsx}',
+    './src/utils/**/*.{js,jsx,ts,tsx}',
+    './src/services/**/*.{js,jsx,ts,tsx}',
+    './App.{js,jsx,ts,tsx}',
+  ],
+  presets: [require('nativewind/preset')],
+  corePlugins: {
+    aspectRatio: false, // Disable aspect-ratio to prevent NativeWind parsing error
+  },
+  darkMode: 'class',
+  theme: {
+    extend: {
+      // ===== VIBEWAKE NEON COLORS =====
+      colors: {
+        // Primary neon colors
+        neon: {
+          mint: '#75FFB0',      // Primary mint
+          aqua: '#66F0FF',      // Aqua highlight  
+          primary: '#5CFFF0',   // Main neon
+          lime: '#9BFF93',      // Lime accent
+        },
+        
+        // Background system (dark-first)
+        bg: {
+          primary: '#000000',     // Pure black 
+          secondary: '#001010',   // Dark teal
+          surface: '#0D1A1A',     // Elevated surface
+          elevated: '#1A2626',    // Cards/modals
+          clickable: '#0D1A1A',   // Interactive elements
+        },
+        
+        // Text system
+        text: {
+          primary: '#FFFFFF',     // Pure white
+          secondary: '#A8B4B6',   // Cool gray
+          muted: '#6B7280',       // Muted
+          accent: '#66F0FF',      // Aqua accent
+        },
+        
+        // Interactive elements
+        interactive: {
+          DEFAULT: '#1A2626',     // Default button bg
+          hover: '#2D3F3F',       // Hover state
+          active: '#3F5252',      // Active state
+          accent: '#5CFFF0',      // Primary accent
+          secondary: '#75FFB0',   // Secondary accent
+          tertiary: '#66F0FF',    // Tertiary accent
+        },
+        
+        // Status colors (neon-adjusted)
+        success: '#75FFB0',
+        warning: '#FFD700', 
+        error: '#FF6B6B',
+        info: '#66F0FF',
+        
+        // Borders with transparency
+        border: {
+          DEFAULT: 'rgba(255,255,255,0.07)',
+          subtle: 'rgba(255,255,255,0.05)',
+          visible: 'rgba(255,255,255,0.1)',
+        },
+      },
+      
+      // ===== GRADIENTS =====
+      backgroundImage: {
+        // Primary gradients
+        'gradient-primary': 'linear-gradient(135deg, #5CFFF0 0%, #9BFF93 100%)',
+        'gradient-primary-reverse': 'linear-gradient(315deg, #5CFFF0 0%, #9BFF93 100%)',
+        
+        // Surface gradients  
+        'gradient-surface': 'linear-gradient(145deg, #000000 0%, #001010 100%)',
+        'gradient-elevated': 'linear-gradient(145deg, #0D1A1A 0%, #1A2626 100%)',
+        
+        // Accent gradients
+        'gradient-mint': 'linear-gradient(135deg, #75FFB0 0%, #5CFFF0 100%)',
+        'gradient-aqua': 'linear-gradient(135deg, #66F0FF 0%, #5CFFF0 100%)',
+        
+        // Button gradients
+        'gradient-cta': 'linear-gradient(135deg, #5CFFF0 0%, #9BFF93 100%)',
+        'gradient-cta-hover': 'linear-gradient(135deg, #4DE6D7 0%, #88E680 100%)',
+      },
+      
+      // ===== TYPOGRAPHY =====
+      fontSize: {
+        // Display sizes (Hero)
+        'display': ['40px', { lineHeight: '48px', fontWeight: '800' }],
+        
+        // Headings
+        'h1': ['32px', { lineHeight: '40px', fontWeight: '700' }],
+        'h2': ['20px', { lineHeight: '24px', fontWeight: '700' }],
+        'h3': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+        
+        // Body text
+        'body': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'caption': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'small': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+      },
+      
+      fontFamily: {
+        // Modern system fonts
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      
+      // ===== SPACING (8pt Grid) =====
+      spacing: {
+        // Base spacing
+        '1': '4px',   // xs
+        '2': '8px',   // sm  
+        '4': '16px',  // md
+        '6': '24px',  // lg
+        '8': '32px',  // xl
+        '12': '48px', // 2xl
+        '16': '64px', // 3xl
+        
+        // Specific use cases
+        'safe': '24px',      // Safe area padding
+        'hit': '56px',       // Touch zone
+        'safe-top': '44px',  // iOS safe top
+        'safe-bottom': '34px', // iOS safe bottom
+      },
+      
+      // ===== BORDER RADIUS =====
+      borderRadius: {
+        'sm': '8px',
+        'md': '12px', 
+        'lg': '16px',
+        'xl': '20px',     // Card radius (Echo style)
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px', // FAB circular
+      },
+      
+      // ===== SHADOWS & GLOWS =====
+      boxShadow: {
+        // Regular shadows
+        'sm': '0 2px 6px rgba(0,0,0,0.35)',
+        'md': '0 4px 8px rgba(0,0,0,0.4)', 
+        'lg': '0 8px 24px rgba(0,0,0,0.55)',
+        
+        // Neon glows
+        'neon-mint': '0 4px 12px rgba(117,255,176,0.4), 0 0 24px rgba(117,255,176,0.2)',
+        'neon-aqua': '0 4px 12px rgba(102,240,255,0.4), 0 0 24px rgba(102,240,255,0.2)', 
+        'neon-primary': '0 4px 12px rgba(92,255,240,0.4), 0 0 24px rgba(92,255,240,0.2)',
+        
+        // FAB glow
+        'fab': '0 4px 12px rgba(92,255,240,0.4), 0 0 24px rgba(92,255,240,0.2)',
+        
+        // Glass morphism
+        'glass': '0 8px 32px rgba(0,0,0,0.37)',
+      },
+      
+      // ===== BACKDROP BLUR =====
+      backdropBlur: {
+        'glass': '16px',
+        'nav': '8px',
+      },
+      
+      // ===== ANIMATIONS =====
+      animation: {
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite alternate',
+        'float': 'float 3s ease-in-out infinite',
+        'shimmer': 'shimmer 2s ease-in-out infinite',
+      },
+      
+      keyframes: {
+        'glow-pulse': {
+          '0%': { 
+            boxShadow: '0 4px 12px rgba(92,255,240,0.4), 0 0 24px rgba(92,255,240,0.2)' 
+          },
+          '100%': { 
+            boxShadow: '0 4px 20px rgba(92,255,240,0.6), 0 0 32px rgba(92,255,240,0.4)' 
+          },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
+        'shimmer': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
+      
+      // ===== UTILITIES =====
+      transitionTimingFunction: {
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      
+      transitionDuration: {
+        'smooth': '250ms',
+      },
+    },
+  },
+  plugins: [
+    // Custom utilities plugin
+    function({ addUtilities }) {
+      const newUtilities = {
+        // Glassmorphism utilities
+        '.glass': {
+          'backdrop-filter': 'blur(16px)',
+          'background': 'rgba(13, 26, 26, 0.8)',
+          'border': '1px solid rgba(255,255,255,0.1)',
+        },
+        '.glass-nav': {
+          'backdrop-filter': 'blur(8px)',
+          'background': 'rgba(13, 26, 26, 0.9)',
+          'border-top': '1px solid rgba(255,255,255,0.07)',
+        },
+        
+        // Neon text utilities
+        '.text-neon-mint': {
+          'color': '#75FFB0',
+          'text-shadow': '0 0 10px rgba(117,255,176,0.5)',
+        },
+        '.text-neon-aqua': {
+          'color': '#66F0FF', 
+          'text-shadow': '0 0 10px rgba(102,240,255,0.5)',
+        },
+        '.text-neon-primary': {
+          'color': '#5CFFF0',
+          'text-shadow': '0 0 10px rgba(92,255,240,0.5)',
+        },
+        
+        // Gradient text
+        '.text-gradient-primary': {
+          'background': 'linear-gradient(135deg, #5CFFF0 0%, #9BFF93 100%)',
+          'background-clip': 'text',
+          'color': 'transparent',
+        },
+      };
+      
+      addUtilities(newUtilities);
+    },
+  ],
+};

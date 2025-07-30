@@ -76,29 +76,32 @@ export function ThemeSwitcher({ className, showLabel = true }: ThemeSwitcherProp
 // Simple inline theme toggle for dev/test purposes
 export function SimpleThemeToggle({ className }: { className?: string }) {
   const { themeMode, setThemeMode, isDark } = useTheme();
-  const { colors, borderRadius, spacing } = useThemedStyles();
 
   const toggleTheme = () => {
     console.log('🎨 Toggle theme clicked, current:', { themeMode, isDark });
     const nextMode = isDark ? 'light' : 'dark';
+    console.log('🎨 Setting theme to:', nextMode);
     setThemeMode(nextMode);
+    
+    // Force a small delay to see change
+    setTimeout(() => {
+      console.log('🎨 Theme after change:', { 
+        newMode: isDark ? 'light' : 'dark',
+        shouldBeDark: nextMode === 'dark'
+      });
+    }, 100);
   };
 
   return (
     <TouchableOpacity
       onPress={toggleTheme}
-      style={{
-        backgroundColor: colors.interactive.background,
-        borderRadius: borderRadius.full,
-        padding: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 44,
-        minHeight: 44,
-      }}
-      className={className}
+      className={`w-12 h-12 rounded-full items-center justify-center ${
+        isDark 
+          ? 'bg-interactive-DEFAULT' 
+          : 'bg-gray-200'
+      }`}
     >
-      <Text style={{ fontSize: 18 }}>
+      <Text className="text-xl">
         {isDark ? '☀️' : '🌙'}
       </Text>
     </TouchableOpacity>

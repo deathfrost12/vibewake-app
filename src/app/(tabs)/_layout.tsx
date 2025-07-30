@@ -1,8 +1,10 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemedStyles } from '../../theme/useThemedStyles';
+import { useRouter } from 'expo-router';
+import { useAlarmStore } from '../../stores/alarm-store';
+import { notificationService } from '../../services/notifications/notification-service';
 
 // Tab bar icon component
 function TabBarIcon({
@@ -15,42 +17,41 @@ function TabBarIcon({
   return <Ionicons name={name} size={24} color={color} />;
 }
 
-// Create button for center tab
+// Neon FAB button for center tab
 function CreateButton() {
-  const { colors, shadows } = useThemedStyles();
-
   return (
-    <TouchableOpacity
-      style={{
-        width: 56,
-        height: 56,
-        backgroundColor: colors.interactive.accent,
-        borderRadius: 28,
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...shadows.lg,
-      }}
-    >
-      <Ionicons name="add" size={28} color="#FFFFFF" />
-    </TouchableOpacity>
+    <View className="w-16 h-16 rounded-full bg-gradient-cta items-center justify-center shadow-fab animate-glow-pulse border-2 border-neon-primary">
+      <Ionicons name="add" size={32} color="#FFFFFF" />
+    </View>
   );
 }
 
 export default function TabLayout() {
-  const { colors } = useThemedStyles();
+  const router = useRouter();
+  const { loadAlarms } = useAlarmStore();
+
+  useEffect(() => {
+    // Initialize alarm store when app loads
+    loadAlarms();
+    
+    // Setup alarm notification listeners
+    notificationService.setupAlarmListeners();
+  }, [loadAlarms]);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.text.primary,
-        tabBarInactiveTintColor: colors.text.secondary,
+        tabBarActiveTintColor: '#5CFFF0',      // Neon primary
+        tabBarInactiveTintColor: '#A8B4B6',   // Cool secondary
         tabBarStyle: {
-          backgroundColor: colors.primary,
+          backgroundColor: 'rgba(13, 26, 26, 0.9)', // Glass background
           borderTopWidth: 1,
-          borderTopColor: colors.border,
+          borderTopColor: 'rgba(255,255,255,0.07)', // Subtle border
           height: 88,
           paddingTop: 8,
           paddingBottom: 34,
+          position: 'absolute',
+          backdropFilter: 'blur(8px)',     // Glassmorphism blur
         },
         headerShown: false,
       }}
@@ -58,17 +59,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="library"
-        options={{
-          title: 'Testing',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="flask" color={color} />
-          ),
+          title: 'Alarms',
+          tabBarIcon: ({ color }) => <TabBarIcon name="alarm" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -82,7 +74,9 @@ export default function TabLayout() {
             return (
               <TouchableOpacity
                 {...safeProps}
-                className="flex-1 justify-center items-center"
+                className="flex-1 justify-center items-center -mt-3"
+                activeOpacity={0.7}
+                onPress={() => router.push('/alarms/create')}
               >
                 <CreateButton />
               </TouchableOpacity>
@@ -91,19 +85,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stats"
-        options={{
-          title: 'Analytics',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="analytics" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <TabBarIcon name="person" color={color} />,
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <TabBarIcon name="settings" color={color} />,
         }}
       />
     </Tabs>
