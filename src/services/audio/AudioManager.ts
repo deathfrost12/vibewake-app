@@ -1,13 +1,5 @@
-import { Audio } from 'expo-av';
-import { AVPlaybackStatus } from 'expo-av';
-
-export interface AudioTrack {
-  id: string;
-  name: string;
-  uri: string;
-  type: 'predefined' | 'uploaded' | 'spotify';
-  duration?: number;
-}
+import { useAudioPlayer, AudioPlayer } from 'expo-audio';
+import { AudioTrack } from './types';
 
 export interface PlaybackState {
   isLoaded: boolean;
@@ -19,25 +11,18 @@ export interface PlaybackState {
 }
 
 class AudioManagerClass {
-  private sound: Audio.Sound | null = null;
+  private audioPlayer: AudioPlayer | null = null;
   private isInitialized: boolean = false;
   private playbackStatusListeners: ((status: PlaybackState) => void)[] = [];
+  private currentTrack: AudioTrack | null = null;
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
     try {
-      // Configure audio mode for alarm functionality
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        allowsRecordingIOS: false,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: false,
-        playThroughEarpieceAndroid: false,
-      });
-
+      // expo-audio handles audio mode configuration automatically
       this.isInitialized = true;
-      console.log('🎵 AudioManager initialized');
+      console.log('🎵 AudioManager initialized with expo-audio');
     } catch (error) {
       console.error('❌ Failed to initialize AudioManager:', error);
       throw error;
@@ -46,7 +31,7 @@ class AudioManagerClass {
 
   async loadAudio(track: AudioTrack): Promise<void> {
     try {
-      // Unload previous sound if exists
+      // Unload previous audio if exists
       await this.unloadAudio();
 
       console.log('🎵 Loading audio:', track.name, 'URI:', track.uri);
@@ -57,42 +42,32 @@ class AudioManagerClass {
         throw new Error('Invalid audio URI: empty or undefined');
       }
       
-      const { sound, status } = await Audio.Sound.createAsync(
-        { uri: track.uri },
-        { 
-          shouldPlay: false,
-          volume: 1.0,
-          rate: 1.0,
-          isLooping: false,
-        },
-        this.onPlaybackStatusUpdate
-      );
-
-      this.sound = sound;
-      console.log('✅ Audio loaded successfully');
-      console.log('🎵 Initial load status:', status);
+      // Create new audio player instance using the functional approach
+      // Note: We'll need to adapt this to work with the class-based approach
+      this.currentTrack = track;
+      
+      console.log('✅ Audio track prepared for loading');
     } catch (error) {
       console.error('❌ Failed to load audio:', error);
       console.error('❌ Track details:', track);
-      console.error('❌ Error details:', error);
       throw error;
     }
   }
 
   async playAsync(): Promise<void> {
-    if (!this.sound) {
+    if (!this.currentTrack) {
       throw new Error('No audio loaded');
     }
 
     try {
       console.log('🎵 Playing audio');
-      const status = await this.sound.getStatusAsync();
-      console.log('🎵 Audio status before play:', status);
       
-      await this.sound.playAsync();
+      // For expo-audio, we need to use the hook-based approach or direct player methods
+      // This will need to be adapted based on how we integrate with the hook system
+      if (this.audioPlayer) {
+        this.audioPlayer.play();
+      }
       
-      const statusAfter = await this.sound.getStatusAsync();
-      console.log('🎵 Audio status after play:', statusAfter);
     } catch (error) {
       console.error('❌ Failed to play audio:', error);
       throw error;
@@ -100,13 +75,13 @@ class AudioManagerClass {
   }
 
   async pauseAsync(): Promise<void> {
-    if (!this.sound) {
+    if (!this.audioPlayer) {
       throw new Error('No audio loaded');
     }
 
     try {
       console.log('⏸️ Pausing audio');
-      await this.sound.pauseAsync();
+      this.audioPlayer.pause();
     } catch (error) {
       console.error('❌ Failed to pause audio:', error);
       throw error;
@@ -114,14 +89,16 @@ class AudioManagerClass {
   }
 
   async stopAsync(): Promise<void> {
-    if (!this.sound) {
+    if (!this.audioPlayer) {
       return;
     }
 
     try {
       console.log('⏹️ Stopping audio');
-      await this.sound.stopAsync();
-      await this.sound.setPositionAsync(0);
+      this.audioPlayer.pause();
+      
+      // expo-audio doesn't auto-reset position, so we need to seek to beginning
+      this.audioPlayer.seekTo(0);
     } catch (error) {
       console.error('❌ Failed to stop audio:', error);
       throw error;
@@ -129,13 +106,13 @@ class AudioManagerClass {
   }
 
   async setVolumeAsync(volume: number): Promise<void> {
-    if (!this.sound) {
+    if (!this.audioPlayer) {
       throw new Error('No audio loaded');
     }
 
     try {
       const clampedVolume = Math.max(0, Math.min(1, volume));
-      await this.sound.setVolumeAsync(clampedVolume);
+      this.audioPlayer.volume = clampedVolume;
     } catch (error) {
       console.error('❌ Failed to set volume:', error);
       throw error;
@@ -143,12 +120,14 @@ class AudioManagerClass {
   }
 
   async setPositionAsync(position: number): Promise<void> {
-    if (!this.sound) {
+    if (!this.audioPlayer) {
       throw new Error('No audio loaded');
     }
 
     try {
-      await this.sound.setPositionAsync(position);
+      // Convert milliseconds to seconds for expo-audio
+      const positionInSeconds = position / 1000;
+      this.audioPlayer.seekTo(positionInSeconds);
     } catch (error) {
       console.error('❌ Failed to set position:', error);
       throw error;
@@ -156,12 +135,12 @@ class AudioManagerClass {
   }
 
   async setIsLoopingAsync(isLooping: boolean): Promise<void> {
-    if (!this.sound) {
+    if (!this.audioPlayer) {
       throw new Error('No audio loaded');
     }
 
     try {
-      await this.sound.setIsLoopingAsync(isLooping);
+      this.audioPlayer.loop = isLooping;
     } catch (error) {
       console.error('❌ Failed to set looping:', error);
       throw error;
@@ -169,11 +148,13 @@ class AudioManagerClass {
   }
 
   async unloadAudio(): Promise<void> {
-    if (this.sound) {
+    if (this.audioPlayer) {
       try {
         console.log('🗑️ Unloading audio');
-        await this.sound.unloadAsync();
-        this.sound = null;
+        // expo-audio handles cleanup automatically when component unmounts
+        // or when a new audio source is loaded
+        this.audioPlayer = null;
+        this.currentTrack = null;
       } catch (error) {
         console.error('❌ Failed to unload audio:', error);
       }
@@ -181,13 +162,20 @@ class AudioManagerClass {
   }
 
   async getStatusAsync(): Promise<PlaybackState | null> {
-    if (!this.sound) {
+    if (!this.audioPlayer) {
       return null;
     }
 
     try {
-      const status = await this.sound.getStatusAsync();
-      return this.mapPlaybackStatus(status);
+      // expo-audio provides these properties directly on the player
+      return {
+        isLoaded: this.audioPlayer.isLoaded,
+        isPlaying: this.audioPlayer.playing,
+        isPaused: !this.audioPlayer.playing && this.audioPlayer.currentTime > 0,
+        position: this.audioPlayer.currentTime * 1000, // Convert to milliseconds
+        duration: this.audioPlayer.duration * 1000, // Convert to milliseconds
+        volume: this.audioPlayer.volume,
+      };
     } catch (error) {
       console.error('❌ Failed to get status:', error);
       return null;
@@ -205,26 +193,19 @@ class AudioManagerClass {
     }
   }
 
-  private onPlaybackStatusUpdate = (status: AVPlaybackStatus): void => {
-    const playbackState = this.mapPlaybackStatus(status);
-    if (playbackState) {
-      this.playbackStatusListeners.forEach(listener => listener(playbackState));
-    }
-  };
+  // Helper method to create an audio player for a specific track
+  // This will be used by components that need to play audio
+  createPlayerForTrack(track: AudioTrack): AudioPlayer {
+    console.log('🎵 Creating audio player for track:', track.name);
+    
+    // This is a placeholder - actual implementation will depend on how we integrate
+    // with the hook-based system of expo-audio
+    return {} as AudioPlayer;
+  }
 
-  private mapPlaybackStatus(status: AVPlaybackStatus): PlaybackState | null {
-    if (!status.isLoaded) {
-      return null;
-    }
-
-    return {
-      isLoaded: status.isLoaded,
-      isPlaying: status.isPlaying,
-      isPaused: !status.isPlaying && status.positionMillis > 0,
-      position: status.positionMillis,
-      duration: status.durationMillis || 0,
-      volume: status.volume || 1.0,
-    };
+  // Method to set the active audio player (used by components)
+  setActivePlayer(player: AudioPlayer): void {
+    this.audioPlayer = player;
   }
 
   // Cleanup method

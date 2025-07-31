@@ -337,8 +337,9 @@ class NotificationService {
         console.log(`⏰ Attempting to schedule notification (attempt ${attempt}/${maxRetries})`);
         
         // Additional validation to prevent NSInternalInconsistencyException
-        if (request.trigger?.type === Notifications.SchedulableTriggerInputTypes.DATE) {
-          const triggerDate = (request.trigger as any).date;
+        if (request.trigger && 'type' in request.trigger && request.trigger.type === Notifications.SchedulableTriggerInputTypes.DATE) {
+          const dateTrigger = request.trigger as any;
+          const triggerDate = dateTrigger.date;
           if (!(triggerDate instanceof Date) || isNaN(triggerDate.getTime())) {
             throw new Error('Invalid trigger date provided');
           }

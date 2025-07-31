@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AudioTrack } from './AudioManager';
+import { AudioTrack } from './types';
 
 export interface UploadedAudioFile {
   id: string;

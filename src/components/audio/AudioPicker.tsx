@@ -11,7 +11,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/theme-context';
 import { ThemedView, ThemedText, ThemedCard } from '../ui/themed-view';
-import { AudioManager, AudioTrack } from '../../services/audio/AudioManager';
+import { AudioManager } from '../../services/audio/AudioManager';
+import { AudioTrack } from '../../services/audio/types';
 import { SoundLibrary, PredefinedSound } from '../../services/audio/SoundLibrary';
 import { FileUploadService, UploadedAudioFile } from '../../services/audio/FileUploadService';
 import { spotifyAuth, SpotifyTrack, SpotifyPlaylist } from '../../services/auth/spotify-auth';

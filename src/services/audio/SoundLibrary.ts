@@ -1,4 +1,4 @@
-import { AudioTrack } from './AudioManager';
+import { AudioTrack } from './types';
 import { Asset } from 'expo-asset';
 
 export interface PredefinedSound {

@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedView, ThemedText, ThemedCard } from '../../components/ui/themed-view';
 import { useTheme } from '../../contexts/theme-context';
 import { AudioPicker } from '../../components/audio/AudioPicker';
-import { AudioTrack } from '../../services/audio/AudioManager';
+import { AudioTrack } from '../../services/audio/types';
 import { SoundLibrary } from '../../services/audio/SoundLibrary';
 
 export default function AddAlarmScreen() {
