@@ -9,6 +9,8 @@ import { ThemedView, ThemedText, ThemedCard } from '../../components/ui/themed-v
 import { AudioPicker } from '../../components/audio/AudioPicker';
 import { useAlarmStore } from '../../stores/alarm-store';
 import { AudioTrack } from '../../services/audio/types';
+import { useTheme } from '../../contexts/theme-context';
+import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
 
 const DAYS_OF_WEEK = [
   { id: 0, name: 'Sun', fullName: 'Sunday' },
@@ -22,6 +24,8 @@ const DAYS_OF_WEEK = [
 
 export default function CreateAlarmScreen() {
   const { createAlarm, isLoading } = useAlarmStore();
+  const { isDark } = useTheme();
+  const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
   const [alarmTime, setAlarmTime] = useState(new Date());
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
@@ -91,33 +95,29 @@ export default function CreateAlarmScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView 
-          style={{ flex: 1, paddingHorizontal: 24 }} 
-          showsVerticalScrollIndicator={false}
-          className="space-y-6"
-        >
+        <ScrollView style={{ flex: 1, paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
           {/* Header */}
-          <View className="flex-row items-center justify-between mt-4 mb-6">
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, marginBottom: 32 }}>
             <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color="#66F0FF" />
+              <Ionicons name="chevron-back" size={24} color={APP_COLORS.accent} />
             </TouchableOpacity>
-            <View className="flex-1 ml-4">
-              <ThemedText style={{ fontSize: 32, fontWeight: 'bold' }}>
+            <View style={{ flex: 1, marginLeft: 16 }}>
+              <ThemedText style={{ fontSize: 32, fontWeight: 'bold', lineHeight: 40 }}>
                 Create Alarm
-              </ThemedText>
-              <ThemedText className="text-text-secondary" style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
-                Set your wake-up call
               </ThemedText>
             </View>
           </View>
 
           {/* Time Selection - Hero Card */}
-          <ThemedCard className="bg-bg-elevated border border-border-visible rounded-xl p-6 mb-6">
-            <ThemedText className="text-caption text-neon-mint font-semibold mb-4">
-              ⏰ ALARM TIME
-            </ThemedText>
+          <ThemedCard style={{ padding: 24, marginBottom: 32, borderRadius: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <ThemedText style={{ fontSize: 12, color: APP_COLORS.primary, fontWeight: '600' }}>
+                ⏰ ALARM TIME
+              </ThemedText>
+              <View style={{ width: 12, height: 12, backgroundColor: APP_COLORS.primary, borderRadius: 6 }} />
+            </View>
             
-            <View className="items-center py-4">
+            <View style={{ alignItems: 'center', paddingVertical: 16 }}>
               <DateTimePicker
                 value={alarmTime}
                 mode="time"
@@ -128,13 +128,8 @@ export default function CreateAlarmScreen() {
                 style={{ width: '100%', height: 120 }}
               />
               
-              <View className="bg-interactive-accent rounded-xl px-6 py-3 mt-4">
-                <ThemedText style={{ 
-                  fontSize: 28, 
-                  fontWeight: 'bold', 
-                  color: '#000000',
-                  textAlign: 'center',
-                }}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 16 }}>
+                <ThemedText style={{ fontSize: 48, fontWeight: '800' }}>
                   {formatTime(alarmTime)}
                 </ThemedText>
               </View>
@@ -142,27 +137,34 @@ export default function CreateAlarmScreen() {
           </ThemedCard>
 
           {/* Repeat Days */}
-          <ThemedCard className="bg-bg-elevated border border-border-visible rounded-xl p-6 mb-6">
-            <ThemedText className="text-caption text-neon-mint font-semibold mb-4">
-              🔄 REPEAT
-            </ThemedText>
+          <ThemedCard style={{ padding: 24, marginBottom: 32, borderRadius: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <ThemedText style={{ fontSize: 12, color: APP_COLORS.primary, fontWeight: '600' }}>
+                🔄 REPEAT DAYS
+              </ThemedText>
+            </View>
             
-            <View className="flex-row justify-between mb-4">
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
               {DAYS_OF_WEEK.map(day => (
                 <TouchableOpacity
                   key={day.id}
                   onPress={() => toggleDay(day.id)}
-                  className={`w-10 h-10 rounded-full items-center justify-center ${
-                    selectedDays.includes(day.id)
-                      ? 'bg-neon-primary'
-                      : 'bg-interactive-DEFAULT border border-border-visible'
-                  }`}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: selectedDays.includes(day.id) ? APP_COLORS.primary : theme.elevated,
+                    borderWidth: selectedDays.includes(day.id) ? 0 : 1,
+                    borderColor: theme.border,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                 >
                   <ThemedText 
                     style={{
                       fontSize: 12,
                       fontWeight: '600',
-                      color: selectedDays.includes(day.id) ? '#000000' : '#A8B4B6',
+                      color: selectedDays.includes(day.id) ? '#000000' : theme.text.secondary,
                     }}
                   >
                     {day.name}
@@ -171,29 +173,41 @@ export default function CreateAlarmScreen() {
               ))}
             </View>
             
-            <View className="bg-interactive-DEFAULT rounded-lg p-3">
-              <ThemedText className="text-text-secondary text-center" style={{ fontSize: 14 }}>
+            <View style={{ 
+              backgroundColor: theme.elevated,
+              borderRadius: 8,
+              padding: 12,
+            }}>
+              <ThemedText style={{ fontSize: 14, textAlign: 'center', opacity: 0.7 }}>
                 {getSelectedDaysText()}
               </ThemedText>
             </View>
           </ThemedCard>
 
           {/* Audio Selection */}
-          <ThemedCard className="bg-bg-elevated border border-border-visible rounded-xl p-6 mb-6">
-            <ThemedText className="text-caption text-neon-mint font-semibold mb-4">
-              🎵 ALARM SOUND
-            </ThemedText>
+          <ThemedCard style={{ padding: 24, marginBottom: 32, borderRadius: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <ThemedText style={{ fontSize: 12, color: APP_COLORS.primary, fontWeight: '600' }}>
+                🎵 ALARM SOUND
+              </ThemedText>
+            </View>
             
             <TouchableOpacity
               onPress={() => setShowAudioPicker(true)}
-              className="bg-interactive-DEFAULT border border-border-visible rounded-xl p-4"
+              style={{
+                backgroundColor: theme.elevated,
+                borderWidth: 1,
+                borderColor: theme.border,
+                borderRadius: 12,
+                padding: 16,
+              }}
             >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1 }}>
                   <ThemedText style={{ fontSize: 16, fontWeight: '600' }}>
                     {selectedAudio ? selectedAudio.name : 'Select audio track'}
                   </ThemedText>
-                  <ThemedText className="text-text-secondary" style={{ fontSize: 12, marginTop: 2 }}>
+                  <ThemedText style={{ fontSize: 12, marginTop: 4, opacity: 0.7 }}>
                     {selectedAudio 
                       ? `${selectedAudio.type.charAt(0).toUpperCase() + selectedAudio.type.slice(1)} • ${selectedAudio.duration ? Math.round(selectedAudio.duration / 1000) + 's' : 'Unknown duration'}`
                       : 'Tap to choose your wake-up sound'
@@ -201,12 +215,16 @@ export default function CreateAlarmScreen() {
                   </ThemedText>
                 </View>
                 
-                <View className="flex-row items-center ml-3">
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
                   {selectedAudio && (
-                    <View className={`px-2 py-1 rounded mr-2 ${
-                      selectedAudio.type === 'spotify' ? 'bg-neon-aqua' : 
-                      selectedAudio.type === 'uploaded' ? 'bg-neon-mint' : 'bg-neon-lime'
-                    }`}>
+                    <View style={{
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 4,
+                      marginRight: 8,
+                      backgroundColor: selectedAudio.type === 'spotify' ? APP_COLORS.accent : 
+                                     selectedAudio.type === 'uploaded' ? APP_COLORS.success : APP_COLORS.primary
+                    }}>
                       <ThemedText style={{ 
                         fontSize: 10, 
                         fontWeight: '600',
@@ -217,19 +235,33 @@ export default function CreateAlarmScreen() {
                       </ThemedText>
                     </View>
                   )}
-                  <Ionicons name="chevron-forward" size={16} color="#66F0FF" />
+                  <Ionicons name="chevron-forward" size={16} color={APP_COLORS.accent} />
                 </View>
               </View>
             </TouchableOpacity>
+            
+            {selectedAudio && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
+                <Ionicons name="musical-notes" size={16} color={APP_COLORS.accent} />
+                <ThemedText style={{ fontSize: 12, color: APP_COLORS.accent, marginLeft: 8 }}>
+                  {selectedAudio.name}
+                </ThemedText>
+              </View>
+            )}
           </ThemedCard>
 
           {/* Create Button */}
           <TouchableOpacity
             onPress={handleCreateAlarm}
             disabled={isLoading}
-            className={`bg-gradient-cta rounded-xl py-4 items-center mb-8 ${
-              isLoading ? 'opacity-50' : ''
-            }`}
+            style={{
+              backgroundColor: APP_COLORS.primary,
+              borderRadius: 12,
+              paddingVertical: 16,
+              alignItems: 'center',
+              marginBottom: 32,
+              opacity: isLoading ? 0.5 : 1,
+            }}
           >
             <ThemedText style={{ 
               fontSize: 16, 
@@ -239,17 +271,51 @@ export default function CreateAlarmScreen() {
               {isLoading ? 'Creating Alarm...' : 'Create Alarm'}
             </ThemedText>
           </TouchableOpacity>
+
+          {/* Bottom padding for safe area */}
+          <View style={{ height: 20 }} />
         </ScrollView>
 
         {/* Audio Picker Modal */}
         {showAudioPicker && (
-          <AudioPicker
-            selectedAudio={selectedAudio || undefined}
-            onAudioSelect={(audio: AudioTrack) => {
-              setSelectedAudio(audio);
-              setShowAudioPicker(false);
-            }}
-          />
+          <View style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+          }}>
+            <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
+              <View style={{
+                flex: 1,
+                backgroundColor: theme.primary,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                paddingHorizontal: 24,
+                paddingTop: 24,
+              }}>
+                {/* Modal Header */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                  <ThemedText style={{ fontSize: 24, fontWeight: 'bold' }}>
+                    Choose Sound
+                  </ThemedText>
+                  <TouchableOpacity onPress={() => setShowAudioPicker(false)}>
+                    <Ionicons name="close" size={24} color={APP_COLORS.accent} />
+                  </TouchableOpacity>
+                </View>
+
+                <AudioPicker
+                  selectedAudio={selectedAudio || undefined}
+                  onAudioSelect={(audio: AudioTrack) => {
+                    setSelectedAudio(audio);
+                    setShowAudioPicker(false);
+                  }}
+                />
+              </View>
+            </SafeAreaView>
+          </View>
         )}
       </SafeAreaView>
     </ThemedView>

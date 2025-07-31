@@ -10,6 +10,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../contexts/theme-context';
+import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
 import { ThemedView, ThemedText, ThemedCard } from '../../components/ui/themed-view';
 import { useAlarmStore } from '../../stores/alarm-store';
 
@@ -57,10 +58,7 @@ export default function AlarmsScreen() {
   };
 
   const nextAlarm = getNextAlarm();
-
-  const backgroundColor = isDark ? '#000000' : '#FFFFFF';
-  const textColor = isDark ? '#FFFFFF' : '#0F172A';
-  const cardColor = isDark ? '#1A2626' : '#FFFFFF';
+  const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
   return (
     <ThemedView style={{ flex: 1 }}>
@@ -69,7 +67,7 @@ export default function AlarmsScreen() {
           {/* Header with greeting */}
           <View style={{ marginTop: 24, marginBottom: 32 }}>
             <ThemedText style={{ fontSize: 32, fontWeight: 'bold', lineHeight: 40 }}>
-              Good Evening, <Text style={{ color: '#5CFFF0' }}>Daniel</Text>
+              Good Evening, <Text style={{ color: APP_COLORS.primary }}>Daniel</Text>
             </ThemedText>
             <ThemedText style={{ fontSize: 14, lineHeight: 20, marginTop: 8, opacity: 0.7 }}>
               Ready to wake up? ✨
@@ -84,10 +82,10 @@ export default function AlarmsScreen() {
                 onPress={() => router.push('/alarms/create')}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <ThemedText style={{ fontSize: 12, color: '#5CFFF0', fontWeight: '600' }}>
+                  <ThemedText style={{ fontSize: 12, color: APP_COLORS.primary, fontWeight: '600' }}>
                     🌅 NEXT ALARM
                   </ThemedText>
-                  <View style={{ width: 12, height: 12, backgroundColor: '#5CFFF0', borderRadius: 6 }} />
+                  <View style={{ width: 12, height: 12, backgroundColor: APP_COLORS.primary, borderRadius: 6 }} />
                 </View>
                 
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 12 }}>
@@ -101,8 +99,8 @@ export default function AlarmsScreen() {
                 </ThemedText>
                 
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="musical-notes" size={16} color="#66F0FF" />
-                  <ThemedText style={{ fontSize: 12, color: '#66F0FF', marginLeft: 8 }}>
+                  <Ionicons name="musical-notes" size={16} color={APP_COLORS.accent} />
+                  <ThemedText style={{ fontSize: 12, color: APP_COLORS.accent, marginLeft: 8 }}>
                     {nextAlarm.audioTrack.name}
                   </ThemedText>
                 </View>
@@ -115,7 +113,7 @@ export default function AlarmsScreen() {
                 onPress={() => router.push('/alarms/create')}
               >
                 <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-                  <Ionicons name="add-circle-outline" size={48} color="#A8B4B6" />
+                  <Ionicons name="add-circle-outline" size={48} color={theme.text.secondary} />
                   <ThemedText style={{ fontSize: 20, fontWeight: '600', marginTop: 12 }}>
                     No Alarm Set
                   </ThemedText>
@@ -139,7 +137,7 @@ export default function AlarmsScreen() {
               </ThemedCard>
             ) : alarms.length === 0 ? (
               <ThemedCard style={{ padding: 24, alignItems: 'center', borderRadius: 12 }}>
-                <Ionicons name="alarm-outline" size={32} color="#A8B4B6" />
+                <Ionicons name="alarm-outline" size={32} color={theme.text.secondary} />
                 <ThemedText style={{ fontSize: 16, marginTop: 12, textAlign: 'center' }}>
                   No alarms yet
                 </ThemedText>
@@ -153,9 +151,9 @@ export default function AlarmsScreen() {
                   <TouchableOpacity
                     key={alarm.id}
                     style={{
-                      backgroundColor: isDark ? '#1F2937' : '#F9FAFB',
+                      backgroundColor: theme.elevated,
                       borderWidth: 1,
-                      borderColor: alarm.isActive ? '#5CFFF0' : (isDark ? '#374151' : '#E5E7EB'),
+                      borderColor: alarm.isActive ? APP_COLORS.primary : theme.border,
                       borderRadius: 12,
                       padding: 20,
                       marginBottom: 12,
@@ -178,11 +176,11 @@ export default function AlarmsScreen() {
                           <Ionicons 
                             name="musical-notes" 
                             size={14} 
-                            color={alarm.isActive ? "#66F0FF" : "#6B7280"} 
+                            color={alarm.isActive ? APP_COLORS.accent : theme.text.muted} 
                           />
                           <ThemedText style={{ 
                             fontSize: 12, 
-                            color: alarm.isActive ? '#66F0FF' : '#6B7280',
+                            color: alarm.isActive ? APP_COLORS.accent : theme.text.muted,
                             marginLeft: 8,
                           }}>
                             {alarm.audioTrack.name}
@@ -196,7 +194,7 @@ export default function AlarmsScreen() {
                           width: 48,
                           height: 24,
                           borderRadius: 12,
-                          backgroundColor: alarm.isActive ? '#5CFFF0' : (isDark ? '#374151' : '#E5E7EB'),
+                          backgroundColor: alarm.isActive ? APP_COLORS.primary : theme.border,
                           padding: 2,
                           justifyContent: 'center',
                         }}
@@ -226,43 +224,67 @@ export default function AlarmsScreen() {
               Quick Actions
             </ThemedText>
             
-            <View className="flex-row space-x-4">
+            <View style={{ flexDirection: 'row', gap: 16 }}>
               <TouchableOpacity
-                className="flex-1 bg-bg-elevated border border-border-DEFAULT rounded-xl p-4 items-center"
+                style={{
+                  flex: 1,
+                  backgroundColor: theme.elevated,
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                  borderRadius: 12,
+                  padding: 16,
+                  alignItems: 'center',
+                }}
                 activeOpacity={0.8}
                 onPress={() => router.push('/alarms/create')}
               >
-                <Ionicons name="add-circle" size={24} color="#5CFFF0" />
-                <Text className="text-caption text-text-secondary mt-2 text-center">
+                <Ionicons name="add-circle" size={24} color={APP_COLORS.primary} />
+                <ThemedText style={{ fontSize: 12, color: theme.text.secondary, marginTop: 8, textAlign: 'center' }}>
                   New Alarm
-                </Text>
+                </ThemedText>
               </TouchableOpacity>
               
               <TouchableOpacity
-                className="flex-1 bg-bg-elevated border border-border-DEFAULT rounded-xl p-4 items-center"
+                style={{
+                  flex: 1,
+                  backgroundColor: theme.elevated,
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                  borderRadius: 12,
+                  padding: 16,
+                  alignItems: 'center',
+                }}
                 activeOpacity={0.8}
               >
-                <Ionicons name="musical-notes" size={24} color="#75FFB0" />
-                <Text className="text-caption text-text-secondary mt-2 text-center">
+                <Ionicons name="musical-notes" size={24} color={APP_COLORS.success} />
+                <ThemedText style={{ fontSize: 12, color: theme.text.secondary, marginTop: 8, textAlign: 'center' }}>
                   Sound Library
-                </Text>
+                </ThemedText>
               </TouchableOpacity>
               
               <TouchableOpacity
-                className="flex-1 bg-bg-elevated border border-border-DEFAULT rounded-xl p-4 items-center"
+                style={{
+                  flex: 1,
+                  backgroundColor: theme.elevated,
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                  borderRadius: 12,
+                  padding: 16,
+                  alignItems: 'center',
+                }}
                 activeOpacity={0.8}
                 onPress={() => router.push('/(tabs)/profile')}
               >
-                <Ionicons name="settings" size={24} color="#66F0FF" />
-                <Text className="text-caption text-text-secondary mt-2 text-center">
+                <Ionicons name="settings" size={24} color={APP_COLORS.accent} />
+                <ThemedText style={{ fontSize: 12, color: theme.text.secondary, marginTop: 8, textAlign: 'center' }}>
                   Settings
-                </Text>
+                </ThemedText>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Bottom padding for FAB */}
-          <View className="h-20" />
+          <View style={{ height: 80 }} />
         </ScrollView>
       </SafeAreaView>
     </ThemedView>

@@ -9,6 +9,8 @@ import * as Haptics from 'expo-haptics';
 import { ThemedView, ThemedText } from '../../components/ui/themed-view';
 import { useAlarmStore } from '../../stores/alarm-store';
 import { AudioManager } from '../../services/audio/AudioManager';
+import { useTheme } from '../../contexts/theme-context';
+import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SLIDER_WIDTH = SCREEN_WIDTH * 0.8;
@@ -18,6 +20,8 @@ const SLIDE_THRESHOLD = SLIDER_WIDTH * 0.7;
 export default function AlarmRingingScreen() {
   const { alarmId } = useLocalSearchParams<{ alarmId: string }>();
   const { alarms, deleteAlarm } = useAlarmStore();
+  const { isDark } = useTheme();
+  const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
   
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSliding, setIsSliding] = useState(false);
@@ -38,21 +42,7 @@ export default function AlarmRingingScreen() {
       setCurrentTime(new Date());
     }, 1000);
 
-    // Start background pulse animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(backgroundPulse, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backgroundPulse, {
-          toValue: 0,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
+    // Simplified background - no pulse animation
 
     // Start icon pulse animation
     Animated.loop(
@@ -70,12 +60,20 @@ export default function AlarmRingingScreen() {
       ])
     ).start();
 
-    // Play alarm audio
-    if (alarm?.audioTrack) {
-      AudioManager.loadAudio(alarm.audioTrack)
-        .then(() => AudioManager.playAsync())
-        .catch(error => console.error('Failed to play alarm audio:', error));
-    }
+    // Initialize and play alarm audio
+    const initializeAndPlayAudio = async () => {
+      if (alarm?.audioTrack) {
+        try {
+          await AudioManager.initialize();
+          await AudioManager.loadAudio(alarm.audioTrack);
+          await AudioManager.playAsync();
+        } catch (error) {
+          console.error('Failed to play alarm audio:', error);
+        }
+      }
+    };
+    
+    initializeAndPlayAudio();
 
     return () => {
       clearInterval(timeInterval);
@@ -183,7 +181,7 @@ export default function AlarmRingingScreen() {
 
   if (!alarm) {
     return (
-      <ThemedView className="flex-1 items-center justify-center">
+      <ThemedView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ThemedText>Alarm not found</ThemedText>
       </ThemedView>
     );
@@ -192,77 +190,77 @@ export default function AlarmRingingScreen() {
   return (
     <ThemedView style={{ flex: 1, backgroundColor: '#000000' }}>
       <SafeAreaView style={{ flex: 1 }}>
-        {/* Animated Background */}
-        <Animated.View 
-          className="absolute inset-0"
-          style={{
-            opacity: backgroundPulse.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.1, 0.3],
-            }),
-            backgroundColor: '#5CFFF0',
-          }}
-        />
+        {/* Clean Background - no animation */}
 
         {/* Header - Emergency Stop */}
-        <View className="flex-row justify-between items-center px-6 py-4">
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 16 }}>
           <TouchableOpacity onPress={handleEmergencyStop}>
-            <ThemedText className="text-text-secondary" style={{ fontSize: 12 }}>
+            <ThemedText style={{ fontSize: 12, opacity: 0.7 }}>
               {tapCount > 0 ? `Tap ${5 - tapCount} more times to stop` : 'Emergency stop'}
             </ThemedText>
           </TouchableOpacity>
           
-          <View className="bg-interactive-DEFAULT rounded-full px-3 py-1">
-            <ThemedText className="text-text-secondary" style={{ fontSize: 10 }}>
+          <View style={{ backgroundColor: APP_COLORS.primary, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 }}>
+            <ThemedText style={{ fontSize: 10, fontWeight: '600', color: '#FFFFFF' }}>
               ALARM
             </ThemedText>
           </View>
         </View>
 
         {/* Main Content */}
-        <View className="flex-1 items-center justify-center px-6">
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
           {/* Alarm Icon */}
-          <Animated.View
-            style={{
-              transform: [{ scale: pulseAnimation }],
-              marginBottom: 40,
-            }}
-          >
-            <View className="bg-neon-primary rounded-full p-8">
-              <Ionicons name="alarm" size={80} color="#000000" />
+          <View style={{ marginBottom: 40 }}>
+            <View style={{ 
+              backgroundColor: APP_COLORS.primary, 
+              borderRadius: 50, 
+              padding: 32,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Ionicons name="alarm" size={80} color="#FFFFFF" />
             </View>
-          </Animated.View>
+          </View>
 
           {/* Time Display */}
-          <View className="items-center mb-8">
+          <View style={{ alignItems: 'center', marginBottom: 32 }}>
             <ThemedText style={{ 
               fontSize: 72, 
               fontWeight: '800',
-              color: '#5CFFF0',
+              color: APP_COLORS.primary,
               textAlign: 'center',
             }}>
               {formatTime(currentTime)}
             </ThemedText>
             
-            <ThemedText className="text-text-secondary" style={{ 
+            <ThemedText style={{ 
               fontSize: 18,
               marginTop: 8,
               textAlign: 'center',
+              opacity: 0.7
             }}>
               {formatDate(currentTime)}
             </ThemedText>
           </View>
 
           {/* Alarm Info */}
-          <View className="bg-bg-elevated border border-border-visible rounded-xl p-4 mb-12 w-full">
-            <View className="flex-row items-center justify-center">
-              <Ionicons name="musical-notes" size={20} color="#66F0FF" />
-              <ThemedText className="text-text-primary ml-2" style={{ fontSize: 16, fontWeight: '600' }}>
+          <View style={{
+            backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+            borderWidth: 1,
+            borderColor: isDark ? '#374151' : '#E5E7EB',
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 48,
+            width: '100%'
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="musical-notes" size={20} color={APP_COLORS.accent} />
+              <ThemedText style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
                 {alarm.audioTrack.name}
               </ThemedText>
             </View>
             
-            <ThemedText className="text-text-secondary text-center mt-2" style={{ fontSize: 12 }}>
+            <ThemedText style={{ fontSize: 12, textAlign: 'center', marginTop: 8, opacity: 0.7 }}>
               {alarm.title}
             </ThemedText>
           </View>
@@ -270,11 +268,21 @@ export default function AlarmRingingScreen() {
           {/* Snooze Button */}
           <TouchableOpacity
             onPress={handleSnooze}
-            className="bg-interactive-DEFAULT border border-border-visible rounded-full px-8 py-4 mb-8"
+            style={{
+              backgroundColor: theme.elevated,
+              borderWidth: 1,
+              borderColor: theme.border,
+              borderRadius: 24,
+              paddingVertical: 16,
+              paddingHorizontal: 32,
+              marginBottom: 32,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <View className="flex-row items-center">
-              <Ionicons name="time" size={24} color="#75FFB0" />
-              <ThemedText className="text-text-primary ml-2" style={{ fontSize: 16, fontWeight: '600' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="time" size={24} color={APP_COLORS.accent} />
+              <ThemedText style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
                 Snooze
               </ThemedText>
             </View>
@@ -282,28 +290,44 @@ export default function AlarmRingingScreen() {
         </View>
 
         {/* Slide to Dismiss */}
-        <View className="px-6 pb-12">
-          <View className="items-center mb-4">
-            <ThemedText className="text-text-secondary" style={{ fontSize: 14 }}>
+        <View style={{ paddingHorizontal: 24, paddingBottom: 48 }}>
+          <View style={{ alignItems: 'center', marginBottom: 16 }}>
+            <ThemedText style={{ fontSize: 14, opacity: 0.7 }}>
               Slide to dismiss alarm
             </ThemedText>
           </View>
 
           <View 
-            className="bg-interactive-DEFAULT rounded-full relative"
             style={{ 
               height: THUMB_SIZE,
               width: SLIDER_WIDTH,
               marginHorizontal: (SCREEN_WIDTH - SLIDER_WIDTH) / 2,
+              backgroundColor: theme.elevated,
+              borderRadius: 35,
+              position: 'relative',
             }}
           >
             {/* Slider Track */}
-            <View className="absolute inset-0 rounded-full border border-border-visible" />
+            <View style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: 35,
+              borderWidth: 1,
+              borderColor: theme.border,
+            }} />
             
             {/* Progress Fill */}
             <Animated.View
-              className="absolute left-0 top-0 bottom-0 bg-neon-primary rounded-full"
               style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: APP_COLORS.primary,
+                borderRadius: 35,
                 width: slideAnimation.interpolate({
                   inputRange: [0, SLIDER_WIDTH - THUMB_SIZE],
                   outputRange: [THUMB_SIZE, SLIDER_WIDTH],
@@ -322,25 +346,41 @@ export default function AlarmRingingScreen() {
               }}
             >
               <Animated.View
-                className="absolute bg-white rounded-full items-center justify-center shadow-lg"
                 style={{
+                  position: 'absolute',
+                  backgroundColor: '#FFFFFF',
                   width: THUMB_SIZE,
                   height: THUMB_SIZE,
+                  borderRadius: 35,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
                   left: slideAnimation,
                 }}
               >
                 <Ionicons 
                   name="chevron-forward" 
                   size={24} 
-                  color={isSliding ? "#5CFFF0" : "#666666"} 
+                  color={isSliding ? APP_COLORS.primary : "#666666"} 
                 />
               </Animated.View>
             </PanGestureHandler>
 
             {/* Slide Text */}
-            <View className="absolute inset-0 items-center justify-center">
+            <View style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
               <ThemedText 
-                className="text-text-secondary"
                 style={{ 
                   fontSize: 16,
                   fontWeight: '600',

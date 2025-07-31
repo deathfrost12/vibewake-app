@@ -78,30 +78,23 @@ export function SimpleThemeToggle({ className }: { className?: string }) {
   const { themeMode, setThemeMode, isDark } = useTheme();
 
   const toggleTheme = () => {
-    console.log('🎨 Toggle theme clicked, current:', { themeMode, isDark });
     const nextMode = isDark ? 'light' : 'dark';
-    console.log('🎨 Setting theme to:', nextMode);
     setThemeMode(nextMode);
-    
-    // Force a small delay to see change
-    setTimeout(() => {
-      console.log('🎨 Theme after change:', { 
-        newMode: isDark ? 'light' : 'dark',
-        shouldBeDark: nextMode === 'dark'
-      });
-    }, 100);
   };
 
   return (
     <TouchableOpacity
       onPress={toggleTheme}
-      className={`w-12 h-12 rounded-full items-center justify-center ${
-        isDark 
-          ? 'bg-interactive-DEFAULT' 
-          : 'bg-gray-200'
-      }`}
+      style={{
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: isDark ? '#374151' : '#E5E7EB',
+      }}
     >
-      <Text className="text-xl">
+      <Text style={{ fontSize: 20 }}>
         {isDark ? '☀️' : '🌙'}
       </Text>
     </TouchableOpacity>

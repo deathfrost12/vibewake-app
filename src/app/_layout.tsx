@@ -11,6 +11,7 @@ import { ThemeProvider } from '../contexts/theme-context';
 import { initSentry, useSentryRouteTracking } from '../lib/sentry';
 import '../../global.css';
 import { useRouter } from 'expo-router';
+import { AudioManager } from '../services/audio/AudioManager';
 
 // Initialize Sentry using centralized configuration
 console.log('🚀 Initializing Sentry...');
@@ -45,6 +46,11 @@ function RootLayoutNav() {
         console.log('📱 SKIP: Push notifications - waiting for new dev client');
         // await pushNotificationService.initialize();
         console.log('⏸️ Push notifications temporarily disabled');
+
+        // Initialize AudioManager globally  
+        console.log('🎵 Initializing AudioManager...');
+        await AudioManager.initialize();
+        console.log('✅ AudioManager initialized');
 
         // Hide splash screen after app is ready
         if (Constants.appOwnership !== 'expo') {

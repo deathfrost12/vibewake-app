@@ -99,42 +99,91 @@ class NotificationService {
 
     // For one-time alarms
     if (!alarm.repeatDays || alarm.repeatDays.length === 0) {
-      const identifier = await Notifications.scheduleNotificationAsync({
-        content,
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: alarm.time,
-          channelId: Platform.OS === 'android' ? 'alarms' : undefined,
-        },
-      });
+      try {
+        // Validate alarm time is in the future
+        const now = new Date();
+        if (alarm.time <= now) {
+          throw new Error('Alarm time must be in the future');
+        }
 
-      console.log('⏰ Scheduled one-time alarm:', identifier, 'for', alarm.time);
-      return identifier;
+        const identifier = await this.scheduleNotificationWithRetry({
+          content,
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: alarm.time,
+            channelId: Platform.OS === 'android' ? 'alarms' : undefined,
+          },
+        });
+
+        console.log('⏰ Scheduled one-time alarm:', identifier, 'for', alarm.time);
+        return identifier;
+      } catch (error) {
+        console.error('❌ Failed to schedule one-time alarm:', error);
+        throw new Error(`Failed to schedule notification, ${error}`);
+      }
     }
 
-    // For repeating alarms, schedule for each day of the week
+    // For repeating alarms, calculate next occurrences and schedule as individual DATE triggers
     const identifiers: string[] = [];
     
-    for (const weekday of alarm.repeatDays) {
-      const identifier = await Notifications.scheduleNotificationAsync({
-        content: {
-          ...content,
-          title: `${alarm.title} (${this.getDayName(weekday)})`,
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
-          weekday: weekday === 0 ? 7 : weekday, // Convert Sunday from 0 to 7
-          hour: alarm.time.getHours(),
-          minute: alarm.time.getMinutes(),
-          channelId: Platform.OS === 'android' ? 'alarms' : undefined,
-        },
-      });
+    try {
+      // Calculate next 7 days for each repeat day to create specific date triggers
+      const now = new Date();
+      const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+      
+      for (const weekday of alarm.repeatDays) {
+        // Find the next occurrence of this weekday
+        const nextOccurrence = this.getNextOccurrenceForWeekday(alarm.time, weekday);
+        
+        if (nextOccurrence && nextOccurrence > now) {
+          try {
+            const identifier = await this.scheduleNotificationWithRetry({
+              content: {
+                ...content,
+                title: `${alarm.title} (${this.getDayName(weekday)})`,
+              },
+              trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: nextOccurrence,
+                channelId: Platform.OS === 'android' ? 'alarms' : undefined,
+              },
+            });
 
-      identifiers.push(identifier);
-      console.log('⏰ Scheduled weekly alarm:', identifier, 'for', this.getDayName(weekday), 'at', `${alarm.time.getHours()}:${alarm.time.getMinutes()}`);
+            identifiers.push(identifier);
+            console.log('⏰ Scheduled date alarm:', identifier, 'for', this.getDayName(weekday), 'at', nextOccurrence.toISOString());
+            
+            // Schedule for the following week too (to maintain recurring behavior)
+            const nextWeek = new Date(nextOccurrence.getTime() + oneWeekInMs);
+            const weekIdentifier = await this.scheduleNotificationWithRetry({
+              content: {
+                ...content,
+                title: `${alarm.title} (${this.getDayName(weekday)})`,
+              },
+              trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: nextWeek,
+                channelId: Platform.OS === 'android' ? 'alarms' : undefined,
+              },
+            });
+            
+            identifiers.push(weekIdentifier);
+            console.log('⏰ Scheduled weekly alarm:', weekIdentifier, 'for', this.getDayName(weekday), 'at', nextWeek.toISOString());
+          } catch (error) {
+            console.error('❌ Failed to schedule repeating alarm for', this.getDayName(weekday), ':', error);
+            // Continue with other days even if one fails
+          }
+        }
+      }
+
+      if (identifiers.length === 0) {
+        throw new Error('No alarm notifications could be scheduled');
+      }
+
+      return identifiers.join(','); // Return comma-separated identifiers
+    } catch (error) {
+      console.error('❌ Failed to schedule repeating alarms:', error);
+      throw new Error(`Failed to schedule notification, ${error}`);
     }
-
-    return identifiers.join(','); // Return comma-separated identifiers
   }
 
   async cancelAlarm(identifier: string): Promise<void> {
@@ -198,6 +247,32 @@ class NotificationService {
     return days[weekday] || 'Unknown';
   }
 
+  private getNextOccurrenceForWeekday(alarmTime: Date, weekday: number): Date | null {
+    const now = new Date();
+    const currentDay = now.getDay();
+    
+    // Calculate days until the target weekday
+    let daysUntilTarget = weekday - currentDay;
+    if (daysUntilTarget < 0) {
+      daysUntilTarget += 7; // Next week
+    } else if (daysUntilTarget === 0) {
+      // Same day - check if alarm time has passed
+      const todayAlarmTime = new Date(now);
+      todayAlarmTime.setHours(alarmTime.getHours(), alarmTime.getMinutes(), 0, 0);
+      
+      if (todayAlarmTime <= now) {
+        daysUntilTarget = 7; // Next week
+      }
+    }
+    
+    // Create the next occurrence
+    const nextOccurrence = new Date(now);
+    nextOccurrence.setDate(now.getDate() + daysUntilTarget);
+    nextOccurrence.setHours(alarmTime.getHours(), alarmTime.getMinutes(), 0, 0);
+    
+    return nextOccurrence;
+  }
+
   // Setup notification listeners for alarm triggering
   setupAlarmListeners() {
     // Listen for notification responses (when user taps notification)
@@ -247,6 +322,52 @@ class NotificationService {
 
   removeNotificationSubscription(subscription: Notifications.EventSubscription) {
     Notifications.removeNotificationSubscription(subscription);
+  }
+
+  // Helper method for retry logic with exponential backoff
+  private async scheduleNotificationWithRetry(
+    request: Notifications.NotificationRequestInput,
+    maxRetries: number = 3,
+    delay: number = 1000
+  ): Promise<string> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`⏰ Attempting to schedule notification (attempt ${attempt}/${maxRetries})`);
+        
+        // Additional validation to prevent NSInternalInconsistencyException
+        if (request.trigger?.type === Notifications.SchedulableTriggerInputTypes.DATE) {
+          const triggerDate = (request.trigger as any).date;
+          if (!(triggerDate instanceof Date) || isNaN(triggerDate.getTime())) {
+            throw new Error('Invalid trigger date provided');
+          }
+          
+          const now = new Date();
+          if (triggerDate <= now) {
+            throw new Error('Trigger date must be in the future');
+          }
+        }
+        
+        const identifier = await Notifications.scheduleNotificationAsync(request);
+        console.log(`✅ Successfully scheduled notification: ${identifier}`);
+        return identifier;
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`⚠️ Attempt ${attempt} failed:`, error.message);
+        
+        // If this is the last attempt, don't wait
+        if (attempt < maxRetries) {
+          // Exponential backoff: wait longer between retries
+          const waitTime = delay * Math.pow(2, attempt - 1);
+          console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+    
+    // If we get here, all retries failed
+    throw new Error(`Failed to schedule notification after ${maxRetries} attempts. Last error: ${lastError?.message}`);
   }
 }
 

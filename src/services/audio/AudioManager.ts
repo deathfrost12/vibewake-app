@@ -50,8 +50,14 @@ class AudioManagerClass {
       await this.unloadAudio();
 
       console.log('🎵 Loading audio:', track.name, 'URI:', track.uri);
+      console.log('🎵 Track type:', track.type);
       
-      const { sound } = await Audio.Sound.createAsync(
+      // Validate URI
+      if (!track.uri || track.uri.trim() === '') {
+        throw new Error('Invalid audio URI: empty or undefined');
+      }
+      
+      const { sound, status } = await Audio.Sound.createAsync(
         { uri: track.uri },
         { 
           shouldPlay: false,
@@ -64,8 +70,10 @@ class AudioManagerClass {
 
       this.sound = sound;
       console.log('✅ Audio loaded successfully');
+      console.log('🎵 Initial load status:', status);
     } catch (error) {
       console.error('❌ Failed to load audio:', error);
+      console.error('❌ Track details:', track);
       console.error('❌ Error details:', error);
       throw error;
     }
@@ -77,8 +85,14 @@ class AudioManagerClass {
     }
 
     try {
-      console.log('▶️ Playing audio');
+      console.log('🎵 Playing audio');
+      const status = await this.sound.getStatusAsync();
+      console.log('🎵 Audio status before play:', status);
+      
       await this.sound.playAsync();
+      
+      const statusAfter = await this.sound.getStatusAsync();
+      console.log('🎵 Audio status after play:', statusAfter);
     } catch (error) {
       console.error('❌ Failed to play audio:', error);
       throw error;

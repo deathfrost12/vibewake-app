@@ -258,12 +258,12 @@ export const BORDER_RADIUS = {
   full: 9999,        // FAB and circular elements
 };
 
-// ===== QUICK ACCESS =====
-export const NEON_COLORS = {
-  mint: '#75FFB0',
-  aqua: '#66F0FF', 
-  primary: '#5CFFF0',
-  lime: '#9BFF93',
+// ===== CLEAN APP COLORS =====
+export const APP_COLORS = {
+  primary: '#10B981',      // Emerald 500 - primary green
+  secondary: '#059669',    // Emerald 600 - darker green  
+  success: '#34D399',      // Emerald 400 - light green
+  accent: '#0891B2',       // Cyan 600 - subtle accent
 };
 
 // Export default theme (dark-first)

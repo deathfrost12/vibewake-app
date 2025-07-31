@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -33,6 +33,7 @@ export function AudioPicker({ selectedAudio, onAudioSelect, className }: AudioPi
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const isPlayingRef = useRef<string | null>(null);
   
   // Spotify state
   const [isSpotifyAuthenticated, setIsSpotifyAuthenticated] = useState(false);
@@ -63,10 +64,15 @@ export function AudioPicker({ selectedAudio, onAudioSelect, className }: AudioPi
     }
   };
 
+  // Update ref when isPlaying changes
   useEffect(() => {
-    // Setup audio manager status listener
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+  
+  useEffect(() => {
+    // Setup audio manager status listener - only run once on mount
     const handlePlaybackStatus = (status: any) => {
-      if (!status.isPlaying && isPlaying) {
+      if (!status.isPlaying && isPlayingRef.current) {
         setIsPlaying(null);
       }
     };
@@ -75,13 +81,17 @@ export function AudioPicker({ selectedAudio, onAudioSelect, className }: AudioPi
     return () => {
       AudioManager.removePlaybackStatusListener(handlePlaybackStatus);
       AudioManager.unloadAudio(); // Clean up when component unmounts
-      
-      // Clear search timeout
+    };
+  }, []); // Empty dependency array - run only on mount/unmount
+
+  useEffect(() => {
+    // Handle search timeout cleanup separately
+    return () => {
       if (searchTimeout) {
         clearTimeout(searchTimeout);
       }
     };
-  }, [isPlaying, searchTimeout]);
+  }, [searchTimeout]);
 
   const initializeServices = async () => {
     try {

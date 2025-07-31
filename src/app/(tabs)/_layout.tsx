@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAlarmStore } from '../../stores/alarm-store';
 import { notificationService } from '../../services/notifications/notification-service';
+import { useTheme } from '../../contexts/theme-context';
+import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
 
 // Tab bar icon component
 function TabBarIcon({
@@ -17,10 +19,22 @@ function TabBarIcon({
   return <Ionicons name={name} size={24} color={color} />;
 }
 
-// Neon FAB button for center tab
+// Clean FAB button for center tab
 function CreateButton() {
   return (
-    <View className="w-16 h-16 rounded-full bg-gradient-cta items-center justify-center shadow-fab animate-glow-pulse border-2 border-neon-primary">
+    <View style={{
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: APP_COLORS.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    }}>
       <Ionicons name="add" size={32} color="#FFFFFF" />
     </View>
   );
@@ -29,6 +43,8 @@ function CreateButton() {
 export default function TabLayout() {
   const router = useRouter();
   const { loadAlarms } = useAlarmStore();
+  const { isDark } = useTheme();
+  const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
   useEffect(() => {
     // Initialize alarm store when app loads
@@ -41,17 +57,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#5CFFF0',      // Neon primary
-        tabBarInactiveTintColor: '#A8B4B6',   // Cool secondary
+        tabBarActiveTintColor: APP_COLORS.primary,
+        tabBarInactiveTintColor: theme.text.secondary,
         tabBarStyle: {
-          backgroundColor: 'rgba(13, 26, 26, 0.9)', // Glass background
+          backgroundColor: isDark ? 'rgba(13, 26, 26, 0.9)' : 'rgba(248, 250, 252, 0.9)',
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255,255,255,0.07)', // Subtle border
+          borderTopColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.1)',
           height: 88,
           paddingTop: 8,
           paddingBottom: 34,
           position: 'absolute',
-          backdropFilter: 'blur(8px)',     // Glassmorphism blur
         },
         headerShown: false,
       }}
@@ -74,7 +89,12 @@ export default function TabLayout() {
             return (
               <TouchableOpacity
                 {...safeProps}
-                className="flex-1 justify-center items-center -mt-3"
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: -12,
+                }}
                 activeOpacity={0.7}
                 onPress={() => router.push('/alarms/create')}
               >
