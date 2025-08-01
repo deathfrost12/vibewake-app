@@ -208,36 +208,94 @@ export default function DevMenu() {
           </Text>
         </View>
 
-        {/* Cards Grid */}
-        <View style={{ 
-          flexDirection: 'row', 
-          flexWrap: 'wrap', 
-          justifyContent: 'space-between',
-        }}>
-          {sections.map(section => (
-            <TouchableOpacity
-              key={section.route}
-              onPress={() => router.push(`/${section.route}`)}
-              style={[
-                useThemedCard('clickable'),
-                {
-                  width: '48%',
-                  marginBottom: spacing.md,
-                  alignItems: 'center',
-                }
-              ]}
-            >
-              <Ionicons
-                name={section.icon}
-                size={32}
-                color={colors.text.secondary}
-                style={{ marginBottom: spacing.sm }}
-              />
-              <Text style={[useThemedText('subheading'), { textAlign: 'center' }]}>
-                {section.title}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        {/* Screen Navigation */}
+        <View style={{ marginBottom: spacing['2xl'] }}>
+          <Text style={[sectionHeadingStyle, { marginBottom: spacing.md }]}>
+            📱 Screen Navigation
+          </Text>
+          <View style={{ 
+            flexDirection: 'row', 
+            flexWrap: 'wrap', 
+            justifyContent: 'space-between',
+          }}>
+            {[
+              { route: '/(tabs)/dashboard', title: 'Dashboard', icon: 'home' },
+              { route: '/alarms/create', title: 'Create Alarm', icon: 'add-circle' },
+              { route: '/alarms/ringing', title: 'Ringing Alarm', icon: 'alarm' },
+              { route: '/(tabs)/profile', title: 'Profile', icon: 'person' },
+              { route: '/auth/login', title: 'Login', icon: 'log-in' },
+              { route: '/auth/register', title: 'Register', icon: 'person-add' },
+              { route: '/auth/forgot-password', title: 'Forgot Password', icon: 'key' },
+              { route: '/profile/edit', title: 'Edit Profile', icon: 'create' },
+              { route: '/profile/change-password', title: 'Change Password', icon: 'lock-closed' },
+              { route: '/profile/privacy-policy', title: 'Privacy Policy', icon: 'shield' },
+              { route: '/profile/terms-of-service', title: 'Terms of Service', icon: 'document-text' },
+              { route: '/testing-screen-1', title: 'Testing Screen', icon: 'flask' },
+              { route: '/songmaker-demo', title: 'Songmaker Demo', icon: 'musical-notes' },
+              { route: '/revenuecat-demo', title: 'RevenueCat Demo', icon: 'card' },
+            ].map(screen => (
+              <TouchableOpacity
+                key={screen.route}
+                onPress={() => router.push(screen.route)}
+                style={[
+                  useThemedCard('clickable'),
+                  {
+                    width: '48%',
+                    marginBottom: spacing.sm,
+                    alignItems: 'center',
+                    padding: spacing.md,
+                  }
+                ]}
+              >
+                <Ionicons
+                  name={screen.icon as any}
+                  size={20}
+                  color={colors.text.secondary}
+                  style={{ marginBottom: spacing.xs }}
+                />
+                <Text style={[useThemedText('caption'), { textAlign: 'center', fontSize: 10 }]}>
+                  {screen.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Dev Tools Grid */}
+        <View style={{ marginBottom: spacing['2xl'] }}>
+          <Text style={[sectionHeadingStyle, { marginBottom: spacing.md }]}>
+            🔧 Development Tools
+          </Text>
+          <View style={{ 
+            flexDirection: 'row', 
+            flexWrap: 'wrap', 
+            justifyContent: 'space-between',
+          }}>
+            {sections.map(section => (
+              <TouchableOpacity
+                key={section.route}
+                onPress={() => router.push(`/${section.route}`)}
+                style={[
+                  useThemedCard('clickable'),
+                  {
+                    width: '48%',
+                    marginBottom: spacing.md,
+                    alignItems: 'center',
+                  }
+                ]}
+              >
+                <Ionicons
+                  name={section.icon}
+                  size={32}
+                  color={colors.text.secondary}
+                  style={{ marginBottom: spacing.sm }}
+                />
+                <Text style={[useThemedText('subheading'), { textAlign: 'center' }]}>
+                  {section.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

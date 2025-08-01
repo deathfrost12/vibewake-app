@@ -224,7 +224,7 @@ export default function AlarmsScreen() {
               Quick Actions
             </ThemedText>
             
-            <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={{ flexDirection: 'row', gap: 16, marginBottom: 16 }}>
               <TouchableOpacity
                 style={{
                   flex: 1,
@@ -281,6 +281,31 @@ export default function AlarmsScreen() {
                 </ThemedText>
               </TouchableOpacity>
             </View>
+
+            {/* Developer Menu Button */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: theme.elevated,
+                borderWidth: 2,
+                borderColor: '#FF6B6B',
+                borderRadius: 12,
+                padding: 16,
+                alignItems: 'center',
+                borderStyle: 'dashed',
+              }}
+              activeOpacity={0.8}
+              onPress={() => router.push('/dev-menu')}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="code-slash" size={24} color="#FF6B6B" />
+                <ThemedText style={{ fontSize: 16, color: '#FF6B6B', marginLeft: 12, fontWeight: '600' }}>
+                  🛠️ Developer Menu
+                </ThemedText>
+              </View>
+              <ThemedText style={{ fontSize: 12, color: theme.text.muted, marginTop: 4, textAlign: 'center' }}>
+                Navigate to any screen • Testing tools
+              </ThemedText>
+            </TouchableOpacity>
           </View>
 
           {/* Bottom padding for FAB */}
