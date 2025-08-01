@@ -5,13 +5,16 @@ WebBrowser.maybeCompleteAuthSession();
 
 const SPOTIFY_CLIENT_ID = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID;
 
-// Spotify OAuth scopes for playlist access
+// Spotify OAuth scopes for playlist access and Web Playback SDK
 const SPOTIFY_SCOPES = [
   'playlist-read-private',
   'playlist-read-collaborative',
   'user-library-read',
   'user-read-recently-played',
   'streaming',
+  'user-read-playback-state',
+  'user-modify-playback-state',
+  'user-read-currently-playing',
 ].join(' ');
 
 const redirectUri = 'com.owlee.app://auth/spotify';
@@ -438,9 +441,22 @@ class SpotifyAuthService {
     );
   }
 
+  getAccessToken(): string | null {
+    if (this.isAuthenticated()) {
+      return this.accessToken;
+    }
+    return null;
+  }
+
   logout(): void {
     this.accessToken = null;
     this.tokenExpiry = null;
+  }
+
+  setToken(accessToken: string, expiresIn: number): void {
+    this.accessToken = accessToken;
+    this.tokenExpiry = Date.now() + expiresIn * 1000;
+    console.log('🎵 Spotify token set manually');
   }
 }
 

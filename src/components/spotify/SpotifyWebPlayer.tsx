@@ -8,18 +8,21 @@ import { ThemedView, ThemedText } from '../ui/themed-view';
 import { SpotifyTrack, spotifyAuth } from '../../services/auth/spotify-auth';
 
 interface SpotifyWebPlayerProps {
-  visible: boolean;
+  isVisible: boolean;
   track: SpotifyTrack | null;
   onClose: () => void;
+  onPlaybackError: (error: Error) => void;
+  accessToken: string;
 }
 
 interface PlayerMessage {
-  type: 'PLAYER_READY' | 'PLAYER_STATE_CHANGED' | 'PLAYER_ERROR';
+  type: 'PLAYER_READY' | 'PLAYER_STATE_CHANGED' | 'PLAYER_ERROR' | 'ERROR' | 'SDK_READY' | 'PLAYBACK_STARTED';
+  payload?: any;
   data?: any;
   error?: string;
 }
 
-export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerProps) {
+export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, accessToken }: SpotifyWebPlayerProps) {
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
   const webViewRef = useRef<WebView>(null);
@@ -29,12 +32,12 @@ export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerPr
   const [playerError, setPlayerError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (visible) {
+    if (isVisible) {
       setIsLoading(true);
       setIsPlayerReady(false);
       setPlayerError(null);
     }
-  }, [visible]);
+  }, [isVisible]);
 
   const handleWebViewMessage = (event: WebViewMessageEvent) => {
     try {
@@ -45,7 +48,7 @@ export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerPr
         case 'PLAYER_READY':
           setIsPlayerReady(true);
           setIsLoading(false);
-          console.log('🎵 Spotify Player ready with device ID:', message.data?.device_id);
+          console.log('🎵 Spotify Player ready with device ID:', message.payload?.device_id);
           
           // Auto-play the track if available
           if (track && spotifyAuth.isAuthenticated()) {
@@ -54,13 +57,23 @@ export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerPr
           break;
 
         case 'PLAYER_STATE_CHANGED':
-          console.log('🎵 Player state:', message.data);
+          console.log('🎵 Player state:', message.payload);
           break;
 
         case 'PLAYER_ERROR':
-          console.error('🎵 Player error:', message.error);
-          setPlayerError(message.error || 'Unknown player error');
+        case 'ERROR':
+          const errorMsg = message.payload?.message || message.error || 'Unknown player error';
+          console.error('🎵 Player error:', errorMsg);
+          setPlayerError(errorMsg);
           setIsLoading(false);
+          break;
+
+        case 'SDK_READY':
+          console.log('🎵 Spotify SDK is ready');
+          break;
+
+        case 'PLAYBACK_STARTED':
+          console.log('🎵 Playback started successfully');
           break;
 
         default:
@@ -77,284 +90,20 @@ export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerPr
       return;
     }
 
-    const playCommand = {
-      type: 'PLAY_TRACK',
-      trackUri: `spotify:track:${trackToPlay.id}`,
-      trackId: trackToPlay.id
+    const playMessage = {
+      type: 'PLAY',
+      payload: { trackUri: `spotify:track:${trackToPlay.id}` },
     };
-
-    const javascript = `
-      window.playSpotifyTrack(${JSON.stringify(playCommand)});
-      true;
-    `;
-
-    webViewRef.current.injectJavaScript(javascript);
+    webViewRef.current.postMessage(JSON.stringify(playMessage));
   };
 
-  const getAccessToken = () => {
-    // We'll need to get the current access token from spotifyAuth
-    // This is a simplified version - you'll need to implement proper token management
-    return spotifyAuth.isAuthenticated() ? 'CURRENT_ACCESS_TOKEN' : null;
-  };
+  
 
-  const generatePlayerHTML = () => {
-    const accessToken = getAccessToken();
-    
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VibeWake Spotify Player</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: ${isDark ? '#0D1A1A' : '#F8FAFC'};
-            color: ${isDark ? '#F9FAFB' : '#1F2937'};
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            text-align: center;
-        }
-        .player-container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .track-info {
-            margin-bottom: 20px;
-        }
-        .track-image {
-            width: 200px;
-            height: 200px;
-            border-radius: 12px;
-            margin: 0 auto 16px;
-            display: block;
-        }
-        .track-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .track-artist {
-            font-size: 14px;
-            opacity: 0.7;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .play-button {
-            background-color: #1DB954;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .play-button:hover {
-            background-color: #1ed760;
-        }
-        .status {
-            margin-top: 20px;
-            font-size: 14px;
-            opacity: 0.7;
-        }
-        .error {
-            color: #ef4444;
-            background-color: rgba(239, 68, 68, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 16px 0;
-        }
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="player-container">
-        <div id="loading" class="loading">
-            <div>⏳</div>
-            <div>Loading Spotify Player...</div>
-        </div>
-        
-        <div id="player-content" style="display: none;">
-            <div class="track-info">
-                <img id="track-image" class="track-image" src="" alt="Track artwork">
-                <div id="track-name" class="track-name"></div>
-                <div id="track-artist" class="track-artist"></div>
-            </div>
-            
-            <div class="controls">
-                <button id="play-button" class="play-button">▶</button>
-            </div>
-            
-            <div id="status" class="status">Ready to play</div>
-        </div>
-        
-        <div id="error-container"></div>
-    </div>
-
-    <script>
-        let player = null;
-        let deviceId = null;
-        let currentTrack = null;
-        
-        const postMessage = (message) => {
-            if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(JSON.stringify(message));
-            }
-        };
-
-        const showError = (error) => {
-            document.getElementById('error-container').innerHTML = 
-                '<div class="error">' + error + '</div>';
-            postMessage({ type: 'PLAYER_ERROR', error });
-        };
-
-        const updateTrackInfo = (track) => {
-            const imageElement = document.getElementById('track-image');
-            const nameElement = document.getElementById('track-name');
-            const artistElement = document.getElementById('track-artist');
-            
-            if (track) {
-                imageElement.src = track.album?.images?.[1]?.url || track.album?.images?.[0]?.url || '';
-                nameElement.textContent = track.name || 'Unknown Track';
-                artistElement.textContent = track.artists?.map(a => a.name).join(', ') || 'Unknown Artist';
-            }
-        };
-
-        window.onSpotifyWebPlaybackSDKReady = () => {
-            const token = '${accessToken}';
-            
-            if (!token || token === 'CURRENT_ACCESS_TOKEN') {
-                showError('No valid Spotify access token. Please re-authenticate.');
-                return;
-            }
-
-            player = new Spotify.Player({
-                name: 'VibeWake Player',
-                getOAuthToken: cb => { cb(token); },
-                volume: 1.0
-            });
-
-            // Ready
-            player.addListener('ready', ({ device_id }) => {
-                console.log('Ready with Device ID', device_id);
-                deviceId = device_id;
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('player-content').style.display = 'block';
-                
-                postMessage({ 
-                    type: 'PLAYER_READY', 
-                    data: { device_id } 
-                });
-            });
-
-            // Not Ready
-            player.addListener('not_ready', ({ device_id }) => {
-                console.log('Device ID has gone offline', device_id);
-            });
-
-            // Player state changes
-            player.addListener('player_state_changed', (state) => {
-                if (!state) return;
-                
-                currentTrack = state.track_window.current_track;
-                const isPlaying = !state.paused;
-                
-                document.getElementById('play-button').textContent = isPlaying ? '⏸' : '▶';
-                document.getElementById('status').textContent = 
-                    isPlaying ? 'Playing...' : 'Paused';
-                
-                postMessage({ 
-                    type: 'PLAYER_STATE_CHANGED', 
-                    data: { isPlaying, track: currentTrack } 
-                });
-            });
-
-            // Errors
-            player.addListener('initialization_error', ({ message }) => {
-                showError('Initialization Error: ' + message);
-            });
-
-            player.addListener('authentication_error', ({ message }) => {
-                showError('Authentication Error: ' + message);
-            });
-
-            player.addListener('account_error', ({ message }) => {
-                showError('Account Error: ' + message);
-            });
-
-            player.addListener('playback_error', ({ message }) => {
-                showError('Playback Error: ' + message);
-            });
-
-            // Connect to the player
-            player.connect().then(success => {
-                if (!success) {
-                    showError('Failed to connect to Spotify');
-                }
-            });
-
-            // Play button click handler
-            document.getElementById('play-button').addEventListener('click', () => {
-                player.togglePlay();
-            });
-        };
-
-        // Function to play specific track (called from React Native)
-        window.playSpotifyTrack = async (command) => {
-            if (!player || !deviceId) {
-                showError('Player not ready');
-                return;
-            }
-
-            try {
-                const response = await fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceId, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        uris: [command.trackUri]
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ${accessToken}'
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to start playback: ' + response.status);
-                }
-
-                document.getElementById('status').textContent = 'Starting playback...';
-            } catch (error) {
-                showError('Playback failed: ' + error.message);
-            }
-        };
-    </script>
-</body>
-</html>
-    `;
-  };
-
-  if (!visible) return null;
+  if (!isVisible) return null;
 
   return (
     <Modal
-      visible={visible}
+      visible={isVisible}
       presentationStyle="pageSheet"
       animationType="slide"
     >
@@ -413,7 +162,7 @@ export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerPr
           ) : (
             <WebView
               ref={webViewRef}
-              source={{ html: generatePlayerHTML() }}
+              source={require('../../assets/html/spotify-player.html')}
               style={{ flex: 1 }}
               javaScriptEnabled={true}
               domStorageEnabled={true}
@@ -421,13 +170,19 @@ export function SpotifyWebPlayer({ visible, track, onClose }: SpotifyWebPlayerPr
               allowsInlineMediaPlayback={true}
               mixedContentMode="compatibility"
               onMessage={handleWebViewMessage}
-              onError={(error) => {
-                console.error('🎵 WebView error:', error);
-                setPlayerError('WebView failed to load');
-                setIsLoading(false);
-              }}
               onLoadEnd={() => {
-                console.log('🎵 WebView loaded');
+                if (webViewRef.current && track && spotifyAuth.getAccessToken()) {
+                  const initMessage = {
+                    type: 'INITIALIZE',
+                    payload: { accessToken: spotifyAuth.getAccessToken() },
+                  };
+                  webViewRef.current.postMessage(JSON.stringify(initMessage));
+                }
+              }}
+              onError={(syntheticEvent) => {
+                const { nativeEvent } = syntheticEvent;
+                console.warn('WebView error: ', nativeEvent);
+                setPlayerError(nativeEvent.description || 'Failed to load player');
               }}
             />
           )}

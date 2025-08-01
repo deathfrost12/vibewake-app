@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { supabase } from '../services/supabase/client';
 import { googleAuth } from '../services/auth/google-auth';
 import { appleAuth } from '../services/auth/apple-auth';
+import { spotifyAuth, SpotifyAuthResult } from '../services/auth/spotify-auth';
 
 // Helper function to decode JWT without verification (just for nonce extraction)
 const decodeJWT = (token: string) => {
@@ -41,6 +42,11 @@ interface AuthState {
   passwordResetSent: boolean;
   passwordResetLoading: boolean;
 
+  // Spotify state
+  spotifyToken: string | null;
+  spotifyTokenExpires: number | null;
+  spotifyLoading: boolean;
+
   // Actions - Email/Password
   signInWithEmail: (
     email: string,
@@ -59,6 +65,8 @@ interface AuthState {
   // Actions - Social Auth
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signInWithApple: () => Promise<{ success: boolean; error?: string }>;
+  signInWithSpotify: () => Promise<{ success: boolean; error?: string }>;
+  signOutFromSpotify: () => void;
 
   // Actions - General
   signOut: () => Promise<void>;
@@ -96,6 +104,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   emailVerificationLoading: false,
   passwordResetSent: false,
   passwordResetLoading: false,
+
+  // Spotify initial state
+  spotifyToken: null,
+  spotifyTokenExpires: null,
+  spotifyLoading: false,
 
   // Initialize auth listener
   initialize: () => {
@@ -488,6 +501,39 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 
+  // Spotify Auth
+  signInWithSpotify: async () => {
+    set({ spotifyLoading: true, error: null });
+    try {
+      console.log('🎵 Starting Spotify authentication...');
+      const result = await spotifyAuth.authenticate();
+      
+      const expiresAt = Date.now() + result.expiresIn * 1000;
+      set({
+        spotifyToken: result.accessToken,
+        spotifyTokenExpires: expiresAt,
+        spotifyLoading: false,
+      });
+
+      // Also set the token in the service for API calls
+      spotifyAuth.setToken(result.accessToken, result.expiresIn);
+
+      console.log('🎵 Spotify sign-in successful');
+      return { success: true };
+    } catch (error: any) {
+      console.error('🎵 Spotify sign-in error:', error);
+      const errorMsg = `Spotify přihlášení selhalo: ${error.message}`;
+      set({ spotifyLoading: false, error: errorMsg });
+      return { success: false, error: errorMsg };
+    }
+  },
+
+  signOutFromSpotify: () => {
+    console.log('🎵 Signing out from Spotify');
+    spotifyAuth.logout();
+    set({ spotifyToken: null, spotifyTokenExpires: null });
+  },
+
   // Sign out
   signOut: async () => {
     set({ loading: true, error: null });
@@ -506,6 +552,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       } catch (appleError) {
         console.warn('Apple sign out error:', appleError);
       }
+
+      // Sign out from Spotify
+      get().signOutFromSpotify();
 
       // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();

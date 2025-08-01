@@ -21,6 +21,9 @@ import { useAlarmStore } from '../../stores/alarm-store';
 import { AudioManager } from '../../services/audio/AudioManager';
 import { useTheme } from '../../contexts/theme-context';
 import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
+import { SpotifyWebPlayer } from '../../components/spotify/SpotifyWebPlayer';
+import { SpotifyTrack } from '../../services/auth/spotify-auth';
+import { useAuthStore } from '../../stores/auth-store';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SLIDER_WIDTH = SCREEN_WIDTH * 0.8;
@@ -32,6 +35,10 @@ export default function AlarmRingingScreen() {
   const { alarms, deleteAlarm } = useAlarmStore();
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
+  const { spotifyToken } = useAuthStore();
+
+  const [showSpotifyPlayer, setShowSpotifyPlayer] = useState(false);
+  const [spotifyTrack, setSpotifyTrack] = useState<SpotifyTrack | null>(null);
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSliding, setIsSliding] = useState(false);
@@ -75,8 +82,29 @@ export default function AlarmRingingScreen() {
       if (alarm?.audioTrack) {
         try {
           await AudioManager.initialize();
-          await AudioManager.loadAudio(alarm.audioTrack);
-          await AudioManager.playAsync();
+          await AudioManager.playAlarmAudio({
+            preferredTrack: alarm.audioTrack,
+            onSpotifyPlayerNeeded: (track) => {
+              if (track.type === 'spotify') {
+                // Convert AudioTrack back to a SpotifyTrack-like object for the player
+                const spotifyTrackForPlayer: SpotifyTrack = {
+                  id: track.id.replace('spotify_', ''),
+                  name: track.name,
+                  artists: track.artist ? [{ name: track.artist }] : [],
+                  preview_url: track.uri,
+                  external_urls: { spotify: '' },
+                  duration_ms: track.duration || 0,
+                  album: {
+                    id: '',
+                    name: 'Album',
+                    images: track.artworkUrl ? [{ url: track.artworkUrl }] : [],
+                  },
+                };
+                setSpotifyTrack(spotifyTrackForPlayer);
+                setShowSpotifyPlayer(true);
+              }
+            },
+          });
         } catch (error) {
           console.error('Failed to play alarm audio:', error);
         }
@@ -126,6 +154,7 @@ export default function AlarmRingingScreen() {
   };
 
   const handleDismissAlarm = async () => {
+    setShowSpotifyPlayer(false); // Close player on dismiss
     try {
       await AudioManager.stopAsync();
 
@@ -201,6 +230,20 @@ export default function AlarmRingingScreen() {
   return (
     <ThemedView style={{ flex: 1, backgroundColor: '#000000' }}>
       <SafeAreaView style={{ flex: 1 }}>
+        {/* Spotify Player Modal */}
+        {spotifyTrack && (
+          <SpotifyWebPlayer
+            isVisible={showSpotifyPlayer}
+            track={spotifyTrack}
+            accessToken={spotifyToken || ''}
+            onClose={() => setShowSpotifyPlayer(false)}
+            onPlaybackError={(error) => {
+              Alert.alert('Spotify Error', error.message);
+              setShowSpotifyPlayer(false);
+            }}
+          />
+        )}
+
         {/* Clean Background - no animation */}
 
         {/* Header - Emergency Stop */}
@@ -329,30 +372,58 @@ export default function AlarmRingingScreen() {
             </ThemedText>
           </View>
 
-          {/* Snooze Button */}
-          <TouchableOpacity
-            onPress={handleSnooze}
-            style={{
-              backgroundColor: theme.elevated,
-              borderWidth: 1,
-              borderColor: theme.border,
-              borderRadius: 24,
-              paddingVertical: 16,
-              paddingHorizontal: 32,
-              marginBottom: 32,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="time" size={24} color={APP_COLORS.accent} />
-              <ThemedText
-                style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}
+          {/* Action Buttons */}
+          <View style={{ flexDirection: 'row', gap: 16, marginBottom: 32 }}>
+            {/* Snooze Button */}
+            <TouchableOpacity
+              onPress={handleSnooze}
+              style={{
+                backgroundColor: theme.elevated,
+                borderWidth: 1,
+                borderColor: theme.border,
+                borderRadius: 24,
+                paddingVertical: 16,
+                paddingHorizontal: 24,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: 1,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="time" size={20} color={APP_COLORS.accent} />
+                <ThemedText
+                  style={{ fontSize: 14, fontWeight: '600', marginLeft: 6 }}
+                >
+                  Snooze
+                </ThemedText>
+              </View>
+            </TouchableOpacity>
+
+            {/* Spotify Player Button - only show for Spotify tracks */}
+            {alarm.audioTrack.type === 'spotify' && spotifyTrack && (
+              <TouchableOpacity
+                onPress={() => setShowSpotifyPlayer(true)}
+                style={{
+                  backgroundColor: '#1DB954',
+                  borderRadius: 24,
+                  paddingVertical: 16,
+                  paddingHorizontal: 24,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flex: 1,
+                }}
               >
-                Snooze
-              </ThemedText>
-            </View>
-          </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="musical-note" size={20} color="#FFFFFF" />
+                  <ThemedText
+                    style={{ fontSize: 14, fontWeight: '600', marginLeft: 6, color: '#FFFFFF' }}
+                  >
+                    Play Full Song
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* Slide to Dismiss */}
