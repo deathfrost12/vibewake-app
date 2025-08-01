@@ -7,6 +7,7 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 ## Hlavní funkce
 
 ### 🔊 Pokročilá audio integrace
+
 - **Přednastavené zvuky**: Kurátorovaná kolekce kvalitních budíků
 - **Nahrávání vlastních souborů**: Možnost nahrát MP3, M4A, WAV, AAC soubory
 - **Spotify integrace**: Buzení s oblíbenými písničkami ze Spotify
@@ -14,17 +15,20 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 - **Pozadí audio**: Spolehlivé přehrávání i při uzamčeném telefonu
 
 ### ⏰ Chytré plánování alarmů
+
 - **Opakování**: Denní, týdenní, nebo vlastní vzory opakování
 - **Více alarmů**: Neomezený počet aktivních buzení
 - **Inteligentní plánování**: Optimalizace pro spolehlivé buzení
 - **Pozadí zpracování**: Alarm funguje i když je aplikace zavřená
 
 ### 👤 Správa uživatelských účtů
+
 - **Autentizace**: Google OAuth, Apple Sign-In
 - **Synchronizace**: Alarmy synchronizované mezi zařízeními
 - **Profil uživatele**: Správa osobních údajů a preferencí
 
 ### 💎 Prémiové předplatné
+
 - **RevenueCat integrace**: Správa předplatného a plateb
 - **Pokročilé funkce**: Exkluzivní zvuky, neomezené alarmy
 - **Spotify Premium**: Integrace s placenými Spotify účty
@@ -32,6 +36,7 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 ## Struktura obrazovek
 
 ### Hlavní navigace (Tab Navigation)
+
 1. **Dashboard** (`/dashboard`)
    - Přehled všech aktivních alarmů
    - Rychlé zapnutí/vypnutí alarmů
@@ -50,22 +55,26 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
    - Informace o účtu
 
 ### Autentizační obrazovky (`/auth`)
+
 - **Přihlášení** (`/auth/login`)
-- **Registrace** (`/auth/register`) 
+- **Registrace** (`/auth/register`)
 - **Zapomenuté heslo** (`/auth/forgot-password`)
 - **OAuth callback** (`/auth/callback`)
 
 ### Správa profilu (`/profile`)
+
 - **Nastavení účtu** (`/profile/account`)
 - **Správa předplatného** (`/profile/subscription`)
 - **Soukromí a bezpečnost** (`/profile/privacy`)
 
 ### Alarm systém (`/alarms`)
+
 - **Zvonění alarmu** (`/alarms/ringing`)
 - **Editace alarmu** (`/alarms/edit/[id]`)
 - **Historie alarmů** (`/alarms/history`)
 
 ### Vývojářské nástroje (`/dev`)
+
 - **Testování komponent** (`/dev/test-screens`)
 - **Audio testy** (`/dev/audio-test`)
 - **Diagnostika sítě** (`/dev/network-test`)
@@ -73,18 +82,21 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 ## Klíčové komponenty
 
 ### Audio systém
+
 - **AudioPicker**: Výběr ze všech dostupných audio zdrojů
 - **SpotifyWebPlayer**: Integrace s Spotify Web API
 - **SoundLibrary**: Správa přednastavených zvuků
 - **FileUploader**: Nahrávání vlastních audio souborů
 
 ### UI komponenty
+
 - **ThemedView/ThemedText**: Komponenty s podporou tmavého/světlého režimu
 - **LoadingStates**: Jednotné loading stavy napříč aplikací
 - **Toast notifikace**: Zpětná vazba pro uživatelské akce
 - **SafeAreaView**: Správné zobrazení na všech zařízeních
 
 ### Správa stavu
+
 - **auth-store**: Zustand store pro autentizaci
 - **revenuecat-store**: Správa předplatného a plateb
 - **React Query**: Server state management pro Supabase data
@@ -92,12 +104,14 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 ## Technické služby
 
 ### Databáze (Supabase)
+
 - **Uživatelské účty**: Správa profilů a autentizace
 - **Alarmy**: Persistentní uložení všech alarmů
 - **Audio soubory**: Metadata nahraných souborů
 - **Předplatné**: Tracking prémiových funkcí
 
 ### Externí integrace
+
 - **Spotify API**: Přístup k hudební knihovně uživatele
 - **Google/Apple OAuth**: Bezpečná autentizace
 - **RevenueCat**: Správa in-app purchases a předplatného
@@ -105,6 +119,7 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 - **Sentry**: Monitoring chyb a performance
 
 ### Notifikace a pozadí
+
 - **Push notifikace**: Spolehlivé doručování alarmů
 - **Background processing**: Plánování alarmů v systému
 - **App permissions**: Správa povolení pro mikrofon, notifikace
@@ -112,12 +127,14 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 ## Designový systém
 
 ### Barevná paleta "Vibrant Cyan"
+
 - **Primární**: #5CFFF0 (Neon cyan)
 - **Akcentní**: #75FFB0 (Neon mint), #66F0FF (Neon aqua)
 - **Pozadí**: Adaptivní tmavý/světlý režim
 - **UI**: Minimalistický design s focus na funkčnost
 
 ### Stylovací přístup
+
 - **NativeWind**: Utility-first CSS pro 90% stylování
 - **Gluestack UI v2**: Komplexní komponenty když je potřeba
 - **Responzivní**: Optimalizováno pro všechny velikosti displejů
@@ -125,16 +142,19 @@ VibeWake (dříve Owlee) je pokročilá mobilní aplikace pro buzení postavená
 ## Uživatelské scénáře
 
 ### Základní použití
+
 1. **Nastavení prvního alarmu**: Registrace → výběr času → výběr zvuku → aktivace
 2. **Ranní buzení**: Alarm zvoní → snooze/zastavit → rychlé nastavení dalšího dne
 3. **Správa více alarmů**: Dashboard s přehledem → rychlé zapínání/vypínání
 
 ### Pokročilé funkce
+
 1. **Spotify integrace**: Propojení účtu → procházení playlistů → výběr skladby
 2. **Vlastní audio**: Nahrání souboru → preview → uložení do knihovny
 3. **Prémiové předplatné**: Upgrade → přístup k exkluzivním zvukům
 
 ### Administrace
+
 1. **Synchronizace**: Změny se automaticky sync mezi zařízeními
 2. **Záloha**: Všechna data bezpečně uložena v cloudu
 3. **Privacy**: Plná kontrola nad sdílenými daty

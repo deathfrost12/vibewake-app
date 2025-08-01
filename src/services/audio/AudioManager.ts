@@ -243,7 +243,7 @@ class AudioManagerClass {
   }
 
   // HYBRID ALARM PLAYBACK METHODS
-  
+
   /**
    * Play audio for alarm with smart fallback strategy
    * For Spotify tracks without preview: plays fallback and triggers Spotify player callback
@@ -254,23 +254,38 @@ class AudioManagerClass {
     usedFallback: boolean;
     requiresSpotifyPlayer: boolean;
   }> {
-    const { preferredTrack, fallbackSoundId, onSpotifyPlayerNeeded, onPlaybackFailed } = options;
-    
+    const {
+      preferredTrack,
+      fallbackSoundId,
+      onSpotifyPlayerNeeded,
+      onPlaybackFailed,
+    } = options;
+
     console.log('🚨 Starting alarm playback for:', preferredTrack.name);
-    console.log('🚨 Track type:', preferredTrack.type, 'URI:', preferredTrack.uri);
+    console.log(
+      '🚨 Track type:',
+      preferredTrack.type,
+      'URI:',
+      preferredTrack.uri
+    );
 
     // Strategy 1: Handle Spotify tracks without preview URL
-    if (preferredTrack.type === 'spotify' && (!preferredTrack.uri || preferredTrack.uri.trim() === '')) {
-      console.log('🎵 Spotify track has no preview URL, using fallback + Spotify player option');
-      
+    if (
+      preferredTrack.type === 'spotify' &&
+      (!preferredTrack.uri || preferredTrack.uri.trim() === '')
+    ) {
+      console.log(
+        '🎵 Spotify track has no preview URL, using fallback + Spotify player option'
+      );
+
       // Play fallback sound immediately for reliable alarm
       const fallbackResult = await this.playFallbackSound(fallbackSoundId);
-      
+
       // Notify that Spotify player is needed for full track
       if (onSpotifyPlayerNeeded) {
         onSpotifyPlayerNeeded(preferredTrack);
       }
-      
+
       return {
         success: fallbackResult,
         usedFallback: true,
@@ -282,7 +297,7 @@ class AudioManagerClass {
     try {
       await this.loadAudio(preferredTrack);
       await this.playAsync();
-      
+
       console.log('✅ Successfully playing preferred track');
       return {
         success: true,
@@ -290,21 +305,24 @@ class AudioManagerClass {
         requiresSpotifyPlayer: false,
       };
     } catch (error) {
-      console.warn('⚠️ Failed to play preferred track, trying fallback:', error);
-      
+      console.warn(
+        '⚠️ Failed to play preferred track, trying fallback:',
+        error
+      );
+
       // Strategy 3: Fallback to reliable local sound
       const fallbackResult = await this.playFallbackSound(fallbackSoundId);
-      
+
       if (onPlaybackFailed) {
         onPlaybackFailed(error as Error, true);
       }
-      
+
       // For Spotify tracks, also offer the web player option
       const requiresSpotifyPlayer = preferredTrack.type === 'spotify';
       if (requiresSpotifyPlayer && onSpotifyPlayerNeeded) {
         onSpotifyPlayerNeeded(preferredTrack);
       }
-      
+
       return {
         success: fallbackResult,
         usedFallback: true,
@@ -319,7 +337,7 @@ class AudioManagerClass {
   async playFallbackSound(fallbackSoundId?: string): Promise<boolean> {
     try {
       console.log('🔄 Playing fallback alarm sound');
-      
+
       // Use provided fallback or default to first predefined sound
       const soundId = fallbackSoundId || SoundLibrary.getAllSounds()[0]?.id;
       if (!soundId) {
@@ -334,11 +352,12 @@ class AudioManagerClass {
       }
 
       // Convert to AudioTrack and play
-      const fallbackTrack = await SoundLibrary.convertToAudioTrack(fallbackSound);
+      const fallbackTrack =
+        await SoundLibrary.convertToAudioTrack(fallbackSound);
       await this.loadAudio(fallbackTrack);
       await this.setIsLoopingAsync(true); // Loop alarm sound
       await this.playAsync();
-      
+
       console.log('✅ Fallback sound playing:', fallbackSound.name);
       return true;
     } catch (error) {

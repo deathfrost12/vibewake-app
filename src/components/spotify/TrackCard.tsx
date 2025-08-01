@@ -52,9 +52,9 @@ export function TrackCard({
               track.album?.images?.[0]?.url ||
               'https://via.placeholder.com/120x120/333/fff?text=♪',
           }}
-          style={{ 
-            width: 116, 
-            height: 116, 
+          style={{
+            width: 116,
+            height: 116,
             borderRadius: 8,
             marginBottom: 8,
           }}
@@ -77,29 +77,26 @@ export function TrackCard({
               onPreviewPress(track);
             }}
           >
-            <Ionicons 
-              name={track.preview_url ? "play" : "musical-note-outline"} 
-              size={16} 
-              color="white" 
+            <Ionicons
+              name={track.preview_url ? 'play' : 'musical-note-outline'}
+              size={16}
+              color="white"
             />
           </TouchableOpacity>
         )}
       </View>
-      
+
       <ThemedText
         style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }}
         numberOfLines={2}
       >
         {track.name}
       </ThemedText>
-      
-      <ThemedText
-        style={{ fontSize: 12, opacity: 0.7 }}
-        numberOfLines={1}
-      >
+
+      <ThemedText style={{ fontSize: 12, opacity: 0.7 }} numberOfLines={1}>
         {track.artists.map(a => a.name).join(', ')}
       </ThemedText>
-      
+
       {!track.preview_url && (
         <ThemedText style={{ fontSize: 10, opacity: 0.5, marginTop: 2 }}>
           No preview

@@ -4,6 +4,8 @@ export interface AudioTrack {
   uri: string;
   type: 'predefined' | 'uploaded' | 'spotify';
   duration?: number;
+  artist?: string;
+  artworkUrl?: string;
 }
 
 export interface PredefinedSound {

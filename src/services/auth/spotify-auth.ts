@@ -215,7 +215,7 @@ class SpotifyAuthService {
       const allTracks = data.tracks.items.filter(
         (track: SpotifyTrack) => track && track.id
       );
-      
+
       const tracksWithPreview = allTracks.filter(
         (track: SpotifyTrack) => track.preview_url
       );
@@ -227,13 +227,13 @@ class SpotifyAuthService {
       // Prioritize tracks with previews, but include others as fallback
       const result = [
         ...tracksWithPreview.slice(0, 15), // Prefer tracks with preview
-        ...allTracks.filter(track => !track.preview_url).slice(0, 5) // Add some without preview as fallback
+        ...allTracks.filter((track: any) => !track.preview_url).slice(0, 5), // Add some without preview as fallback
       ].slice(0, 20);
 
       return result;
     } catch (error) {
       console.error('🎵 Enhanced search failed, trying basic search:', error);
-      
+
       // Fallback to basic search if enhanced fails
       return this.searchTracksBasic(query);
     }
@@ -293,15 +293,21 @@ class SpotifyAuthService {
       .filter((track: any) => track && track.id);
 
     // Prioritize tracks with preview_url
-    const tracksWithPreview = allTracks.filter((track: any) => track.preview_url);
-    const tracksWithoutPreview = allTracks.filter((track: any) => !track.preview_url);
+    const tracksWithPreview = allTracks.filter(
+      (track: any) => track.preview_url
+    );
+    const tracksWithoutPreview = allTracks.filter(
+      (track: any) => !track.preview_url
+    );
 
-    console.log(`🎵 Recently played: ${tracksWithPreview.length} with preview, ${tracksWithoutPreview.length} without`);
+    console.log(
+      `🎵 Recently played: ${tracksWithPreview.length} with preview, ${tracksWithoutPreview.length} without`
+    );
 
     // Return prioritized list
     const result = [
       ...tracksWithPreview.slice(0, Math.ceil(limit * 0.8)),
-      ...tracksWithoutPreview.slice(0, Math.floor(limit * 0.2))
+      ...tracksWithoutPreview.slice(0, Math.floor(limit * 0.2)),
     ].slice(0, limit);
 
     return result;
@@ -340,15 +346,21 @@ class SpotifyAuthService {
       .filter((track: any) => track && track.id);
 
     // Prioritize tracks with preview_url
-    const tracksWithPreview = allTracks.filter((track: any) => track.preview_url);
-    const tracksWithoutPreview = allTracks.filter((track: any) => !track.preview_url);
+    const tracksWithPreview = allTracks.filter(
+      (track: any) => track.preview_url
+    );
+    const tracksWithoutPreview = allTracks.filter(
+      (track: any) => !track.preview_url
+    );
 
-    console.log(`🎵 Saved tracks: ${tracksWithPreview.length} with preview, ${tracksWithoutPreview.length} without`);
+    console.log(
+      `🎵 Saved tracks: ${tracksWithPreview.length} with preview, ${tracksWithoutPreview.length} without`
+    );
 
     // Return prioritized list (80% with preview, 20% without)
     const result = [
       ...tracksWithPreview.slice(0, Math.ceil(limit * 0.8)),
-      ...tracksWithoutPreview.slice(0, Math.floor(limit * 0.2))
+      ...tracksWithoutPreview.slice(0, Math.floor(limit * 0.2)),
     ].slice(0, limit);
 
     return result;
@@ -411,7 +423,7 @@ class SpotifyAuthService {
 
     const data = await response.json();
     const playlists = data.playlists?.items || [];
-    
+
     if (playlists.length === 0) {
       throw new Error('No featured playlists available');
     }
@@ -419,7 +431,7 @@ class SpotifyAuthService {
     // Get tracks from first featured playlist
     const firstPlaylist = playlists[0];
     const tracks = await this.getPlaylistTracks(firstPlaylist.id);
-    
+
     return tracks.slice(0, limit);
   }
 

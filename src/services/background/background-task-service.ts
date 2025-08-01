@@ -29,7 +29,7 @@ export class BackgroundTaskService {
     try {
       // Register background notification task
       this.registerBackgroundNotificationTask();
-      
+
       // Register background alarm task
       this.registerBackgroundAlarmTask();
 
@@ -49,35 +49,41 @@ export class BackgroundTaskService {
    * This handles notifications when app is in background/killed
    */
   private registerBackgroundNotificationTask(): void {
-    TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => {
-      if (error) {
-        console.error('❌ Background notification task error:', error);
-        return;
-      }
+    TaskManager.defineTask(
+      BACKGROUND_NOTIFICATION_TASK,
+      async ({ data, error }) => {
+        if (error) {
+          console.error('❌ Background notification task error:', error);
+          return;
+        }
 
-      if (data) {
-        try {
-          const notificationData = data as any;
-          console.log('🔔 Background notification received:', notificationData);
+        if (data) {
+          try {
+            const notificationData = data as any;
+            console.log(
+              '🔔 Background notification received:',
+              notificationData
+            );
 
-          // Extract alarm data from notification
-          const alarmId = notificationData.alarmId;
-          const audioTrack = notificationData.audioTrack;
+            // Extract alarm data from notification
+            const alarmId = notificationData.alarmId;
+            const audioTrack = notificationData.audioTrack;
 
-          if (alarmId && audioTrack) {
-            // Configure audio for background playback
-            await audioService.configureAudio();
+            if (alarmId && audioTrack) {
+              // Configure audio for background playback
+              await audioService.configureAudio();
 
-            // Start alarm ringing in background
-            await alarmService.startRingingAlarm(alarmId, audioTrack);
+              // Start alarm ringing in background
+              await alarmService.startRingingAlarm(alarmId, audioTrack);
 
-            console.log('✅ Background alarm started ringing:', alarmId);
+              console.log('✅ Background alarm started ringing:', alarmId);
+            }
+          } catch (error) {
+            console.error('❌ Error handling background notification:', error);
           }
-        } catch (error) {
-          console.error('❌ Error handling background notification:', error);
         }
       }
-    });
+    );
   }
 
   /**
@@ -124,17 +130,17 @@ export class BackgroundTaskService {
 
       // Check if any alarms should be triggered now
       const now = new Date();
-      
+
       for (const alarm of scheduledAlarms) {
         const trigger = alarm.trigger;
-        
+
         // Check if this alarm should trigger now
         if (this.shouldAlarmTrigger(trigger, now)) {
           const alarmData = alarm.content.data;
-          
+
           if (alarmData?.alarmId && alarmData?.audioTrack) {
             console.log('🔔 Triggering background alarm:', alarmData.alarmId);
-            
+
             // Start ringing alarm
             await alarmService.startRingingAlarm(
               alarmData.alarmId,
@@ -158,8 +164,10 @@ export class BackgroundTaskService {
       // Handle DATE triggers
       if (trigger.type === 'date') {
         const triggerTime = new Date(trigger.value);
-        const timeDiff = Math.abs(currentTime.getTime() - triggerTime.getTime());
-        
+        const timeDiff = Math.abs(
+          currentTime.getTime() - triggerTime.getTime()
+        );
+
         // Allow 1 minute tolerance for background execution delays
         return timeDiff <= 60000; // 60 seconds
       }
@@ -169,7 +177,7 @@ export class BackgroundTaskService {
         const currentDay = currentTime.getDay();
         const currentHour = currentTime.getHours();
         const currentMinute = currentTime.getMinutes();
-        
+
         return (
           trigger.weekday === currentDay + 1 && // Expo uses 1-7, JS uses 0-6
           trigger.hour === currentHour &&
@@ -211,8 +219,8 @@ export class BackgroundTaskService {
   /**
    * Check if background tasks are properly registered
    */
-  isBackgroundTaskRegistered(taskName: string): boolean {
-    return TaskManager.isTaskRegisteredAsync(taskName);
+  async isBackgroundTaskRegistered(taskName: string): Promise<boolean> {
+    return await TaskManager.isTaskRegisteredAsync(taskName);
   }
 
   /**

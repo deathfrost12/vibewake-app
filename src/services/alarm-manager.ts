@@ -72,7 +72,8 @@ export class AlarmManager {
    */
   async logSystemStatus(): Promise<void> {
     try {
-      const backgroundStatus = await backgroundTaskService.getBackgroundTaskStatus();
+      const backgroundStatus =
+        await backgroundTaskService.getBackgroundTaskStatus();
       const scheduledAlarms = await alarmService.getScheduledAlarms();
       const isRinging = alarmService.isAlarmRinging();
       const audioConfigured = audioService.isAudioConfigured();
@@ -85,7 +86,10 @@ export class AlarmManager {
         currentlyRinging: isRinging,
       };
 
-      console.log('📊 VibeWake Alarm System Status:', JSON.stringify(status, null, 2));
+      console.log(
+        '📊 VibeWake Alarm System Status:',
+        JSON.stringify(status, null, 2)
+      );
     } catch (error) {
       console.error('❌ Failed to get system status:', error);
     }
@@ -123,25 +127,34 @@ export class AlarmManager {
         }
       } catch (error) {
         services.notificationService = false;
-        issues.push('Notification service error: ' + error.message);
+        issues.push(
+          'Notification service error: ' +
+            (error instanceof Error ? error.message : String(error))
+        );
       }
 
       // Check background task service
       try {
-        const backgroundStatus = await backgroundTaskService.getBackgroundTaskStatus();
+        const backgroundStatus =
+          await backgroundTaskService.getBackgroundTaskStatus();
         services.backgroundTaskService = backgroundStatus.isInitialized;
         if (!backgroundStatus.isInitialized) {
           issues.push('Background task service not initialized');
         }
       } catch (error) {
         services.backgroundTaskService = false;
-        issues.push('Background task service error: ' + error.message);
+        issues.push(
+          'Background task service error: ' +
+            (error instanceof Error ? error.message : String(error))
+        );
       }
 
       const healthy = issues.length === 0;
 
       console.log(
-        healthy ? '✅ Alarm system health check passed' : '⚠️ Alarm system health check found issues:',
+        healthy
+          ? '✅ Alarm system health check passed'
+          : '⚠️ Alarm system health check found issues:',
         issues
       );
 
@@ -150,7 +163,9 @@ export class AlarmManager {
       console.error('❌ Health check failed:', error);
       return {
         healthy: false,
-        issues: [`Health check error: ${error.message}`],
+        issues: [
+          `Health check error: ${error instanceof Error ? error.message : String(error)}`,
+        ],
         services,
       };
     }

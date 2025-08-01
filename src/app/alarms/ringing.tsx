@@ -84,7 +84,7 @@ export default function AlarmRingingScreen() {
           await AudioManager.initialize();
           await AudioManager.playAlarmAudio({
             preferredTrack: alarm.audioTrack,
-            onSpotifyPlayerNeeded: (track) => {
+            onSpotifyPlayerNeeded: track => {
               if (track.type === 'spotify') {
                 // Convert AudioTrack back to a SpotifyTrack-like object for the player
                 const spotifyTrackForPlayer: SpotifyTrack = {
@@ -237,7 +237,7 @@ export default function AlarmRingingScreen() {
             track={spotifyTrack}
             accessToken={spotifyToken || ''}
             onClose={() => setShowSpotifyPlayer(false)}
-            onPlaybackError={(error) => {
+            onPlaybackError={error => {
               Alert.alert('Spotify Error', error.message);
               setShowSpotifyPlayer(false);
             }}
@@ -416,7 +416,12 @@ export default function AlarmRingingScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="musical-note" size={20} color="#FFFFFF" />
                   <ThemedText
-                    style={{ fontSize: 14, fontWeight: '600', marginLeft: 6, color: '#FFFFFF' }}
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      marginLeft: 6,
+                      color: '#FFFFFF',
+                    }}
                   >
                     Play Full Song
                   </ThemedText>

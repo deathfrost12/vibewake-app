@@ -51,7 +51,9 @@ function RootLayoutNav() {
         // Initialize AlarmManager globally (includes audio, notifications, background tasks)
         console.log('⏰ Initializing VibeWake Alarm System...');
         await alarmManager.initialize();
-        console.log('✅ VibeWake Alarm System initialized with background support');
+        console.log(
+          '✅ VibeWake Alarm System initialized with background support'
+        );
 
         // Hide splash screen after app is ready
         if (Constants.appOwnership !== 'expo') {
@@ -87,7 +89,10 @@ function RootLayoutNav() {
         <Stack.Screen name="revenuecat-demo" options={{ headerShown: false }} />
         <Stack.Screen name="alarms/create" options={{ headerShown: false }} />
         <Stack.Screen name="alarms/ringing" options={{ headerShown: false }} />
-        <Stack.Screen name="alarms/spotify-selector" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="alarms/spotify-selector"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </GestureHandlerRootView>
   );

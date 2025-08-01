@@ -507,7 +507,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       console.log('🎵 Starting Spotify authentication...');
       const result = await spotifyAuth.authenticate();
-      
+
       const expiresAt = Date.now() + result.expiresIn * 1000;
       set({
         spotifyToken: result.accessToken,

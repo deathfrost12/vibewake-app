@@ -1,145 +1,195 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Spotify Web Playback SDK</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <style>
-        body { margin: 0; padding: 0; background-color: #121212; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #player-container { text-align: center; }
-        #status { margin-bottom: 16px; }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: white;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      #player-container {
+        text-align: center;
+      }
+      #status {
+        margin-bottom: 16px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="player-container">
-        <div id="status">Initializing Player...</div>
+      <div id="status">Initializing Player...</div>
     </div>
 
     <script>
-        let player;
-        let deviceId;
-        let accessToken;
-        let trackUri;
+      let player;
+      let deviceId;
+      let accessToken;
+      let trackUri;
 
-        window.onSpotifyWebPlaybackSDKReady = () => {
-            console.log('Spotify SDK is ready');
-            window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'SDK_READY' }));
-        };
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        console.log('Spotify SDK is ready');
+        window.ReactNativeWebView?.postMessage(
+          JSON.stringify({ type: 'SDK_READY' })
+        );
+      };
 
-        function initializePlayer(token) {
-            if (player) {
-                console.log('Player already initialized.');
-                return;
-            }
-            
-            accessToken = token;
-            player = new Spotify.Player({
-                name: 'VibeWake Player',
-                getOAuthToken: cb => { cb(accessToken); },
-                volume: 1.0
-            });
-
-            // Error handling
-            player.addListener('initialization_error', ({ message }) => { 
-                console.error('Initialization Error:', message);
-                postMessageToRN({ type: 'ERROR', payload: { message: `Initialization Error: ${message}` } });
-            });
-            player.addListener('authentication_error', ({ message }) => {
-                console.error('Authentication Error:', message);
-                postMessageToRN({ type: 'ERROR', payload: { message: `Authentication Error: ${message}` } });
-            });
-            player.addListener('account_error', ({ message }) => {
-                console.error('Account Error:', message);
-                postMessageToRN({ type: 'ERROR', payload: { message: `Account Error: ${message}` } });
-            });
-            player.addListener('playback_error', ({ message }) => {
-                console.error('Playback Error:', message);
-                postMessageToRN({ type: 'ERROR', payload: { message: `Playback Error: ${message}` } });
-            });
-
-            // Playback status updates
-            player.addListener('player_state_changed', state => {
-                console.log('Player state changed', state);
-                postMessageToRN({ type: 'PLAYER_STATE_CHANGED', payload: state });
-            });
-
-            // Ready
-            player.addListener('ready', ({ device_id }) => {
-                console.log('Ready with Device ID', device_id);
-                deviceId = device_id;
-                document.getElementById('status').textContent = 'Ready to play.';
-                postMessageToRN({ type: 'PLAYER_READY', payload: { device_id } });
-            });
-
-            // Not Ready
-            player.addListener('not_ready', ({ device_id }) => {
-                console.log('Device ID has gone offline', device_id);
-            });
-
-            player.connect().then(success => {
-                if (success) {
-                    console.log('The Web Playback SDK successfully connected to Spotify!');
-                } else {
-                    console.error('The Web Playback SDK failed to connect to Spotify.');
-                    postMessageToRN({ type: 'ERROR', payload: { message: 'Failed to connect to Spotify' } });
-                }
-            });
+      function initializePlayer(token) {
+        if (player) {
+          console.log('Player already initialized.');
+          return;
         }
 
-        function playTrack(uri) {
-            if (!deviceId) {
-                console.error('Device ID not available. Cannot play track.');
-                postMessageToRN({ type: 'ERROR', payload: { message: 'Device ID not available' } });
-                return;
-            }
-            trackUri = uri;
-            fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-                method: 'PUT',
-                body: JSON.stringify({ uris: [trackUri] }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-            })
-            .then(res => {
-                if (res.status === 204) {
-                    console.log('Playback started for track:', trackUri);
-                    document.getElementById('status').textContent = `Playing: ${trackUri}`;
-                    postMessageToRN({ type: 'PLAYBACK_STARTED' });
-                } else {
-                    console.error('Failed to start playback', res);
-                    res.json().then(err => {
-                        postMessageToRN({ type: 'ERROR', payload: { message: `Failed to start playback: ${err.error.message}` } });
-                    });
-                }
-            })
-            .catch(err => {
-                console.error('Error during playback request', err);
-                postMessageToRN({ type: 'ERROR', payload: { message: `Playback request failed: ${err.message}` } });
-            });
-        }
-
-        function postMessageToRN(message) {
-            window.ReactNativeWebView?.postMessage(JSON.stringify(message));
-        }
-
-        // Listen for messages from React Native
-        window.addEventListener('message', event => {
-            try {
-                const message = JSON.parse(event.data);
-                console.log('Message from RN:', message.type);
-                switch (message.type) {
-                    case 'INITIALIZE':
-                        initializePlayer(message.payload.accessToken);
-                        break;
-                    case 'PLAY':
-                        playTrack(message.payload.trackUri);
-                        break;
-                }
-            } catch (e) {
-                console.error('Error parsing message from RN', e);
-            }
+        accessToken = token;
+        player = new Spotify.Player({
+          name: 'VibeWake Player',
+          getOAuthToken: cb => {
+            cb(accessToken);
+          },
+          volume: 1.0,
         });
+
+        // Error handling
+        player.addListener('initialization_error', ({ message }) => {
+          console.error('Initialization Error:', message);
+          postMessageToRN({
+            type: 'ERROR',
+            payload: { message: `Initialization Error: ${message}` },
+          });
+        });
+        player.addListener('authentication_error', ({ message }) => {
+          console.error('Authentication Error:', message);
+          postMessageToRN({
+            type: 'ERROR',
+            payload: { message: `Authentication Error: ${message}` },
+          });
+        });
+        player.addListener('account_error', ({ message }) => {
+          console.error('Account Error:', message);
+          postMessageToRN({
+            type: 'ERROR',
+            payload: { message: `Account Error: ${message}` },
+          });
+        });
+        player.addListener('playback_error', ({ message }) => {
+          console.error('Playback Error:', message);
+          postMessageToRN({
+            type: 'ERROR',
+            payload: { message: `Playback Error: ${message}` },
+          });
+        });
+
+        // Playback status updates
+        player.addListener('player_state_changed', state => {
+          console.log('Player state changed', state);
+          postMessageToRN({ type: 'PLAYER_STATE_CHANGED', payload: state });
+        });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+          console.log('Ready with Device ID', device_id);
+          deviceId = device_id;
+          document.getElementById('status').textContent = 'Ready to play.';
+          postMessageToRN({ type: 'PLAYER_READY', payload: { device_id } });
+        });
+
+        // Not Ready
+        player.addListener('not_ready', ({ device_id }) => {
+          console.log('Device ID has gone offline', device_id);
+        });
+
+        player.connect().then(success => {
+          if (success) {
+            console.log(
+              'The Web Playback SDK successfully connected to Spotify!'
+            );
+          } else {
+            console.error('The Web Playback SDK failed to connect to Spotify.');
+            postMessageToRN({
+              type: 'ERROR',
+              payload: { message: 'Failed to connect to Spotify' },
+            });
+          }
+        });
+      }
+
+      function playTrack(uri) {
+        if (!deviceId) {
+          console.error('Device ID not available. Cannot play track.');
+          postMessageToRN({
+            type: 'ERROR',
+            payload: { message: 'Device ID not available' },
+          });
+          return;
+        }
+        trackUri = uri;
+        fetch(
+          `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({ uris: [trackUri] }),
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        )
+          .then(res => {
+            if (res.status === 204) {
+              console.log('Playback started for track:', trackUri);
+              document.getElementById('status').textContent =
+                `Playing: ${trackUri}`;
+              postMessageToRN({ type: 'PLAYBACK_STARTED' });
+            } else {
+              console.error('Failed to start playback', res);
+              res.json().then(err => {
+                postMessageToRN({
+                  type: 'ERROR',
+                  payload: {
+                    message: `Failed to start playback: ${err.error.message}`,
+                  },
+                });
+              });
+            }
+          })
+          .catch(err => {
+            console.error('Error during playback request', err);
+            postMessageToRN({
+              type: 'ERROR',
+              payload: { message: `Playback request failed: ${err.message}` },
+            });
+          });
+      }
+
+      function postMessageToRN(message) {
+        window.ReactNativeWebView?.postMessage(JSON.stringify(message));
+      }
+
+      // Listen for messages from React Native
+      window.addEventListener('message', event => {
+        try {
+          const message = JSON.parse(event.data);
+          console.log('Message from RN:', message.type);
+          switch (message.type) {
+            case 'INITIALIZE':
+              initializePlayer(message.payload.accessToken);
+              break;
+            case 'PLAY':
+              playTrack(message.payload.trackUri);
+              break;
+          }
+        } catch (e) {
+          console.error('Error parsing message from RN', e);
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

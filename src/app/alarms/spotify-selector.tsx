@@ -205,7 +205,10 @@ export default function SpotifySelectorScreen() {
           marginBottom: 8,
         }}
       />
-      <ThemedText style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }} numberOfLines={2}>
+      <ThemedText
+        style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }}
+        numberOfLines={2}
+      >
         {item.name}
       </ThemedText>
       <ThemedText style={{ fontSize: 12, opacity: 0.7 }}>
@@ -262,22 +265,25 @@ export default function SpotifySelectorScreen() {
             console.log('🎵 Preview track:', item.name);
           }}
         >
-          <Ionicons 
-            name={item.preview_url ? "play" : "musical-note-outline"} 
-            size={16} 
-            color="white" 
+          <Ionicons
+            name={item.preview_url ? 'play' : 'musical-note-outline'}
+            size={16}
+            color="white"
           />
         </TouchableOpacity>
       </View>
-      
-      <ThemedText style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }} numberOfLines={2}>
+
+      <ThemedText
+        style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }}
+        numberOfLines={2}
+      >
         {item.name}
       </ThemedText>
-      
+
       <ThemedText style={{ fontSize: 12, opacity: 0.7 }} numberOfLines={1}>
         {item.artists[0]?.name}
       </ThemedText>
-      
+
       {!item.preview_url && (
         <ThemedText style={{ fontSize: 10, opacity: 0.5, marginTop: 2 }}>
           No preview
@@ -380,8 +386,13 @@ export default function SpotifySelectorScreen() {
                       keyExtractor={item => item.id}
                       horizontal
                       showsHorizontalScrollIndicator={false}
-                      ItemSeparatorComponent={() => <View style={{width: 16}} />}
-                      contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
+                      ItemSeparatorComponent={() => (
+                        <View style={{ width: 16 }} />
+                      )}
+                      contentContainerStyle={{
+                        paddingHorizontal: 4,
+                        paddingBottom: 8,
+                      }}
                     />
                   ) : !isSearching ? (
                     <ThemedText
@@ -405,8 +416,13 @@ export default function SpotifySelectorScreen() {
                       keyExtractor={item => item.id}
                       horizontal
                       showsHorizontalScrollIndicator={false}
-                      ItemSeparatorComponent={() => <View style={{width: 16}} />}
-                      contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
+                      ItemSeparatorComponent={() => (
+                        <View style={{ width: 16 }} />
+                      )}
+                      contentContainerStyle={{
+                        paddingHorizontal: 4,
+                        paddingBottom: 8,
+                      }}
                     />
                   ) : null}
                 </>
@@ -444,8 +460,11 @@ export default function SpotifySelectorScreen() {
                   keyExtractor={item => item.id}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  ItemSeparatorComponent={() => <View style={{width: 12}} />}
-                  contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
+                  ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                  contentContainerStyle={{
+                    paddingHorizontal: 4,
+                    paddingBottom: 8,
+                  }}
                 />
               ) : (
                 <ThemedText
@@ -468,8 +487,11 @@ export default function SpotifySelectorScreen() {
                   keyExtractor={item => item.id}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  ItemSeparatorComponent={() => <View style={{width: 12}} />}
-                  contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
+                  ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                  contentContainerStyle={{
+                    paddingHorizontal: 4,
+                    paddingBottom: 8,
+                  }}
                 />
               ) : (
                 <ThemedText

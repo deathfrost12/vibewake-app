@@ -23,7 +23,11 @@
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
         "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["audio", "background-processing", "remote-notification"]
+        "UIBackgroundModes": [
+          "audio",
+          "background-processing",
+          "remote-notification"
+        ]
       },
       "entitlements": {
         "com.apple.developer.applesignin": ["Default"],

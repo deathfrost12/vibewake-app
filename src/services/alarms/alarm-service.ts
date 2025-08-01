@@ -1,5 +1,8 @@
 import { AudioTrack } from '../audio/types';
-import { notificationService, AlarmNotification } from '../notifications/notification-service';
+import {
+  notificationService,
+  AlarmNotification,
+} from '../notifications/notification-service';
 import { audioService } from '../audio/audio-service';
 import { Audio } from 'expo-av';
 
@@ -41,7 +44,7 @@ export class AlarmService {
     try {
       // Initialize notification service first
       await notificationService.initialize();
-      
+
       // Configure audio for background playback
       await audioService.configureAudio();
 
@@ -68,8 +71,9 @@ export class AlarmService {
       };
 
       // Schedule the notification
-      const notificationId = await notificationService.scheduleAlarm(alarmNotification);
-      
+      const notificationId =
+        await notificationService.scheduleAlarm(alarmNotification);
+
       // Store notification ID for later cancellation
       alarm.notificationIds = notificationId.split(',');
 
@@ -111,7 +115,7 @@ export class AlarmService {
     try {
       // Cancel existing alarm first
       await this.cancelAlarm(alarm);
-      
+
       // Schedule new alarm if still active
       if (alarm.isActive) {
         await this.scheduleAlarm(alarm);
@@ -127,7 +131,10 @@ export class AlarmService {
   /**
    * Start ringing alarm with background audio support
    */
-  async startRingingAlarm(alarmId: string, audioTrack: AudioTrack): Promise<void> {
+  async startRingingAlarm(
+    alarmId: string,
+    audioTrack: AudioTrack
+  ): Promise<void> {
     try {
       // Stop any currently ringing alarm
       if (this.currentRingingAlarm) {
@@ -141,7 +148,7 @@ export class AlarmService {
 
       // Load and play the alarm sound
       let soundObject: Audio.Sound;
-      
+
       if (audioTrack.uri) {
         soundObject = await audioService.loadAudio(audioTrack.uri);
       } else {
@@ -223,7 +230,12 @@ export class AlarmService {
         title: 'Snoozed Alarm',
         time: snoozeTime,
         isActive: true,
-        audioTrack: { name: 'Default', uri: null }, // Will use default sound
+        audioTrack: {
+          id: 'default',
+          name: 'Default',
+          uri: '',
+          type: 'predefined',
+        }, // Will use default sound
       };
 
       // Schedule snooze notification
@@ -262,7 +274,7 @@ export class AlarmService {
 
       if (alarmId && audioTrack) {
         console.log('🔔 Alarm notification tapped:', alarmId);
-        this.handleAlarmTrigger(alarmId, audioTrack);
+        this.handleAlarmTrigger(String(alarmId), audioTrack as any);
       }
     });
 
@@ -274,7 +286,7 @@ export class AlarmService {
 
       if (alarmId && audioTrack) {
         console.log('🔔 Alarm triggered in foreground:', alarmId);
-        this.handleAlarmTrigger(alarmId, audioTrack);
+        this.handleAlarmTrigger(String(alarmId), audioTrack as any);
       }
     });
   }
@@ -282,7 +294,10 @@ export class AlarmService {
   /**
    * Handle alarm trigger (from notification or foreground)
    */
-  private async handleAlarmTrigger(alarmId: string, audioTrack: AudioTrack): Promise<void> {
+  private async handleAlarmTrigger(
+    alarmId: string,
+    audioTrack: AudioTrack
+  ): Promise<void> {
     try {
       // Start ringing the alarm
       await this.startRingingAlarm(alarmId, audioTrack);
@@ -325,7 +340,7 @@ export class AlarmService {
   async cancelAllAlarms(): Promise<void> {
     try {
       await notificationService.cancelAllAlarms();
-      
+
       // Stop any currently ringing alarm
       if (this.currentRingingAlarm) {
         await this.stopRingingAlarm();

@@ -24,22 +24,22 @@ export class AudioService {
       await Audio.setAudioModeAsync({
         // Allow audio to continue playing when app goes to background
         staysActiveInBackground: true,
-        
+
         // Allow audio to play even when device is in silent mode (iOS)
         playsInSilentModeIOS: true,
-        
+
         // Set interruption mode for iOS - prioritize alarm over other audio
         interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        
+
         // Set interruption mode for Android - prioritize alarm over other audio
         interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        
+
         // Duck other audio when our alarm plays (lower their volume)
         shouldDuckAndroid: true,
-        
+
         // Play through earpiece if no headphones (important for alarms)
         playThroughEarpieceAndroid: false,
-        
+
         // Allow recording (if we need it for voice notes later)
         allowsRecordingIOS: false,
       });

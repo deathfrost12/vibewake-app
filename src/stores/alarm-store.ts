@@ -237,7 +237,10 @@ export const useAlarmStore = create<AlarmState>()(
           await get().syncScheduledAlarms();
 
           set({ isLoading: false });
-          console.log('⏰ Loaded alarms with background support:', get().alarms.length);
+          console.log(
+            '⏰ Loaded alarms with background support:',
+            get().alarms.length
+          );
         } catch (error) {
           console.error('⏰ Failed to load alarms:', error);
           set({ isLoading: false });

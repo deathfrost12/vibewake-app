@@ -115,7 +115,10 @@ class NotificationService {
           const nextDay = new Date(alarm.time);
           nextDay.setDate(nextDay.getDate() + 1);
           alarm.time = nextDay;
-          console.log('⏰ Alarm time was in past, rescheduled for next day:', alarm.time);
+          console.log(
+            '⏰ Alarm time was in past, rescheduled for next day:',
+            alarm.time
+          );
         }
 
         const identifier = await this.scheduleNotificationWithRetry({

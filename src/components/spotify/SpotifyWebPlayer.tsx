@@ -1,5 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Modal, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/theme-context';
@@ -16,17 +22,29 @@ interface SpotifyWebPlayerProps {
 }
 
 interface PlayerMessage {
-  type: 'PLAYER_READY' | 'PLAYER_STATE_CHANGED' | 'PLAYER_ERROR' | 'ERROR' | 'SDK_READY' | 'PLAYBACK_STARTED';
+  type:
+    | 'PLAYER_READY'
+    | 'PLAYER_STATE_CHANGED'
+    | 'PLAYER_ERROR'
+    | 'ERROR'
+    | 'SDK_READY'
+    | 'PLAYBACK_STARTED';
   payload?: any;
   data?: any;
   error?: string;
 }
 
-export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, accessToken }: SpotifyWebPlayerProps) {
+export function SpotifyWebPlayer({
+  isVisible,
+  track,
+  onClose,
+  onPlaybackError,
+  accessToken,
+}: SpotifyWebPlayerProps) {
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
   const webViewRef = useRef<WebView>(null);
-  
+
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [playerError, setPlayerError] = useState<string | null>(null);
@@ -48,8 +66,11 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
         case 'PLAYER_READY':
           setIsPlayerReady(true);
           setIsLoading(false);
-          console.log('🎵 Spotify Player ready with device ID:', message.payload?.device_id);
-          
+          console.log(
+            '🎵 Spotify Player ready with device ID:',
+            message.payload?.device_id
+          );
+
           // Auto-play the track if available
           if (track && spotifyAuth.isAuthenticated()) {
             playTrack(track);
@@ -62,7 +83,8 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
 
         case 'PLAYER_ERROR':
         case 'ERROR':
-          const errorMsg = message.payload?.message || message.error || 'Unknown player error';
+          const errorMsg =
+            message.payload?.message || message.error || 'Unknown player error';
           console.error('🎵 Player error:', errorMsg);
           setPlayerError(errorMsg);
           setIsLoading(false);
@@ -97,8 +119,6 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
     webViewRef.current.postMessage(JSON.stringify(playMessage));
   };
 
-  
-
   if (!isVisible) return null;
 
   return (
@@ -131,29 +151,35 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
         {/* Content */}
         <View style={{ flex: 1 }}>
           {!spotifyAuth.isAuthenticated() ? (
-            <View style={{ 
-              flex: 1, 
-              justifyContent: 'center', 
-              alignItems: 'center',
-              padding: 24 
-            }}>
-              <Ionicons name="musical-note" size={48} color={APP_COLORS.primary} />
-              <ThemedText 
-                style={{ 
-                  fontSize: 18, 
-                  fontWeight: '600', 
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: 24,
+              }}
+            >
+              <Ionicons
+                name="musical-note"
+                size={48}
+                color={APP_COLORS.primary}
+              />
+              <ThemedText
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
                   marginTop: 16,
-                  textAlign: 'center'
+                  textAlign: 'center',
                 }}
               >
                 Spotify Authentication Required
               </ThemedText>
-              <ThemedText 
-                style={{ 
-                  fontSize: 14, 
-                  opacity: 0.7, 
+              <ThemedText
+                style={{
+                  fontSize: 14,
+                  opacity: 0.7,
                   marginTop: 8,
-                  textAlign: 'center'
+                  textAlign: 'center',
                 }}
               >
                 Please authenticate with Spotify to play full tracks
@@ -171,7 +197,11 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
               mixedContentMode="compatibility"
               onMessage={handleWebViewMessage}
               onLoadEnd={() => {
-                if (webViewRef.current && track && spotifyAuth.getAccessToken()) {
+                if (
+                  webViewRef.current &&
+                  track &&
+                  spotifyAuth.getAccessToken()
+                ) {
                   const initMessage = {
                     type: 'INITIALIZE',
                     payload: { accessToken: spotifyAuth.getAccessToken() },
@@ -179,10 +209,12 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
                   webViewRef.current.postMessage(JSON.stringify(initMessage));
                 }
               }}
-              onError={(syntheticEvent) => {
+              onError={syntheticEvent => {
                 const { nativeEvent } = syntheticEvent;
                 console.warn('WebView error: ', nativeEvent);
-                setPlayerError(nativeEvent.description || 'Failed to load player');
+                setPlayerError(
+                  nativeEvent.description || 'Failed to load player'
+                );
               }}
             />
           )}
@@ -190,7 +222,7 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
 
         {/* Status Overlay */}
         {isLoading && (
-          <View 
+          <View
             style={{
               position: 'absolute',
               top: 100,
@@ -204,11 +236,11 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
             }}
           >
             <ActivityIndicator size="large" color={APP_COLORS.primary} />
-            <ThemedText 
-              style={{ 
-                color: 'white', 
+            <ThemedText
+              style={{
+                color: 'white',
                 marginTop: 12,
-                textAlign: 'center'
+                textAlign: 'center',
               }}
             >
               Loading Spotify Player...
@@ -217,7 +249,7 @@ export function SpotifyWebPlayer({ isVisible, track, onClose, onPlaybackError, a
         )}
 
         {playerError && (
-          <View 
+          <View
             style={{
               position: 'absolute',
               bottom: 100,
