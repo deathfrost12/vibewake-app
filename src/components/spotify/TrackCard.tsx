@@ -31,55 +31,80 @@ export function TrackCard({
   return (
     <TouchableOpacity
       style={{
-        flexDirection: 'row',
-        padding: 12,
+        width: 140,
         backgroundColor: theme.elevated,
-        borderRadius: 8,
-        marginBottom: 8,
-        alignItems: 'center',
+        borderRadius: 12,
+        padding: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
       }}
       onPress={() => onPress(track)}
       activeOpacity={0.8}
     >
-      <Image
-        source={{
-          uri:
-            track.album?.images?.[2]?.url ||
-            track.album?.images?.[0]?.url ||
-            'https://via.placeholder.com/64x64/333/fff?text=♪',
-        }}
-        style={{ width: 48, height: 48, borderRadius: 4 }}
-      />
-      <View style={{ flex: 1, marginLeft: 12 }}>
-        <ThemedText
-          style={{ fontSize: 16, fontWeight: '600' }}
-          numberOfLines={1}
-        >
-          {track.name}
-        </ThemedText>
-        <ThemedText
-          style={{ fontSize: 14, opacity: 0.7, marginTop: 2 }}
-          numberOfLines={1}
-        >
-          {track.artists.map(a => a.name).join(', ')}
-        </ThemedText>
-      </View>
-      <View style={{ alignItems: 'flex-end' }}>
-        <ThemedText style={{ fontSize: 12, opacity: 0.5 }}>
-          {formatDuration(track.duration_ms)}
-        </ThemedText>
-        {showPreview && track.preview_url && onPreviewPress && (
+      <View style={{ position: 'relative' }}>
+        <Image
+          source={{
+            uri:
+              track.album?.images?.[1]?.url ||
+              track.album?.images?.[0]?.url ||
+              'https://via.placeholder.com/120x120/333/fff?text=♪',
+          }}
+          style={{ 
+            width: 116, 
+            height: 116, 
+            borderRadius: 8,
+            marginBottom: 8,
+          }}
+        />
+        {showPreview && onPreviewPress && (
           <TouchableOpacity
-            style={{ marginTop: 4, padding: 4 }}
+            style={{
+              position: 'absolute',
+              bottom: 4,
+              right: 4,
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              borderRadius: 16,
+              width: 32,
+              height: 32,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             onPress={e => {
               e.stopPropagation();
               onPreviewPress(track);
             }}
           >
-            <Ionicons name="play-circle" size={20} color={APP_COLORS.primary} />
+            <Ionicons 
+              name={track.preview_url ? "play" : "musical-note-outline"} 
+              size={16} 
+              color="white" 
+            />
           </TouchableOpacity>
         )}
       </View>
+      
+      <ThemedText
+        style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }}
+        numberOfLines={2}
+      >
+        {track.name}
+      </ThemedText>
+      
+      <ThemedText
+        style={{ fontSize: 12, opacity: 0.7 }}
+        numberOfLines={1}
+      >
+        {track.artists.map(a => a.name).join(', ')}
+      </ThemedText>
+      
+      {!track.preview_url && (
+        <ThemedText style={{ fontSize: 10, opacity: 0.5, marginTop: 2 }}>
+          No preview
+        </ThemedText>
+      )}
     </TouchableOpacity>
   );
 }

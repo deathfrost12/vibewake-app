@@ -177,10 +177,15 @@ export default function SpotifySelectorScreen() {
   const renderPlaylistItem = ({ item }: { item: SpotifyPlaylist }) => (
     <TouchableOpacity
       style={{
-        width: 120,
+        width: 140,
         backgroundColor: theme.elevated,
-        borderRadius: 8,
+        borderRadius: 12,
         padding: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
       }}
       onPress={() => {
         // TODO: Navigate to playlist tracks or handle playlist selection
@@ -194,16 +199,16 @@ export default function SpotifySelectorScreen() {
             'https://via.placeholder.com/120x120/333/fff?text=Playlist',
         }}
         style={{
-          width: '100%',
-          aspectRatio: 1,
-          borderRadius: 4,
+          width: 116,
+          height: 116,
+          borderRadius: 8,
           marginBottom: 8,
         }}
       />
-      <ThemedText style={{ fontSize: 12, fontWeight: '600' }} numberOfLines={2}>
+      <ThemedText style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }} numberOfLines={2}>
         {item.name}
       </ThemedText>
-      <ThemedText style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}>
+      <ThemedText style={{ fontSize: 12, opacity: 0.7 }}>
         {item.tracks.total} tracks
       </ThemedText>
     </TouchableOpacity>
@@ -212,38 +217,72 @@ export default function SpotifySelectorScreen() {
   const renderRecentlyPlayedItem = ({ item }: { item: SpotifyTrack }) => (
     <TouchableOpacity
       style={{
-        width: 120,
-        marginRight: 12,
+        width: 140,
         backgroundColor: theme.elevated,
-        borderRadius: 8,
-        padding: 8,
+        borderRadius: 12,
+        padding: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
       }}
       onPress={() => handleTrackSelect(item)}
       activeOpacity={0.8}
     >
-      <Image
-        source={{
-          uri:
-            item.album?.images?.[1]?.url ||
-            item.album?.images?.[0]?.url ||
-            'https://via.placeholder.com/120x120/333/fff?text=♪',
-        }}
-        style={{
-          width: '100%',
-          aspectRatio: 1,
-          borderRadius: 4,
-          marginBottom: 8,
-        }}
-      />
-      <ThemedText style={{ fontSize: 12, fontWeight: '600' }} numberOfLines={2}>
+      <View style={{ position: 'relative' }}>
+        <Image
+          source={{
+            uri:
+              item.album?.images?.[1]?.url ||
+              item.album?.images?.[0]?.url ||
+              'https://via.placeholder.com/120x120/333/fff?text=♪',
+          }}
+          style={{
+            width: 116,
+            height: 116,
+            borderRadius: 8,
+            marginBottom: 8,
+          }}
+        />
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            bottom: 4,
+            right: 4,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            borderRadius: 16,
+            width: 32,
+            height: 32,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={e => {
+            e.stopPropagation();
+            console.log('🎵 Preview track:', item.name);
+          }}
+        >
+          <Ionicons 
+            name={item.preview_url ? "play" : "musical-note-outline"} 
+            size={16} 
+            color="white" 
+          />
+        </TouchableOpacity>
+      </View>
+      
+      <ThemedText style={{ fontSize: 14, fontWeight: '600', marginBottom: 2 }} numberOfLines={2}>
         {item.name}
       </ThemedText>
-      <ThemedText
-        style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}
-        numberOfLines={1}
-      >
+      
+      <ThemedText style={{ fontSize: 12, opacity: 0.7 }} numberOfLines={1}>
         {item.artists[0]?.name}
       </ThemedText>
+      
+      {!item.preview_url && (
+        <ThemedText style={{ fontSize: 10, opacity: 0.5, marginTop: 2 }}>
+          No preview
+        </ThemedText>
+      )}
     </TouchableOpacity>
   );
 
@@ -341,7 +380,7 @@ export default function SpotifySelectorScreen() {
                       keyExtractor={item => item.id}
                       horizontal
                       showsHorizontalScrollIndicator={false}
-                      ItemSeparatorComponent={() => <View style={{width: 12}} />}
+                      ItemSeparatorComponent={() => <View style={{width: 16}} />}
                       contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
                     />
                   ) : !isSearching ? (
@@ -366,7 +405,7 @@ export default function SpotifySelectorScreen() {
                       keyExtractor={item => item.id}
                       horizontal
                       showsHorizontalScrollIndicator={false}
-                      ItemSeparatorComponent={() => <View style={{width: 12}} />}
+                      ItemSeparatorComponent={() => <View style={{width: 16}} />}
                       contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
                     />
                   ) : null}
