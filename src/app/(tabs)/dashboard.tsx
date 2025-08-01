@@ -49,35 +49,67 @@ export default function AlarmsScreen() {
     [deleteAlarm]
   );
 
-  // Render delete action for swipe
+  // Handle three dots menu - custom dialog like in the image
+  const handleThreeDotsMenu = useCallback(
+    (alarm: Alarm) => {
+      Alert.alert(
+        '',
+        '',
+        [
+          { 
+            text: '🗑️ Smazat', 
+            style: 'destructive', 
+            onPress: () => handleDeleteAlarm(alarm.id) 
+          },
+          { 
+            text: '👁️ Náhled budíku.', 
+            onPress: () => Alert.alert('Info', 'Preview functionality coming soon!') 
+          },
+          { 
+            text: '📋 Duplikovat budík.', 
+            onPress: () => Alert.alert('Info', 'Duplicate functionality coming soon!') 
+          },
+          { text: 'Cancel', style: 'cancel' },
+        ],
+        { cancelable: true }
+      );
+    },
+    [handleDeleteAlarm]
+  );
+
+  // Render delete action for swipe - floating button design
   const renderDeleteAction = useCallback(
     (alarmId: string) => {
       return (
-        <TouchableOpacity
+        <View
           style={{
-            backgroundColor: '#FF6B6B',
             justifyContent: 'center',
             alignItems: 'center',
             width: 80,
             height: '100%',
-            borderRadius: 12,
             marginBottom: 12,
           }}
-          onPress={() => handleDeleteAlarm(alarmId)}
-          activeOpacity={0.8}
         >
-          <Ionicons name="trash" size={20} color="#FFFFFF" />
-          <Text
+          <TouchableOpacity
             style={{
-              color: '#FFFFFF',
-              fontSize: 12,
-              fontWeight: '600',
-              marginTop: 4,
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: '#FF6B6B',
+              justifyContent: 'center',
+              alignItems: 'center',
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 6,
             }}
+            onPress={() => handleDeleteAlarm(alarmId)}
+            activeOpacity={0.8}
           >
-            Delete
-          </Text>
-        </TouchableOpacity>
+            <Ionicons name="trash-outline" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       );
     },
     [handleDeleteAlarm]
@@ -111,18 +143,162 @@ export default function AlarmsScreen() {
     });
   }, []);
 
-  // Get next alarm
+  // Get next alarm - finds the alarm that occurs next after current time
   const getNextAlarm = useCallback(() => {
     const enabledAlarms = alarms.filter(alarm => alarm.isActive);
     if (enabledAlarms.length === 0) return null;
 
-    // For now, just return the first enabled alarm
-    // In real app, you'd calculate the actual next occurrence
-    return enabledAlarms[0];
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    let nextAlarm = null;
+    let minTimeToNext = Infinity;
+
+    enabledAlarms.forEach(alarm => {
+      const alarmTime = new Date(alarm.time);
+      const alarmMinutes = alarmTime.getHours() * 60 + alarmTime.getMinutes();
+      
+      // If no repeat days, it's a one-time alarm
+      if (!alarm.repeatDays || alarm.repeatDays.length === 0) {
+        // One-time alarm - check if it's still today and after current time
+        if (alarmMinutes > currentTime) {
+          const timeToNext = alarmMinutes - currentTime;
+          if (timeToNext < minTimeToNext) {
+            minTimeToNext = timeToNext;
+            nextAlarm = alarm;
+          }
+        }
+        // Note: one-time alarms that have passed today are not considered for future days
+        return;
+      }
+
+      // Repeating alarm - find next occurrence
+      for (let daysAhead = 0; daysAhead < 7; daysAhead++) {
+        const checkDay = (currentDay + daysAhead) % 7;
+        const isAlarmDay = alarm.repeatDays.includes(checkDay);
+        
+        if (isAlarmDay) {
+          let timeToNext;
+          if (daysAhead === 0) {
+            // Today - only if alarm time is in the future
+            if (alarmMinutes > currentTime) {
+              timeToNext = alarmMinutes - currentTime;
+            } else {
+              continue; // Skip to next day
+            }
+          } else {
+            // Future day
+            timeToNext = (daysAhead * 24 * 60) + alarmMinutes - currentTime;
+          }
+          
+          if (timeToNext < minTimeToNext) {
+            minTimeToNext = timeToNext;
+            nextAlarm = alarm;
+          }
+          break; // Found next occurrence for this alarm
+        }
+      }
+    });
+
+    return nextAlarm;
   }, [alarms]);
 
   const nextAlarm = getNextAlarm();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
+
+  // Get time until next alarm
+  const getTimeToNextAlarm = useCallback(() => {
+    if (!nextAlarm) return null;
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const currentDay = now.getDay();
+
+    const alarmTime = new Date(nextAlarm.time);
+    const alarmMinutes = alarmTime.getHours() * 60 + alarmTime.getMinutes();
+
+    let timeToNext = 0;
+
+    // One-time alarm
+    if (!nextAlarm.repeatDays || nextAlarm.repeatDays.length === 0) {
+      if (alarmMinutes > currentTime) {
+        timeToNext = alarmMinutes - currentTime;
+      }
+    } else {
+      // Repeating alarm - find next occurrence
+      for (let daysAhead = 0; daysAhead < 7; daysAhead++) {
+        const checkDay = (currentDay + daysAhead) % 7;
+        const isAlarmDay = nextAlarm.repeatDays.includes(checkDay);
+        
+        if (isAlarmDay) {
+          if (daysAhead === 0 && alarmMinutes > currentTime) {
+            timeToNext = alarmMinutes - currentTime;
+          } else if (daysAhead > 0) {
+            timeToNext = (daysAhead * 24 * 60) + alarmMinutes - currentTime;
+          } else {
+            continue;
+          }
+          break;
+        }
+      }
+    }
+
+    const hours = Math.floor(timeToNext / 60);
+    const minutes = timeToNext % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
+  }, [nextAlarm]);
+
+  // Render week days row or "Jednorázový" - pro top left pozici
+  const renderWeekDays = useCallback((activedays: number[] = []) => {
+    // If no repeat days, show "Jednorázový"
+    if (!activedays || activedays.length === 0) {
+      return (
+        <View style={{ height: 24, justifyContent: 'center' }}>
+          <ThemedText style={{ fontSize: 14, opacity: 0.7, textAlign: 'left', fontWeight: '600' }}>
+            Jednorázový
+          </ThemedText>
+        </View>
+      );
+    }
+
+    const dayNames = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+    return (
+      <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+        {dayNames.map((day, index) => {
+          const isActive = activedays.includes(index + 1) || (index === 6 && activedays.includes(0));
+          return (
+            <View
+              key={day}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: isActive ? APP_COLORS.primary : theme.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 9,
+                  fontWeight: '600',
+                  color: isActive ? '#FFFFFF' : theme.text.muted,
+                }}
+              >
+                {day}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    );
+  }, [theme]);
 
   // Render individual alarm item
   const renderAlarmItem = useCallback(
@@ -138,90 +314,128 @@ export default function AlarmsScreen() {
               borderWidth: 1,
               borderColor: alarm.isActive ? APP_COLORS.primary : theme.border,
               borderRadius: 12,
-              padding: 20,
+              padding: 24,
               marginBottom: 12,
+              minHeight: 140, // Ensure consistent height
             }}
             activeOpacity={0.8}
             onPress={() => router.push('/alarms/create')}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <View
+            {/* Main layout container */}
+            <View style={{ flex: 1 }}>
+              {/* Top row: Days vlevo nahoře + Toggle switch */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 0 }}>
+                {/* Dny v týdnu - vlevo nahoře */}
+                <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                  {renderWeekDays(alarm.repeatDays)}
+                </View>
+                
+                {/* Toggle switch */}
+                <TouchableOpacity
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'baseline',
-                    marginBottom: 4,
+                    width: 56,
+                    height: 28,
+                    borderRadius: 14,
+                    backgroundColor: alarm.isActive ? APP_COLORS.primary : theme.border,
+                    padding: 2,
+                    justifyContent: 'center',
+                    marginLeft: 12,
                   }}
+                  activeOpacity={0.8}
+                  onPress={() => toggleAlarm(alarm.id)}
                 >
-                  <ThemedText style={{ fontSize: 32, fontWeight: 'bold' }}>
-                    {formatTime(alarm.time)}
-                  </ThemedText>
-                  <ThemedText
-                    style={{ fontSize: 14, opacity: 0.7, marginLeft: 12 }}
-                  >
-                    {formatDays(alarm.repeatDays)}
-                  </ThemedText>
-                </View>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons
-                    name="musical-notes"
-                    size={14}
-                    color={
-                      alarm.isActive ? APP_COLORS.accent : theme.text.muted
-                    }
-                  />
-                  <ThemedText
+                  <View
                     style={{
-                      fontSize: 12,
-                      color: alarm.isActive
-                        ? APP_COLORS.accent
-                        : theme.text.muted,
-                      marginLeft: 8,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      backgroundColor: '#FFFFFF',
+                      marginLeft: alarm.isActive ? 28 : 0,
                     }}
-                  >
-                    {alarm.audioTrack.name}
-                  </ThemedText>
-                </View>
+                  />
+                </TouchableOpacity>
               </View>
 
-              {/* Toggle Switch */}
-              <TouchableOpacity
-                style={{
-                  width: 48,
-                  height: 24,
-                  borderRadius: 12,
-                  backgroundColor: alarm.isActive
-                    ? APP_COLORS.primary
-                    : theme.border,
-                  padding: 2,
-                  justifyContent: 'center',
-                }}
-                activeOpacity={0.8}
-                onPress={() => toggleAlarm(alarm.id)}
-              >
-                <View
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    backgroundColor: '#FFFFFF',
-                    marginLeft: alarm.isActive ? 24 : 0,
-                  }}
-                />
-              </TouchableOpacity>
+              {/* Center area: Čas - větší pod dny */}
+              <View style={{ 
+                flex: 1, 
+                justifyContent: 'center', 
+                alignItems: 'flex-start',
+                marginVertical: 4
+              }}>
+                <ThemedText style={{ fontSize: 56, fontWeight: 'bold', textAlign: 'left' }}>
+                  {formatTime(alarm.time)}
+                </ThemedText>
+              </View>
+
+              {/* Bottom content area */}
+              <View>
+
+                {/* Bottom row: Song/Mission info + Three dots menu */}
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-end' 
+                }}>
+                  <View style={{ flex: 1 }}>
+                    {/* Song info */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                      <Ionicons
+                        name="musical-notes"
+                        size={14}
+                        color={alarm.isActive ? APP_COLORS.accent : theme.text.muted}
+                      />
+                      <ThemedText
+                        style={{
+                          fontSize: 12,
+                          color: alarm.isActive ? APP_COLORS.accent : theme.text.muted,
+                          marginLeft: 8,
+                        }}
+                      >
+                        {alarm.audioTrack.name}
+                      </ThemedText>
+                    </View>
+
+                    {/* Mission type */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons
+                        name="checkmark-circle-outline"
+                        size={14}
+                        color={APP_COLORS.primary}
+                      />
+                      <ThemedText
+                        style={{
+                          fontSize: 11,
+                          color: theme.text.muted,
+                          marginLeft: 6,
+                          opacity: 0.8,
+                        }}
+                      >
+                        Mise - počítání
+                      </ThemedText>
+                    </View>
+                  </View>
+
+                  {/* Three dots menu - bottom right corner */}
+                  <TouchableOpacity 
+                    activeOpacity={0.7} 
+                    style={{ padding: 4, alignItems: 'flex-end' }}
+                    onPress={() => handleThreeDotsMenu(alarm)}
+                  >
+                    <Ionicons
+                      name="ellipsis-vertical"
+                      size={20}
+                      color={theme.text.secondary}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </TouchableOpacity>
         </Swipeable>
       );
     },
-    [theme, renderDeleteAction, formatTime, formatDays, toggleAlarm]
+    [theme, renderDeleteAction, formatTime, toggleAlarm, renderWeekDays, handleThreeDotsMenu]
   );
 
   return (
@@ -258,74 +472,118 @@ export default function AlarmsScreen() {
               {/* Next Alarm Hero Card */}
               {nextAlarm ? (
                 <ThemedCard
-                  style={{ padding: 24, marginBottom: 32, borderRadius: 12 }}
+                  style={{ 
+                    padding: 24, 
+                    marginBottom: 16, 
+                    borderRadius: 12,
+                  }}
                 >
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => router.push('/alarms/create')}
                   >
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: 8,
-                      }}
-                    >
-                      <ThemedText
-                        style={{
-                          fontSize: 12,
-                          color: APP_COLORS.primary,
-                          fontWeight: '600',
-                        }}
-                      >
-                        🌅 NEXT ALARM
-                      </ThemedText>
-                      <View
-                        style={{
-                          width: 12,
-                          height: 12,
-                          backgroundColor: APP_COLORS.primary,
-                          borderRadius: 6,
-                        }}
-                      />
-                    </View>
+                    {/* Main layout container */}
+                    <View style={{ flex: 1 }}>
+                      {/* Header with next alarm indicator */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <ThemedText
+                          style={{
+                            fontSize: 14,
+                            color: APP_COLORS.primary,
+                            fontWeight: '600',
+                          }}
+                        >
+                          🌅 NEXT ALARM
+                        </ThemedText>
+                        <View
+                          style={{
+                            width: 12,
+                            height: 12,
+                            backgroundColor: APP_COLORS.primary,
+                            borderRadius: 6,
+                          }}
+                        />
+                      </View>
 
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'baseline',
-                        marginBottom: 12,
-                      }}
-                    >
-                      <ThemedText style={{ fontSize: 48, fontWeight: '800' }}>
-                        {formatTime(nextAlarm.time)}
-                      </ThemedText>
-                    </View>
+                      {/* Top row: Days vlevo nahoře + Status indicator */}
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 0 }}>
+                        {/* Dny v týdnu - vlevo nahoře */}
+                        <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                          {renderWeekDays(nextAlarm.repeatDays)}
+                        </View>
+                        
+                        {/* Active indicator */}
+                        <View
+                          style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: 10,
+                            backgroundColor: APP_COLORS.primary,
+                            marginLeft: 12,
+                          }}
+                        />
+                      </View>
 
-                    <ThemedText
-                      style={{ fontSize: 16, opacity: 0.7, marginBottom: 8 }}
-                    >
-                      {formatDays(nextAlarm.repeatDays)}
-                    </ThemedText>
+                      {/* Center area: Čas - větší pod dny */}
+                      <View style={{ 
+                        flex: 1, 
+                        justifyContent: 'center', 
+                        alignItems: 'flex-start',
+                        marginVertical: 4
+                      }}>
+                        <ThemedText style={{ fontSize: 56, fontWeight: 'bold', textAlign: 'left' }}>
+                          {formatTime(nextAlarm.time)}
+                        </ThemedText>
+                      </View>
 
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                      <Ionicons
-                        name="musical-notes"
-                        size={16}
-                        color={APP_COLORS.accent}
-                      />
-                      <ThemedText
-                        style={{
-                          fontSize: 12,
-                          color: APP_COLORS.accent,
-                          marginLeft: 8,
-                        }}
-                      >
-                        {nextAlarm.audioTrack.name}
-                      </ThemedText>
+                      {/* Bottom content area */}
+                      <View>
+                        {/* Bottom row: Song/Mission info */}
+                        <View style={{ 
+                          flexDirection: 'row', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'flex-end' 
+                        }}>
+                          <View style={{ flex: 1 }}>
+                            {/* Song info */}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                              <Ionicons
+                                name="musical-notes"
+                                size={14}
+                                color={APP_COLORS.accent}
+                              />
+                              <ThemedText
+                                style={{
+                                  fontSize: 12,
+                                  color: APP_COLORS.accent,
+                                  marginLeft: 8,
+                                }}
+                              >
+                                {nextAlarm.audioTrack.name}
+                              </ThemedText>
+                            </View>
+
+                            {/* Mission type */}
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              <Ionicons
+                                name="checkmark-circle-outline"
+                                size={14}
+                                color={APP_COLORS.primary}
+                              />
+                              <ThemedText
+                                style={{
+                                  fontSize: 11,
+                                  color: theme.text.muted,
+                                  marginLeft: 6,
+                                  opacity: 0.8,
+                                }}
+                              >
+                                Mise - počítání
+                              </ThemedText>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
                     </View>
                   </TouchableOpacity>
                 </ThemedCard>
@@ -360,6 +618,21 @@ export default function AlarmsScreen() {
                     </View>
                   </TouchableOpacity>
                 </ThemedCard>
+              )}
+
+              {/* Next alarm countdown - only show if there is a next alarm */}
+              {nextAlarm && (
+                <View style={{ marginBottom: 16, alignItems: 'center' }}>
+                  <ThemedText
+                    style={{
+                      fontSize: 14,
+                      opacity: 0.7,
+                      textAlign: 'center',
+                    }}
+                  >
+                    Next alarm in {getTimeToNextAlarm()}
+                  </ThemedText>
+                </View>
               )}
 
               {/* My Alarms Section Header */}
@@ -402,151 +675,7 @@ export default function AlarmsScreen() {
             </ThemedCard>
           )}
           ListFooterComponent={() => (
-            <>
-              {/* Quick Actions */}
-              <View style={{ marginBottom: 32, marginTop: 32 }}>
-                <ThemedText
-                  style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 24 }}
-                >
-                  Quick Actions
-                </ThemedText>
-
-                <View
-                  style={{ flexDirection: 'row', gap: 16, marginBottom: 16 }}
-                >
-                  <TouchableOpacity
-                    style={{
-                      flex: 1,
-                      backgroundColor: theme.elevated,
-                      borderWidth: 1,
-                      borderColor: theme.border,
-                      borderRadius: 12,
-                      padding: 16,
-                      alignItems: 'center',
-                    }}
-                    activeOpacity={0.8}
-                    onPress={() => router.push('/alarms/create')}
-                  >
-                    <Ionicons
-                      name="add-circle"
-                      size={24}
-                      color={APP_COLORS.primary}
-                    />
-                    <ThemedText
-                      style={{
-                        fontSize: 12,
-                        color: theme.text.secondary,
-                        marginTop: 8,
-                        textAlign: 'center',
-                      }}
-                    >
-                      New Alarm
-                    </ThemedText>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={{
-                      flex: 1,
-                      backgroundColor: theme.elevated,
-                      borderWidth: 1,
-                      borderColor: theme.border,
-                      borderRadius: 12,
-                      padding: 16,
-                      alignItems: 'center',
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons
-                      name="musical-notes"
-                      size={24}
-                      color={APP_COLORS.success}
-                    />
-                    <ThemedText
-                      style={{
-                        fontSize: 12,
-                        color: theme.text.secondary,
-                        marginTop: 8,
-                        textAlign: 'center',
-                      }}
-                    >
-                      Sound Library
-                    </ThemedText>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={{
-                      flex: 1,
-                      backgroundColor: theme.elevated,
-                      borderWidth: 1,
-                      borderColor: theme.border,
-                      borderRadius: 12,
-                      padding: 16,
-                      alignItems: 'center',
-                    }}
-                    activeOpacity={0.8}
-                    onPress={() => router.push('/(tabs)/profile')}
-                  >
-                    <Ionicons
-                      name="settings"
-                      size={24}
-                      color={APP_COLORS.accent}
-                    />
-                    <ThemedText
-                      style={{
-                        fontSize: 12,
-                        color: theme.text.secondary,
-                        marginTop: 8,
-                        textAlign: 'center',
-                      }}
-                    >
-                      Settings
-                    </ThemedText>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Developer Menu Button */}
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: theme.elevated,
-                    borderWidth: 2,
-                    borderColor: '#FF6B6B',
-                    borderRadius: 12,
-                    padding: 16,
-                    alignItems: 'center',
-                    borderStyle: 'dashed',
-                  }}
-                  activeOpacity={0.8}
-                  onPress={() => router.push('/dev-menu')}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Ionicons name="code-slash" size={24} color="#FF6B6B" />
-                    <ThemedText
-                      style={{
-                        fontSize: 16,
-                        color: '#FF6B6B',
-                        marginLeft: 12,
-                        fontWeight: '600',
-                      }}
-                    >
-                      🛠️ Developer Menu
-                    </ThemedText>
-                  </View>
-                  <ThemedText
-                    style={{
-                      fontSize: 12,
-                      color: theme.text.muted,
-                      marginTop: 4,
-                      textAlign: 'center',
-                    }}
-                  >
-                    Navigate to any screen • Testing tools
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-
-              {/* Bottom padding */}
-              <View style={{ height: 80 }} />
-            </>
+            <View style={{ height: 80 }} />
           )}
         />
       </SafeAreaView>
