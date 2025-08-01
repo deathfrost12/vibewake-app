@@ -23,7 +23,7 @@
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
         "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["audio", "background-processing"]
+        "UIBackgroundModes": ["audio", "background-processing", "remote-notification"]
       },
       "entitlements": {
         "com.apple.developer.applesignin": ["Default"],
@@ -47,7 +47,8 @@
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.WAKE_LOCK",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.SCHEDULE_EXACT_ALARM"
       ]
     },
     "web": {
@@ -83,9 +84,11 @@
         {
           "icon": "./assets/notification-icon.png",
           "color": "#5CFFF0",
-          "defaultChannel": "alarms"
+          "defaultChannel": "alarms",
+          "enableBackgroundRemoteNotifications": true
         }
       ],
+      "expo-task-manager",
       "expo-dev-client",
       "expo-localization"
     ],

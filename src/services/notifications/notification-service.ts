@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { AudioTrack } from '../audio/types';
+import { audioService } from '../audio/audio-service';
 
 export interface AlarmNotification {
   id: string;
@@ -23,6 +24,14 @@ class NotificationService {
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
+
+    // Configure audio for background playback FIRST
+    try {
+      await audioService.configureAudio();
+      console.log('✅ Audio configured for background alarm playback');
+    } catch (error) {
+      console.error('❌ Failed to configure background audio:', error);
+    }
 
     // Configure notification handler
     Notifications.setNotificationHandler({

@@ -12,7 +12,7 @@ import { ThemeProvider } from '../contexts/theme-context';
 import { initSentry, useSentryRouteTracking } from '../lib/sentry';
 import '../../global.css';
 import { useRouter } from 'expo-router';
-import { AudioManager } from '../services/audio/AudioManager';
+import { alarmManager } from '../services/alarm-manager';
 
 // Initialize Sentry using centralized configuration
 console.log('🚀 Initializing Sentry...');
@@ -48,10 +48,10 @@ function RootLayoutNav() {
         // await pushNotificationService.initialize();
         console.log('⏸️ Push notifications temporarily disabled');
 
-        // Initialize AudioManager globally
-        console.log('🎵 Initializing AudioManager...');
-        await AudioManager.initialize();
-        console.log('✅ AudioManager initialized');
+        // Initialize AlarmManager globally (includes audio, notifications, background tasks)
+        console.log('⏰ Initializing VibeWake Alarm System...');
+        await alarmManager.initialize();
+        console.log('✅ VibeWake Alarm System initialized with background support');
 
         // Hide splash screen after app is ready
         if (Constants.appOwnership !== 'expo') {

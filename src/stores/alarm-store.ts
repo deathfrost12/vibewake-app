@@ -6,6 +6,8 @@ import {
   notificationService,
 } from '../services/notifications/notification-service';
 import { AudioTrack } from '../services/audio/types';
+import { alarmService } from '../services/alarms/alarm-service';
+import { backgroundTaskService } from '../services/background/background-task-service';
 
 export interface Alarm extends AlarmNotification {
   notificationId?: string;
@@ -224,14 +226,18 @@ export const useAlarmStore = create<AlarmState>()(
         set({ isLoading: true });
 
         try {
-          // Initialize notification service
-          await notificationService.initialize();
+          // Initialize all alarm-related services
+          await alarmService.initialize();
+          await backgroundTaskService.initialize();
 
           // Check permissions
           await get().checkPermissions();
 
+          // Sync any desynced alarms
+          await get().syncScheduledAlarms();
+
           set({ isLoading: false });
-          console.log('⏰ Loaded alarms:', get().alarms.length);
+          console.log('⏰ Loaded alarms with background support:', get().alarms.length);
         } catch (error) {
           console.error('⏰ Failed to load alarms:', error);
           set({ isLoading: false });
