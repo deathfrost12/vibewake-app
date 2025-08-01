@@ -77,10 +77,6 @@ function RootLayoutNav() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="create"
-          options={{ presentation: 'modal', headerShown: false }}
-        />
         <Stack.Screen name="dev-menu" options={{ headerShown: false }} />
         <Stack.Screen name="dev" options={{ headerShown: false }} />
         <Stack.Screen
@@ -89,6 +85,9 @@ function RootLayoutNav() {
         />
         <Stack.Screen name="songmaker-demo" options={{ headerShown: false }} />
         <Stack.Screen name="revenuecat-demo" options={{ headerShown: false }} />
+        <Stack.Screen name="alarms/create" options={{ headerShown: false }} />
+        <Stack.Screen name="alarms/ringing" options={{ headerShown: false }} />
+        <Stack.Screen name="alarms/spotify-selector" options={{ headerShown: false }} />
       </Stack>
     </GestureHandlerRootView>
   );
