@@ -84,15 +84,21 @@ export const useAlarmStore = create<AlarmState>()(
             ...alarm,
             ...updates,
             updatedAt: new Date(),
+            notificationId: undefined, // Reset notification ID
           };
 
-          // Schedule new notification if alarm is active
+          // Only schedule new notification if alarm is being activated
           if (updatedAlarm.isActive) {
-            const notificationId = await notificationService.scheduleAlarm(updatedAlarm);
-            updatedAlarm.notificationId = notificationId;
-            console.log('⏰ Updated and rescheduled alarm:', id);
+            try {
+              const notificationId = await notificationService.scheduleAlarm(updatedAlarm);
+              updatedAlarm.notificationId = notificationId;
+              console.log('⏰ Updated and rescheduled alarm:', id);
+            } catch (scheduleError) {
+              console.error('⏰ Failed to schedule updated alarm:', scheduleError);
+              // Keep alarm active but without notification - user can manually fix
+              console.log('⏰ Alarm updated but notification scheduling failed - alarm remains active');
+            }
           } else {
-            updatedAlarm.notificationId = undefined;
             console.log('⏰ Updated alarm (inactive):', id);
           }
 
@@ -133,7 +139,60 @@ export const useAlarmStore = create<AlarmState>()(
         const alarm = get().alarms.find(a => a.id === id);
         if (!alarm) return;
 
-        await get().updateAlarm(id, { isActive: !alarm.isActive });
+        // Optimistic update - update UI immediately
+        const newActiveState = !alarm.isActive;
+        set(state => ({
+          alarms: state.alarms.map(a => 
+            a.id === id 
+              ? { ...a, isActive: newActiveState, updatedAt: new Date() }
+              : a
+          ),
+        }));
+
+        try {
+          // Handle notification scheduling in background
+          if (alarm.notificationId) {
+            await notificationService.cancelAlarm(alarm.notificationId);
+          }
+
+          let notificationId: string | undefined = undefined;
+          
+          // Only schedule if activating the alarm
+          if (newActiveState) {
+            try {
+              notificationId = await notificationService.scheduleAlarm({
+                ...alarm,
+                isActive: newActiveState,
+              });
+              console.log('⏰ Toggled and scheduled alarm:', id);
+            } catch (scheduleError) {
+              console.error('⏰ Failed to schedule toggled alarm:', scheduleError);
+              // Keep optimistic update but log error
+            }
+          } else {
+            console.log('⏰ Toggled alarm off:', id);
+          }
+
+          // Update with notification ID
+          set(state => ({
+            alarms: state.alarms.map(a => 
+              a.id === id 
+                ? { ...a, notificationId, updatedAt: new Date() }
+                : a
+            ),
+          }));
+        } catch (error) {
+          // Revert optimistic update on error
+          console.error('⏰ Failed to toggle alarm, reverting:', error);
+          set(state => ({
+            alarms: state.alarms.map(a => 
+              a.id === id 
+                ? { ...a, isActive: alarm.isActive, updatedAt: new Date() }
+                : a
+            ),
+          }));
+          throw error;
+        }
       },
 
       checkPermissions: async () => {

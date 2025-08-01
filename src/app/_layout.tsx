@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react-native';
 import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import pushNotificationService from '../services/notifications/push-notifications';
 import { ToastProvider } from '../components/ui/toast';
 import { RevenueCatProvider } from '../components/common/revenuecat-provider';
@@ -70,7 +71,7 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="auto" />
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -89,7 +90,7 @@ function RootLayoutNav() {
         <Stack.Screen name="songmaker-demo" options={{ headerShown: false }} />
         <Stack.Screen name="revenuecat-demo" options={{ headerShown: false }} />
       </Stack>
-    </>
+    </GestureHandlerRootView>
   );
 }
 
@@ -97,43 +98,47 @@ function RootLayout() {
   if (!PostHogAPIKey || !PostHogHost) {
     console.warn('⚠️ PostHog not configured');
     return (
-      <ThemeProvider>
-        <RevenueCatProvider>
-          <ToastProvider>
-            <RootLayoutNav />
-          </ToastProvider>
-        </RevenueCatProvider>
-      </ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider>
+          <RevenueCatProvider>
+            <ToastProvider>
+              <RootLayoutNav />
+            </ToastProvider>
+          </RevenueCatProvider>
+        </ThemeProvider>
+      </GestureHandlerRootView>
     );
   }
 
   return (
-    <PostHogProvider
-      apiKey={PostHogAPIKey}
-      options={{
-        host: PostHogHost,
-        enableSessionReplay: false, // Privacy + performance
-        captureAppLifecycleEvents: true,
-        // captureDeepLinks: true, // Deprecated in newer PostHog versions
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PostHogProvider
+        apiKey={PostHogAPIKey}
+        options={{
+          host: PostHogHost,
+          enableSessionReplay: false, // Privacy + performance
+          captureAppLifecycleEvents: true,
+          // captureDeepLinks: true, // Deprecated in newer PostHog versions
 
-        // Logging settings - quiet in production
-        // debug: __DEV__ ? false : false, // Always false for cleaner logs (deprecated option)
-        flushAt: __DEV__ ? 5 : 20, // Smaller batches in dev
-        flushInterval: __DEV__ ? 3000 : 10000, // More frequent in dev
-      }}
-      autocapture={{
-        captureScreens: false, // Disable auto screen tracking - prevents getCurrentRoute errors with Expo Router
-        captureTouches: true, // Keep touch events enabled
-      }}
-    >
-      <ThemeProvider>
-        <RevenueCatProvider>
-          <ToastProvider>
-            <RootLayoutNav />
-          </ToastProvider>
-        </RevenueCatProvider>
-      </ThemeProvider>
-    </PostHogProvider>
+          // Logging settings - quiet in production
+          // debug: __DEV__ ? false : false, // Always false for cleaner logs (deprecated option)
+          flushAt: __DEV__ ? 5 : 20, // Smaller batches in dev
+          flushInterval: __DEV__ ? 3000 : 10000, // More frequent in dev
+        }}
+        autocapture={{
+          captureScreens: false, // Disable auto screen tracking - prevents getCurrentRoute errors with Expo Router
+          captureTouches: true, // Keep touch events enabled
+        }}
+      >
+        <ThemeProvider>
+          <RevenueCatProvider>
+            <ToastProvider>
+              <RootLayoutNav />
+            </ToastProvider>
+          </RevenueCatProvider>
+        </ThemeProvider>
+      </PostHogProvider>
+    </GestureHandlerRootView>
   );
 }
 
