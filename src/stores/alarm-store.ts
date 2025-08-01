@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AlarmNotification, notificationService } from '../services/notifications/notification-service';
+import {
+  AlarmNotification,
+  notificationService,
+} from '../services/notifications/notification-service';
 import { AudioTrack } from '../services/audio/types';
 
 export interface Alarm extends AlarmNotification {
@@ -14,9 +17,11 @@ interface AlarmState {
   alarms: Alarm[];
   permissionsGranted: boolean;
   isLoading: boolean;
-  
+
   // Actions
-  createAlarm: (alarm: Omit<Alarm, 'id' | 'createdAt' | 'updatedAt' | 'notificationId'>) => Promise<string>;
+  createAlarm: (
+    alarm: Omit<Alarm, 'id' | 'createdAt' | 'updatedAt' | 'notificationId'>
+  ) => Promise<string>;
   updateAlarm: (id: string, updates: Partial<Alarm>) => Promise<void>;
   deleteAlarm: (id: string) => Promise<void>;
   toggleAlarm: (id: string) => Promise<void>;
@@ -33,9 +38,9 @@ export const useAlarmStore = create<AlarmState>()(
       permissionsGranted: false,
       isLoading: false,
 
-      createAlarm: async (alarmData) => {
+      createAlarm: async alarmData => {
         const id = `alarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         const alarm: Alarm = {
           ...alarmData,
           id,
@@ -48,7 +53,8 @@ export const useAlarmStore = create<AlarmState>()(
         try {
           // Schedule the notification if alarm is active
           if (alarm.isActive) {
-            const notificationId = await notificationService.scheduleAlarm(alarm);
+            const notificationId =
+              await notificationService.scheduleAlarm(alarm);
             alarm.notificationId = notificationId;
             console.log('⏰ Created and scheduled alarm:', id);
           }
@@ -90,20 +96,26 @@ export const useAlarmStore = create<AlarmState>()(
           // Only schedule new notification if alarm is being activated
           if (updatedAlarm.isActive) {
             try {
-              const notificationId = await notificationService.scheduleAlarm(updatedAlarm);
+              const notificationId =
+                await notificationService.scheduleAlarm(updatedAlarm);
               updatedAlarm.notificationId = notificationId;
               console.log('⏰ Updated and rescheduled alarm:', id);
             } catch (scheduleError) {
-              console.error('⏰ Failed to schedule updated alarm:', scheduleError);
+              console.error(
+                '⏰ Failed to schedule updated alarm:',
+                scheduleError
+              );
               // Keep alarm active but without notification - user can manually fix
-              console.log('⏰ Alarm updated but notification scheduling failed - alarm remains active');
+              console.log(
+                '⏰ Alarm updated but notification scheduling failed - alarm remains active'
+              );
             }
           } else {
             console.log('⏰ Updated alarm (inactive):', id);
           }
 
           set(state => ({
-            alarms: state.alarms.map(a => a.id === id ? updatedAlarm : a),
+            alarms: state.alarms.map(a => (a.id === id ? updatedAlarm : a)),
             isLoading: false,
           }));
         } catch (error) {
@@ -113,7 +125,7 @@ export const useAlarmStore = create<AlarmState>()(
         }
       },
 
-      deleteAlarm: async (id) => {
+      deleteAlarm: async id => {
         set({ isLoading: true });
 
         try {
@@ -135,15 +147,15 @@ export const useAlarmStore = create<AlarmState>()(
         }
       },
 
-      toggleAlarm: async (id) => {
+      toggleAlarm: async id => {
         const alarm = get().alarms.find(a => a.id === id);
         if (!alarm) return;
 
         // Optimistic update - update UI immediately
         const newActiveState = !alarm.isActive;
         set(state => ({
-          alarms: state.alarms.map(a => 
-            a.id === id 
+          alarms: state.alarms.map(a =>
+            a.id === id
               ? { ...a, isActive: newActiveState, updatedAt: new Date() }
               : a
           ),
@@ -156,7 +168,7 @@ export const useAlarmStore = create<AlarmState>()(
           }
 
           let notificationId: string | undefined = undefined;
-          
+
           // Only schedule if activating the alarm
           if (newActiveState) {
             try {
@@ -166,7 +178,10 @@ export const useAlarmStore = create<AlarmState>()(
               });
               console.log('⏰ Toggled and scheduled alarm:', id);
             } catch (scheduleError) {
-              console.error('⏰ Failed to schedule toggled alarm:', scheduleError);
+              console.error(
+                '⏰ Failed to schedule toggled alarm:',
+                scheduleError
+              );
               // Keep optimistic update but log error
             }
           } else {
@@ -175,18 +190,16 @@ export const useAlarmStore = create<AlarmState>()(
 
           // Update with notification ID
           set(state => ({
-            alarms: state.alarms.map(a => 
-              a.id === id 
-                ? { ...a, notificationId, updatedAt: new Date() }
-                : a
+            alarms: state.alarms.map(a =>
+              a.id === id ? { ...a, notificationId, updatedAt: new Date() } : a
             ),
           }));
         } catch (error) {
           // Revert optimistic update on error
           console.error('⏰ Failed to toggle alarm, reverting:', error);
           set(state => ({
-            alarms: state.alarms.map(a => 
-              a.id === id 
+            alarms: state.alarms.map(a =>
+              a.id === id
                 ? { ...a, isActive: alarm.isActive, updatedAt: new Date() }
                 : a
             ),
@@ -209,14 +222,14 @@ export const useAlarmStore = create<AlarmState>()(
 
       loadAlarms: async () => {
         set({ isLoading: true });
-        
+
         try {
           // Initialize notification service
           await notificationService.initialize();
-          
+
           // Check permissions
           await get().checkPermissions();
-          
+
           set({ isLoading: false });
           console.log('⏰ Loaded alarms:', get().alarms.length);
         } catch (error) {
@@ -227,25 +240,28 @@ export const useAlarmStore = create<AlarmState>()(
 
       syncScheduledAlarms: async () => {
         try {
-          const scheduledNotifications = await notificationService.getAllScheduledAlarms();
+          const scheduledNotifications =
+            await notificationService.getAllScheduledAlarms();
           const alarms = get().alarms;
-          
+
           // Find alarms that are marked as active but don't have scheduled notifications
-          const desyncedAlarms = alarms.filter(alarm => 
-            alarm.isActive && 
-            !scheduledNotifications.find(notif => 
-              notif.content.data?.alarmId === alarm.id
-            )
+          const desyncedAlarms = alarms.filter(
+            alarm =>
+              alarm.isActive &&
+              !scheduledNotifications.find(
+                notif => notif.content.data?.alarmId === alarm.id
+              )
           );
 
           // Reschedule desynced alarms
           for (const alarm of desyncedAlarms) {
             try {
-              const notificationId = await notificationService.scheduleAlarm(alarm);
-              
+              const notificationId =
+                await notificationService.scheduleAlarm(alarm);
+
               set(state => ({
-                alarms: state.alarms.map(a => 
-                  a.id === alarm.id 
+                alarms: state.alarms.map(a =>
+                  a.id === alarm.id
                     ? { ...a, notificationId, updatedAt: new Date() }
                     : a
                 ),
@@ -257,7 +273,10 @@ export const useAlarmStore = create<AlarmState>()(
             }
           }
 
-          console.log('⏰ Synced scheduled alarms, resynced:', desyncedAlarms.length);
+          console.log(
+            '⏰ Synced scheduled alarms, resynced:',
+            desyncedAlarms.length
+          );
         } catch (error) {
           console.error('⏰ Failed to sync scheduled alarms:', error);
         }
@@ -266,18 +285,27 @@ export const useAlarmStore = create<AlarmState>()(
     {
       name: 'alarm-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
+      partialize: state => ({
         alarms: state.alarms,
         permissionsGranted: state.permissionsGranted,
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => state => {
         if (state?.alarms) {
           // Convert date strings back to Date objects
           state.alarms = state.alarms.map(alarm => ({
             ...alarm,
-            time: typeof alarm.time === 'string' ? new Date(alarm.time) : alarm.time,
-            createdAt: typeof alarm.createdAt === 'string' ? new Date(alarm.createdAt) : alarm.createdAt,
-            updatedAt: typeof alarm.updatedAt === 'string' ? new Date(alarm.updatedAt) : alarm.updatedAt,
+            time:
+              typeof alarm.time === 'string'
+                ? new Date(alarm.time)
+                : alarm.time,
+            createdAt:
+              typeof alarm.createdAt === 'string'
+                ? new Date(alarm.createdAt)
+                : alarm.createdAt,
+            updatedAt:
+              typeof alarm.updatedAt === 'string'
+                ? new Date(alarm.updatedAt)
+                : alarm.updatedAt,
           }));
         }
       },

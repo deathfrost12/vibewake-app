@@ -27,11 +27,10 @@ class NotificationService {
     // Configure notification handler
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
         shouldShowBanner: true,
         shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
       }),
     });
 
@@ -60,7 +59,8 @@ class NotificationService {
       };
     }
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
     if (existingStatus !== 'granted') {
@@ -100,10 +100,13 @@ class NotificationService {
     // For one-time alarms
     if (!alarm.repeatDays || alarm.repeatDays.length === 0) {
       try {
-        // Validate alarm time is in the future
+        // Auto-schedule for next day if time is in the past
         const now = new Date();
         if (alarm.time <= now) {
-          throw new Error('Alarm time must be in the future');
+          const nextDay = new Date(alarm.time);
+          nextDay.setDate(nextDay.getDate() + 1);
+          alarm.time = nextDay;
+          console.log('⏰ Alarm time was in past, rescheduled for next day:', alarm.time);
         }
 
         const identifier = await this.scheduleNotificationWithRetry({
@@ -115,7 +118,12 @@ class NotificationService {
           },
         });
 
-        console.log('⏰ Scheduled one-time alarm:', identifier, 'for', alarm.time);
+        console.log(
+          '⏰ Scheduled one-time alarm:',
+          identifier,
+          'for',
+          alarm.time
+        );
         return identifier;
       } catch (error) {
         console.error('❌ Failed to schedule one-time alarm:', error);
@@ -125,16 +133,19 @@ class NotificationService {
 
     // For repeating alarms, calculate next occurrences and schedule as individual DATE triggers
     const identifiers: string[] = [];
-    
+
     try {
       // Calculate next 7 days for each repeat day to create specific date triggers
       const now = new Date();
       const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-      
+
       for (const weekday of alarm.repeatDays) {
         // Find the next occurrence of this weekday
-        const nextOccurrence = this.getNextOccurrenceForWeekday(alarm.time, weekday);
-        
+        const nextOccurrence = this.getNextOccurrenceForWeekday(
+          alarm.time,
+          weekday
+        );
+
         if (nextOccurrence && nextOccurrence > now) {
           try {
             const identifier = await this.scheduleNotificationWithRetry({
@@ -150,8 +161,15 @@ class NotificationService {
             });
 
             identifiers.push(identifier);
-            console.log('⏰ Scheduled date alarm:', identifier, 'for', this.getDayName(weekday), 'at', nextOccurrence.toISOString());
-            
+            console.log(
+              '⏰ Scheduled date alarm:',
+              identifier,
+              'for',
+              this.getDayName(weekday),
+              'at',
+              nextOccurrence.toISOString()
+            );
+
             // Schedule for the following week too (to maintain recurring behavior)
             const nextWeek = new Date(nextOccurrence.getTime() + oneWeekInMs);
             const weekIdentifier = await this.scheduleNotificationWithRetry({
@@ -165,11 +183,23 @@ class NotificationService {
                 channelId: Platform.OS === 'android' ? 'alarms' : undefined,
               },
             });
-            
+
             identifiers.push(weekIdentifier);
-            console.log('⏰ Scheduled weekly alarm:', weekIdentifier, 'for', this.getDayName(weekday), 'at', nextWeek.toISOString());
+            console.log(
+              '⏰ Scheduled weekly alarm:',
+              weekIdentifier,
+              'for',
+              this.getDayName(weekday),
+              'at',
+              nextWeek.toISOString()
+            );
           } catch (error) {
-            console.error('❌ Failed to schedule repeating alarm for', this.getDayName(weekday), ':', error);
+            console.error(
+              '❌ Failed to schedule repeating alarm for',
+              this.getDayName(weekday),
+              ':',
+              error
+            );
             // Continue with other days even if one fails
           }
         }
@@ -188,7 +218,7 @@ class NotificationService {
 
   async cancelAlarm(identifier: string): Promise<void> {
     const identifiers = identifier.split(',');
-    
+
     for (const id of identifiers) {
       await Notifications.cancelScheduledNotificationAsync(id.trim());
       console.log('⏰ Cancelled alarm:', id.trim());
@@ -202,12 +232,15 @@ class NotificationService {
 
   async getAllScheduledAlarms(): Promise<Notifications.NotificationRequest[]> {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    return scheduled.filter(notification => 
-      notification.content.data?.type === 'alarm'
+    return scheduled.filter(
+      notification => notification.content.data?.type === 'alarm'
     );
   }
 
-  async getNextTriggerDate(time: Date, repeatDays?: number[]): Promise<Date | null> {
+  async getNextTriggerDate(
+    time: Date,
+    repeatDays?: number[]
+  ): Promise<Date | null> {
     if (!repeatDays || repeatDays.length === 0) {
       // One-time alarm
       return time > new Date() ? time : null;
@@ -225,13 +258,13 @@ class NotificationService {
     // Find next occurrence
     for (let i = 0; i < 7; i++) {
       const checkDay = (currentDay + i) % 7;
-      
+
       if (sortedDays.includes(checkDay)) {
         // If it's today, check if alarm time hasn't passed
         if (i === 0 && alarmTime <= currentTime) {
           continue; // Skip today, alarm time has passed
         }
-        
+
         const nextDate = new Date(now);
         nextDate.setDate(now.getDate() + i);
         nextDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
@@ -243,14 +276,25 @@ class NotificationService {
   }
 
   private getDayName(weekday: number): string {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
     return days[weekday] || 'Unknown';
   }
 
-  private getNextOccurrenceForWeekday(alarmTime: Date, weekday: number): Date | null {
+  private getNextOccurrenceForWeekday(
+    alarmTime: Date,
+    weekday: number
+  ): Date | null {
     const now = new Date();
     const currentDay = now.getDay();
-    
+
     // Calculate days until the target weekday
     let daysUntilTarget = weekday - currentDay;
     if (daysUntilTarget < 0) {
@@ -258,18 +302,23 @@ class NotificationService {
     } else if (daysUntilTarget === 0) {
       // Same day - check if alarm time has passed
       const todayAlarmTime = new Date(now);
-      todayAlarmTime.setHours(alarmTime.getHours(), alarmTime.getMinutes(), 0, 0);
-      
+      todayAlarmTime.setHours(
+        alarmTime.getHours(),
+        alarmTime.getMinutes(),
+        0,
+        0
+      );
+
       if (todayAlarmTime <= now) {
         daysUntilTarget = 7; // Next week
       }
     }
-    
+
     // Create the next occurrence
     const nextOccurrence = new Date(now);
     nextOccurrence.setDate(now.getDate() + daysUntilTarget);
     nextOccurrence.setHours(alarmTime.getHours(), alarmTime.getMinutes(), 0, 0);
-    
+
     return nextOccurrence;
   }
 
@@ -280,9 +329,12 @@ class NotificationService {
       const data = response.notification.request.content.data;
       const alarmId = data?.alarmId;
       const type = data?.type;
-      
+
       if (type === 'alarm' && alarmId) {
-        console.log('⏰ Alarm notification tapped, navigating to ringing screen:', alarmId);
+        console.log(
+          '⏰ Alarm notification tapped, navigating to ringing screen:',
+          alarmId
+        );
         this.navigateToAlarmRinging(alarmId as string);
       }
     });
@@ -292,9 +344,12 @@ class NotificationService {
       const data = notification.request.content.data;
       const alarmId = data?.alarmId;
       const type = data?.type;
-      
+
       if (type === 'alarm' && alarmId) {
-        console.log('⏰ Alarm triggered in foreground, navigating to ringing screen:', alarmId);
+        console.log(
+          '⏰ Alarm triggered in foreground, navigating to ringing screen:',
+          alarmId
+        );
         this.navigateToAlarmRinging(alarmId as string);
       }
     });
@@ -312,15 +367,21 @@ class NotificationService {
   }
 
   // Notification event listeners
-  addNotificationReceivedListener(listener: (notification: Notifications.Notification) => void) {
+  addNotificationReceivedListener(
+    listener: (notification: Notifications.Notification) => void
+  ) {
     return Notifications.addNotificationReceivedListener(listener);
   }
 
-  addNotificationResponseReceivedListener(listener: (response: Notifications.NotificationResponse) => void) {
+  addNotificationResponseReceivedListener(
+    listener: (response: Notifications.NotificationResponse) => void
+  ) {
     return Notifications.addNotificationResponseReceivedListener(listener);
   }
 
-  removeNotificationSubscription(subscription: Notifications.EventSubscription) {
+  removeNotificationSubscription(
+    subscription: Notifications.EventSubscription
+  ) {
     Notifications.removeNotificationSubscription(subscription);
   }
 
@@ -331,32 +392,40 @@ class NotificationService {
     delay: number = 1000
   ): Promise<string> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`⏰ Attempting to schedule notification (attempt ${attempt}/${maxRetries})`);
-        
+        console.log(
+          `⏰ Attempting to schedule notification (attempt ${attempt}/${maxRetries})`
+        );
+
         // Additional validation to prevent NSInternalInconsistencyException
-        if (request.trigger && 'type' in request.trigger && request.trigger.type === Notifications.SchedulableTriggerInputTypes.DATE) {
+        if (
+          request.trigger &&
+          'type' in request.trigger &&
+          request.trigger.type ===
+            Notifications.SchedulableTriggerInputTypes.DATE
+        ) {
           const dateTrigger = request.trigger as any;
           const triggerDate = dateTrigger.date;
           if (!(triggerDate instanceof Date) || isNaN(triggerDate.getTime())) {
             throw new Error('Invalid trigger date provided');
           }
-          
+
           const now = new Date();
           if (triggerDate <= now) {
             throw new Error('Trigger date must be in the future');
           }
         }
-        
-        const identifier = await Notifications.scheduleNotificationAsync(request);
+
+        const identifier =
+          await Notifications.scheduleNotificationAsync(request);
         console.log(`✅ Successfully scheduled notification: ${identifier}`);
         return identifier;
       } catch (error: any) {
         lastError = error;
         console.warn(`⚠️ Attempt ${attempt} failed:`, error.message);
-        
+
         // If this is the last attempt, don't wait
         if (attempt < maxRetries) {
           // Exponential backoff: wait longer between retries
@@ -366,9 +435,11 @@ class NotificationService {
         }
       }
     }
-    
+
     // If we get here, all retries failed
-    throw new Error(`Failed to schedule notification after ${maxRetries} attempts. Last error: ${lastError?.message}`);
+    throw new Error(
+      `Failed to schedule notification after ${maxRetries} attempts. Last error: ${lastError?.message}`
+    );
   }
 }
 

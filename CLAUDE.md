@@ -265,7 +265,7 @@ cat .env  # Check current environment variables
 Required variables include:
 
 - Supabase URL/keys for database and auth
-- PostHog API key for user analytics 
+- PostHog API key for user analytics
 - Sentry DSN for error tracking
 - RevenueCat API keys for subscription management
 - Spotify Client ID/Secret for music integration
@@ -281,6 +281,7 @@ Required variables include:
 **IMPORTANT**: Claude SHOULD NOT execute build, run, or start commands directly. Instead, Claude should provide clear instructions for what the user should run manually.
 
 Commands that Claude should NOT execute (user runs these):
+
 - `npx expo start` and variants
 - `npm run dev`, `npm start`, `npm run build:*`
 - `npx eas build` and variants
@@ -470,12 +471,14 @@ This architecture supports rapid development of alarm features while maintaining
 ### 🎨 MANDATORY: Use ONLY These Components & Patterns
 
 #### **Components (ALWAYS use these):**
+
 - `ThemedView`, `ThemedText`, `ThemedCard` from '../../components/ui/themed-view'
 - `SafeAreaView` for all screens
 - `ScrollView` with paddingHorizontal: 24
 - `Ionicons` for all icons
 
 #### **Styling (NEVER use inline styles):**
+
 ```tsx
 // ✅ CORRECT - Use Tailwind classes
 <View className="bg-bg-elevated border border-border-visible rounded-xl p-6 mb-6">
@@ -489,6 +492,7 @@ This architecture supports rapid development of alarm features while maintaining
 ```
 
 #### **Color Tokens:**
+
 - **Neon**: `text-neon-mint` (#75FFB0), `text-neon-aqua` (#66F0FF), `text-neon-primary` (#5CFFF0)
 - **Background**: `bg-bg-primary`, `bg-bg-elevated`, `bg-bg-surface`
 - **Text**: `text-text-primary`, `text-text-secondary`, `text-text-muted`
@@ -496,18 +500,21 @@ This architecture supports rapid development of alarm features while maintaining
 - **Borders**: `border-border-DEFAULT`, `border-border-visible`
 
 #### **Layout Patterns:**
+
 - **Card Structure**: `bg-bg-elevated border border-border-visible rounded-xl p-6 mb-6`
 - **Section Headers**: `text-caption text-neon-mint font-semibold mb-4`
 - **Vertical Spacing**: `space-y-4`, `space-y-6`
 - **Icon Colors**: Neon colors only (#66F0FF, #75FFB0, #5CFFF0)
 
 #### **Typography Scale:**
+
 - **Headers**: fontSize: 32, fontWeight: 'bold'
 - **Section Titles**: fontSize: 24, fontWeight: 'bold'
 - **Body Text**: fontSize: 16
 - **Captions**: fontSize: 12, opacity: 0.7
 
 ### 🚫 FORBIDDEN Patterns:
+
 1. Inline backgroundColor/color styles
 2. Manual theme switching logic
 3. Custom color values outside design tokens

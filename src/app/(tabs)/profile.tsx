@@ -10,7 +10,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SimpleThemeToggle } from '../../components/ui/theme-switcher';
-import { ThemedView, ThemedText, ThemedCard } from '../../components/ui/themed-view';
+import {
+  ThemedView,
+  ThemedText,
+  ThemedCard,
+} from '../../components/ui/themed-view';
 
 export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
@@ -27,19 +31,28 @@ export default function SettingsScreen() {
   };
 
   const handleSupport = () => {
-    Alert.alert(
-      'Support',
-      'Need help? Contact us at:\nsupport@vibewake.app',
-      [{ text: 'OK' }]
-    );
+    Alert.alert('Support', 'Need help? Contact us at:\nsupport@vibewake.app', [
+      { text: 'OK' },
+    ]);
   };
 
   return (
     <ThemedView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView style={{ flex: 1, paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={{ flex: 1, paddingHorizontal: 24 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, marginBottom: 24 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 16,
+              marginBottom: 24,
+            }}
+          >
             <View>
               <ThemedText style={{ fontSize: 32, fontWeight: 'bold' }}>
                 Settings
@@ -56,7 +69,7 @@ export default function SettingsScreen() {
             <Text className="text-caption text-neon-mint font-semibold mb-4">
               ⏰ ALARM SETTINGS
             </Text>
-            
+
             <View className="space-y-4">
               <View className="flex-row items-center justify-between py-2">
                 <View className="flex-row items-center">
@@ -77,7 +90,7 @@ export default function SettingsScreen() {
                   thumbColor={notifications ? '#FFFFFF' : '#A8B4B6'}
                 />
               </View>
-              
+
               <View className="flex-row items-center justify-between py-2">
                 <View className="flex-row items-center">
                   <Ionicons name="phone-portrait" size={20} color="#75FFB0" />
@@ -97,7 +110,7 @@ export default function SettingsScreen() {
                   thumbColor={vibration ? '#FFFFFF' : '#A8B4B6'}
                 />
               </View>
-              
+
               <View className="flex-row items-center justify-between py-2">
                 <View className="flex-row items-center">
                   <Ionicons name="time" size={20} color="#9BFF93" />
@@ -125,7 +138,7 @@ export default function SettingsScreen() {
             <Text className="text-caption text-neon-aqua font-semibold mb-4">
               🧠 SMART FEATURES
             </Text>
-            
+
             <View className="flex-row items-center justify-between py-2">
               <View className="flex-row items-center">
                 <Ionicons name="bed" size={20} color="#66F0FF" />
@@ -155,7 +168,7 @@ export default function SettingsScreen() {
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#A8B4B6" />
             </View>
-            
+
             <View className="flex-row items-center">
               <Ionicons name="library" size={20} color="#9BFF93" />
               <Text className="text-body text-text-primary ml-3">
@@ -169,8 +182,8 @@ export default function SettingsScreen() {
             <Text className="text-caption text-neon-primary font-semibold mb-4">
               ℹ️ APP INFO
             </Text>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               className="flex-row items-center justify-between py-3"
               onPress={handleAbout}
             >
@@ -182,8 +195,8 @@ export default function SettingsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={16} color="#A8B4B6" />
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               className="flex-row items-center justify-between py-3"
               onPress={handleSupport}
             >
@@ -199,9 +212,7 @@ export default function SettingsScreen() {
 
           {/* Version Info */}
           <View className="items-center py-6 mb-6">
-            <Text className="text-small text-text-muted">
-              VibeWake v1.0.0
-            </Text>
+            <Text className="text-small text-text-muted">VibeWake v1.0.0</Text>
             <Text className="text-small text-text-muted mt-1">
               Built with React Native & Expo
             </Text>

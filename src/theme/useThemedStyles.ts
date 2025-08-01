@@ -1,5 +1,11 @@
 import { useTheme } from '../contexts/theme-context';
-import { THEME_COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from './colors';
+import {
+  THEME_COLORS,
+  TYPOGRAPHY,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+} from './colors';
 
 /**
  * Hook for getting themed colors
@@ -35,13 +41,13 @@ export const useThemedStyles = () => {
     typography: TYPOGRAPHY,
     spacing: SPACING,
     borderRadius: BORDER_RADIUS,
-    
+
     // Pre-built common styles
     screen: {
       flex: 1,
       backgroundColor: colors.primary,
     },
-    
+
     card: {
       backgroundColor: colors.surface,
       borderRadius: BORDER_RADIUS.xl,
@@ -49,7 +55,7 @@ export const useThemedStyles = () => {
       marginBottom: SPACING.md,
       ...shadows.sm,
     },
-    
+
     cardClickable: {
       backgroundColor: colors.clickable,
       borderRadius: BORDER_RADIUS.xl,
@@ -59,7 +65,7 @@ export const useThemedStyles = () => {
       borderColor: isDark ? 'transparent' : colors.border,
       ...shadows.sm,
     },
-    
+
     cardLarge: {
       backgroundColor: colors.surface,
       borderRadius: BORDER_RADIUS.xl,
@@ -67,7 +73,7 @@ export const useThemedStyles = () => {
       marginBottom: SPACING.lg,
       ...shadows.md,
     },
-    
+
     button: {
       backgroundColor: colors.interactive.background,
       borderRadius: BORDER_RADIUS.lg,
@@ -76,7 +82,7 @@ export const useThemedStyles = () => {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
-    
+
     buttonAccent: {
       backgroundColor: colors.interactive.accent,
       borderRadius: BORDER_RADIUS.lg,
@@ -85,7 +91,7 @@ export const useThemedStyles = () => {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
-    
+
     text: {
       primary: {
         color: colors.text.primary,
@@ -108,13 +114,13 @@ export const useThemedStyles = () => {
         fontWeight: TYPOGRAPHY.weights.medium,
       },
     },
-    
+
     separator: {
       height: 1,
       backgroundColor: colors.separator,
       marginVertical: SPACING.sm,
     },
-    
+
     // Utility functions
     isDark,
     isLight: !isDark,
@@ -125,15 +131,17 @@ export const useThemedStyles = () => {
  * Hook for creating themed card styles
  * Usage: const cardStyle = useThemedCard();
  */
-export const useThemedCard = (variant: 'default' | 'elevated' | 'surface' | 'clickable' = 'default') => {
+export const useThemedCard = (
+  variant: 'default' | 'elevated' | 'surface' | 'clickable' = 'default'
+) => {
   const { colors, shadows, isDark } = useThemedStyles();
-  
+
   const baseStyle = {
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   };
-  
+
   switch (variant) {
     case 'elevated':
       return {
@@ -168,14 +176,22 @@ export const useThemedCard = (variant: 'default' | 'elevated' | 'surface' | 'cli
  * Hook for creating themed text styles
  * Usage: const textStyle = useThemedText('heading');
  */
-export const useThemedText = (variant: 'primary' | 'secondary' | 'muted' | 'heading' | 'subheading' | 'accent' = 'primary') => {
+export const useThemedText = (
+  variant:
+    | 'primary'
+    | 'secondary'
+    | 'muted'
+    | 'heading'
+    | 'subheading'
+    | 'accent' = 'primary'
+) => {
   const { colors } = useThemedStyles();
-  
+
   const baseStyle = {
     fontSize: TYPOGRAPHY.sizes.base.fontSize,
     fontWeight: TYPOGRAPHY.weights.normal,
   };
-  
+
   switch (variant) {
     case 'heading':
       return {

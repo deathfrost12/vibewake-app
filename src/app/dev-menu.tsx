@@ -12,7 +12,10 @@ import { Link, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../components/ui/button';
-import { SimpleThemeToggle, ThemeIndicator } from '../components/ui/theme-switcher';
+import {
+  SimpleThemeToggle,
+  ThemeIndicator,
+} from '../components/ui/theme-switcher';
 import { AnalyticsTestComponent } from '../components/common/analytics-test';
 import PushNotificationsTest from '../components/common/push-notifications-test';
 import ToastTest from '../components/common/toast-test';
@@ -20,14 +23,18 @@ import ToastUsageExample from '../components/common/toast-usage-example';
 import LoadingTest from '../components/common/loading-test';
 import LoadingUsageExample from '../components/common/loading-usage-example';
 import { useDevTesting } from '../hooks/use-dev-testing';
-import { useThemedStyles, useThemedCard, useThemedText } from '../theme/useThemedStyles';
+import {
+  useThemedStyles,
+  useThemedCard,
+  useThemedText,
+} from '../theme/useThemedStyles';
 
 export default function DevMenu() {
   const { screen, spacing, colors } = useThemedStyles();
   const headingStyle = useThemedText('heading');
   const subtitleStyle = useThemedText('secondary');
   const sectionHeadingStyle = useThemedText('subheading');
-  
+
   const [message, setMessage] = useState('Ready to test!');
   const {
     mockMode,
@@ -176,17 +183,19 @@ export default function DevMenu() {
     <SafeAreaView style={screen}>
       <ThemeIndicator />
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={{ padding: spacing.sm, marginRight: spacing.sm }}
             onPress={() => router.back()}
           >
@@ -203,7 +212,12 @@ export default function DevMenu() {
           <Text style={[sectionHeadingStyle, { marginBottom: spacing.md }]}>
             🔧 Development Status
           </Text>
-          <Text style={[useThemedText('accent'), { textAlign: 'center', marginBottom: spacing.sm }]}>
+          <Text
+            style={[
+              useThemedText('accent'),
+              { textAlign: 'center', marginBottom: spacing.sm },
+            ]}
+          >
             {message}
           </Text>
         </View>
@@ -213,26 +227,68 @@ export default function DevMenu() {
           <Text style={[sectionHeadingStyle, { marginBottom: spacing.md }]}>
             📱 Screen Navigation
           </Text>
-          <View style={{ 
-            flexDirection: 'row', 
-            flexWrap: 'wrap', 
-            justifyContent: 'space-between',
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+            }}
+          >
             {[
               { route: '/(tabs)/dashboard', title: 'Dashboard', icon: 'home' },
-              { route: '/alarms/create', title: 'Create Alarm', icon: 'add-circle' },
-              { route: '/alarms/ringing', title: 'Ringing Alarm', icon: 'alarm' },
+              {
+                route: '/alarms/create',
+                title: 'Create Alarm',
+                icon: 'add-circle',
+              },
+              {
+                route: '/alarms/ringing',
+                title: 'Ringing Alarm',
+                icon: 'alarm',
+              },
               { route: '/(tabs)/profile', title: 'Profile', icon: 'person' },
               { route: '/auth/login', title: 'Login', icon: 'log-in' },
-              { route: '/auth/register', title: 'Register', icon: 'person-add' },
-              { route: '/auth/forgot-password', title: 'Forgot Password', icon: 'key' },
+              {
+                route: '/auth/register',
+                title: 'Register',
+                icon: 'person-add',
+              },
+              {
+                route: '/auth/forgot-password',
+                title: 'Forgot Password',
+                icon: 'key',
+              },
               { route: '/profile/edit', title: 'Edit Profile', icon: 'create' },
-              { route: '/profile/change-password', title: 'Change Password', icon: 'lock-closed' },
-              { route: '/profile/privacy-policy', title: 'Privacy Policy', icon: 'shield' },
-              { route: '/profile/terms-of-service', title: 'Terms of Service', icon: 'document-text' },
-              { route: '/testing-screen-1', title: 'Testing Screen', icon: 'flask' },
-              { route: '/songmaker-demo', title: 'Songmaker Demo', icon: 'musical-notes' },
-              { route: '/revenuecat-demo', title: 'RevenueCat Demo', icon: 'card' },
+              {
+                route: '/profile/change-password',
+                title: 'Change Password',
+                icon: 'lock-closed',
+              },
+              {
+                route: '/profile/privacy-policy',
+                title: 'Privacy Policy',
+                icon: 'shield',
+              },
+              {
+                route: '/profile/terms-of-service',
+                title: 'Terms of Service',
+                icon: 'document-text',
+              },
+              {
+                route: '/testing-screen-1',
+                title: 'Testing Screen',
+                icon: 'flask',
+              },
+              {
+                route: '/songmaker-demo',
+                title: 'Songmaker Demo',
+                icon: 'musical-notes',
+              },
+              {
+                route: '/revenuecat-demo',
+                title: 'RevenueCat Demo',
+                icon: 'card',
+              },
             ].map(screen => (
               <TouchableOpacity
                 key={screen.route}
@@ -244,7 +300,7 @@ export default function DevMenu() {
                     marginBottom: spacing.sm,
                     alignItems: 'center',
                     padding: spacing.md,
-                  }
+                  },
                 ]}
               >
                 <Ionicons
@@ -253,7 +309,12 @@ export default function DevMenu() {
                   color={colors.text.secondary}
                   style={{ marginBottom: spacing.xs }}
                 />
-                <Text style={[useThemedText('secondary'), { textAlign: 'center', fontSize: 10 }]}>
+                <Text
+                  style={[
+                    useThemedText('secondary'),
+                    { textAlign: 'center', fontSize: 10 },
+                  ]}
+                >
                   {screen.title}
                 </Text>
               </TouchableOpacity>
@@ -266,11 +327,13 @@ export default function DevMenu() {
           <Text style={[sectionHeadingStyle, { marginBottom: spacing.md }]}>
             🔧 Development Tools
           </Text>
-          <View style={{ 
-            flexDirection: 'row', 
-            flexWrap: 'wrap', 
-            justifyContent: 'space-between',
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+            }}
+          >
             {sections.map(section => (
               <TouchableOpacity
                 key={section.route}
@@ -281,7 +344,7 @@ export default function DevMenu() {
                     width: '48%',
                     marginBottom: spacing.md,
                     alignItems: 'center',
-                  }
+                  },
                 ]}
               >
                 <Ionicons
@@ -290,7 +353,9 @@ export default function DevMenu() {
                   color={colors.text.secondary}
                   style={{ marginBottom: spacing.sm }}
                 />
-                <Text style={[useThemedText('subheading'), { textAlign: 'center' }]}>
+                <Text
+                  style={[useThemedText('subheading'), { textAlign: 'center' }]}
+                >
                   {section.title}
                 </Text>
               </TouchableOpacity>

@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#6B7280"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owlee.app",
@@ -25,20 +23,13 @@
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
         "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": [
-          "audio",
-          "background-processing"
-        ]
+        "UIBackgroundModes": ["audio", "background-processing"]
       },
       "entitlements": {
-        "com.apple.developer.applesignin": [
-          "Default"
-        ],
+        "com.apple.developer.applesignin": ["Default"],
         "aps-environment": "development"
       },
-      "associatedDomains": [
-        "applinks:yourapp.com"
-      ]
+      "associatedDomains": ["applinks:yourapp.com"]
     },
     "android": {
       "adaptiveIcon": {

@@ -7,48 +7,56 @@
   /* Dark mode (default) */
   --bg-primary: #000000;
   --bg-secondary: #001010;
-  --bg-surface: #0D1A1A;
-  --bg-elevated: #1A2626;
-  --bg-clickable: #0D1A1A;
-  
-  --text-primary: #FFFFFF;
-  --text-secondary: #A8B4B6;
-  --text-muted: #6B7280;
-  --text-accent: #66F0FF;
-  
-  --border-default: rgba(255,255,255,0.07);
-  --border-subtle: rgba(255,255,255,0.05);
-  --border-visible: rgba(255,255,255,0.1);
-  
-  --interactive-default: #1A2626;
-  --interactive-hover: #2D3F3F;
-  --interactive-active: #3F5252;
+  --bg-surface: #0d1a1a;
+  --bg-elevated: #1a2626;
+  --bg-clickable: #0d1a1a;
+
+  --text-primary: #ffffff;
+  --text-secondary: #a8b4b6;
+  --text-muted: #6b7280;
+  --text-accent: #66f0ff;
+
+  --border-default: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-visible: rgba(255, 255, 255, 0.1);
+
+  --interactive-default: #1a2626;
+  --interactive-hover: #2d3f3f;
+  --interactive-active: #3f5252;
 }
 
 /* Light mode overrides */
 .light {
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --bg-surface: #F1F5F9;
-  --bg-elevated: #FFFFFF;
-  --bg-clickable: #F8FAFC;
-  
-  --text-primary: #0F172A;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-surface: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --bg-clickable: #f8fafc;
+
+  --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #64748B;
-  --text-accent: #0EA5E9;
-  
-  --border-default: rgba(0,0,0,0.1);
-  --border-subtle: rgba(0,0,0,0.07);
-  --border-visible: rgba(0,0,0,0.15);
-  
-  --interactive-default: #F1F5F9;
-  --interactive-hover: #E2E8F0;
-  --interactive-active: #CBD5E1;
+  --text-muted: #64748b;
+  --text-accent: #0ea5e9;
+
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --border-visible: rgba(0, 0, 0, 0.15);
+
+  --interactive-default: #f1f5f9;
+  --interactive-hover: #e2e8f0;
+  --interactive-active: #cbd5e1;
 }
 
 /* Apply CSS variables to classes */
-.bg-theme-primary { background-color: var(--bg-primary); }
-.bg-theme-elevated { background-color: var(--bg-elevated); }
-.text-theme-primary { color: var(--text-primary); }
-.text-theme-secondary { color: var(--text-secondary); }
+.bg-theme-primary {
+  background-color: var(--bg-primary);
+}
+.bg-theme-elevated {
+  background-color: var(--bg-elevated);
+}
+.text-theme-primary {
+  color: var(--text-primary);
+}
+.text-theme-secondary {
+  color: var(--text-secondary);
+}

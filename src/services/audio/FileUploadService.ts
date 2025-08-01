@@ -31,7 +31,9 @@ class FileUploadServiceClass {
       // Create audio directory if it doesn't exist
       const dirInfo = await FileSystem.getInfoAsync(this.AUDIO_DIR);
       if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(this.AUDIO_DIR, { intermediates: true });
+        await FileSystem.makeDirectoryAsync(this.AUDIO_DIR, {
+          intermediates: true,
+        });
         console.log('📁 Created audio directory');
       }
     } catch (error) {
@@ -43,7 +45,7 @@ class FileUploadServiceClass {
   async pickAndUploadAudioFile(): Promise<UploadedAudioFile | null> {
     try {
       console.log('📱 Opening document picker for audio files');
-      
+
       const result = await DocumentPicker.getDocumentAsync({
         type: 'audio/*',
         copyToCacheDirectory: true,
@@ -56,19 +58,18 @@ class FileUploadServiceClass {
       }
 
       const file = result.assets[0];
-      
+
       // Validate file
       this.validateAudioFile(file);
-      
+
       // Copy file to permanent storage
       const uploadedFile = await this.saveAudioFile(file);
-      
+
       // Save to storage
       await this.saveUploadedFileMetadata(uploadedFile);
-      
+
       console.log('✅ Audio file uploaded successfully:', uploadedFile.name);
       return uploadedFile;
-      
     } catch (error) {
       console.error('❌ Failed to upload audio file:', error);
       throw error;
@@ -78,23 +79,31 @@ class FileUploadServiceClass {
   private validateAudioFile(file: DocumentPicker.DocumentPickerAsset): void {
     // Check file size
     if (file.size && file.size > this.MAX_FILE_SIZE) {
-      throw new Error(`File size (${this.formatFileSize(file.size)}) exceeds maximum allowed size (${this.formatFileSize(this.MAX_FILE_SIZE)})`);
+      throw new Error(
+        `File size (${this.formatFileSize(file.size)}) exceeds maximum allowed size (${this.formatFileSize(this.MAX_FILE_SIZE)})`
+      );
     }
 
     // Check MIME type
     if (file.mimeType && !this.SUPPORTED_TYPES.includes(file.mimeType)) {
-      throw new Error(`Unsupported file type: ${file.mimeType}. Supported formats: MP3, M4A, WAV, AAC`);
+      throw new Error(
+        `Unsupported file type: ${file.mimeType}. Supported formats: MP3, M4A, WAV, AAC`
+      );
     }
 
     // Check file extension as fallback
     const extension = file.name.toLowerCase().split('.').pop();
     const supportedExtensions = ['mp3', 'm4a', 'wav', 'aac'];
     if (!extension || !supportedExtensions.includes(extension)) {
-      throw new Error(`Unsupported file extension: .${extension}. Supported formats: .mp3, .m4a, .wav, .aac`);
+      throw new Error(
+        `Unsupported file extension: .${extension}. Supported formats: .mp3, .m4a, .wav, .aac`
+      );
     }
   }
 
-  private async saveAudioFile(file: DocumentPicker.DocumentPickerAsset): Promise<UploadedAudioFile> {
+  private async saveAudioFile(
+    file: DocumentPicker.DocumentPickerAsset
+  ): Promise<UploadedAudioFile> {
     const fileId = `audio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fileExtension = file.name.split('.').pop() || 'mp3';
     const fileName = `${fileId}.${fileExtension}`;
@@ -124,11 +133,16 @@ class FileUploadServiceClass {
     }
   }
 
-  private async saveUploadedFileMetadata(file: UploadedAudioFile): Promise<void> {
+  private async saveUploadedFileMetadata(
+    file: UploadedAudioFile
+  ): Promise<void> {
     try {
       const existingFiles = await this.getUploadedFiles();
       const updatedFiles = [...existingFiles, file];
-      await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedFiles));
+      await AsyncStorage.setItem(
+        this.STORAGE_KEY,
+        JSON.stringify(updatedFiles)
+      );
     } catch (error) {
       console.error('❌ Failed to save file metadata:', error);
       throw error;
@@ -139,9 +153,9 @@ class FileUploadServiceClass {
     try {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       if (!stored) return [];
-      
+
       const files: UploadedAudioFile[] = JSON.parse(stored);
-      
+
       // Verify files still exist on filesystem
       const validFiles: UploadedAudioFile[] = [];
       for (const file of files) {
@@ -152,12 +166,15 @@ class FileUploadServiceClass {
           console.warn('⚠️ File no longer exists:', file.originalName);
         }
       }
-      
+
       // Update storage if some files were removed
       if (validFiles.length !== files.length) {
-        await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(validFiles));
+        await AsyncStorage.setItem(
+          this.STORAGE_KEY,
+          JSON.stringify(validFiles)
+        );
       }
-      
+
       return validFiles;
     } catch (error) {
       console.error('❌ Failed to get uploaded files:', error);
@@ -169,7 +186,7 @@ class FileUploadServiceClass {
     try {
       const files = await this.getUploadedFiles();
       const fileToDelete = files.find(f => f.id === fileId);
-      
+
       if (!fileToDelete) {
         throw new Error('File not found');
       }
@@ -182,8 +199,11 @@ class FileUploadServiceClass {
 
       // Remove from metadata
       const updatedFiles = files.filter(f => f.id !== fileId);
-      await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedFiles));
-      
+      await AsyncStorage.setItem(
+        this.STORAGE_KEY,
+        JSON.stringify(updatedFiles)
+      );
+
       console.log('🗑️ Deleted audio file:', fileToDelete.originalName);
     } catch (error) {
       console.error('❌ Failed to delete audio file:', error);
@@ -220,8 +240,8 @@ class FileUploadServiceClass {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-      const filesToDelete = files.filter(file => 
-        new Date(file.uploadedAt) < cutoffDate
+      const filesToDelete = files.filter(
+        file => new Date(file.uploadedAt) < cutoffDate
       );
 
       for (const file of filesToDelete) {
@@ -237,11 +257,15 @@ class FileUploadServiceClass {
   }
 
   // Get storage usage statistics
-  async getStorageStats(): Promise<{ totalFiles: number; totalSize: number; totalSizeFormatted: string }> {
+  async getStorageStats(): Promise<{
+    totalFiles: number;
+    totalSize: number;
+    totalSizeFormatted: string;
+  }> {
     try {
       const files = await this.getUploadedFiles();
       const totalSize = files.reduce((sum, file) => sum + (file.size || 0), 0);
-      
+
       return {
         totalFiles: files.length,
         totalSize,

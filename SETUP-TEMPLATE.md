@@ -7,6 +7,7 @@ Tento dokument obsahuje kroky pro adaptaci tohoto universal templatu pro váš n
 ### 1. Základní konfigurace projektu
 
 **package.json:**
+
 ```json
 {
   "name": "your-app-name",
@@ -23,6 +24,7 @@ Tento dokument obsahuje kroky pro adaptaci tohoto universal templatu pro váš n
 ```
 
 **app.json - změň tyto hodnoty:**
+
 ```json
 {
   "expo": {
@@ -62,6 +64,7 @@ Tento dokument obsahuje kroky pro adaptaci tohoto universal templatu pro váš n
 ```
 
 **eas.json - aktualizuj cache keys a bundle IDs:**
+
 ```json
 {
   "build": {
@@ -104,12 +107,14 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_your_key
 ### 3. Branding & Design
 
 **Barvy - nahraď tyto hodnoty:**
+
 - Hlavní barva templatu: `#6B7280` (šedá)
 - Nahraď za svou brand barvu ve všech souborech:
   - `app.json` - splash screen a adaptive icon
   - `src/` složce - všechny komponenty s šedou barvou
 
 **Assets:**
+
 - `assets/icon.png` - 1024x1024px app ikona
 - `assets/splash.png` - splash screen obrázek
 - `assets/adaptive-icon.png` - Android adaptive ikona
@@ -129,21 +134,25 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_your_key
 ### 5. External Services Setup
 
 **PostHog Analytics (doporučené):**
+
 1. Účet na [posthog.com](https://posthog.com)
 2. Vyber EU instance pro GDPR
 3. Přidej API key do `.env`
 
 **Sentry Error Tracking:**
+
 1. Projekt na [sentry.io](https://sentry.io)
 2. Přidej DSN do `.env`
 3. Aktualizuj organization/project v `app.json`
 
 **RevenueCat Subscriptions (volitelné):**
+
 1. Účet na [revenuecat.com](https://revenuecat.com)
 2. Nakonfiguruj iOS a Android apps
 3. Přidaj API keys do `.env`
 
 **Google OAuth (volitelné):**
+
 1. [Google Cloud Console](https://console.cloud.google.com)
 2. Vytvoř OAuth 2.0 credentials
 3. Nakonfiguruj pro iOS a Android
@@ -152,24 +161,29 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_your_key
 ### 6. Customizace kódu
 
 **Mock Data:**
+
 - `src/services/mock-data.ts` - nahraď za svá testovací data
 - `src/types/database.ts` - definuj své database typy
 
 **UI Komponenty:**
+
 - `src/components/ui/` - základní UI komponenty
 - Přidej své specifické komponenty do `src/components/`
 
 **Navigace:**
+
 - `src/app/(tabs)/` - hlavní tab navigace
 - Přidaj své screens do `src/app/`
 
 **State Management:**
+
 - `src/stores/` - Zustand stores
 - `src/services/` - external services
 
 ### 7. Testing & Quality
 
 **Před spuštěním:**
+
 ```bash
 npm install
 npm run type-check  # TypeScript kontrola
@@ -177,6 +191,7 @@ npm run quality     # Quality checks (pokud nakonfigurováno)
 ```
 
 **Development:**
+
 ```bash
 npm run dev         # Spustí Expo dev server
 npm run ios:dev     # iOS device
@@ -184,6 +199,7 @@ npm run android:dev # Android device
 ```
 
 **Building:**
+
 ```bash
 npm run build:ios           # iOS development build
 npm run build:android       # Android development build
@@ -195,6 +211,7 @@ npm run build:production    # Production build
 ### Změna color scheme
 
 1. **Aktualizuj `tailwind.config.js`:**
+
 ```js
 module.exports = {
   theme: {
@@ -204,11 +221,11 @@ module.exports = {
           50: '#your-color-50',
           500: '#your-color-500',
           900: '#your-color-900',
-        }
-      }
-    }
-  }
-}
+        },
+      },
+    },
+  },
+};
 ```
 
 2. **Aktualizuj komponenty v `src/components/ui/`**
@@ -249,6 +266,6 @@ Před nasazením do production:
 
 ---
 
-**Hotovo! 🎉** 
+**Hotovo! 🎉**
 
 Váš universal template je připraven k použití. Pro další pomoč se podívejte do `README-TEMPLATE.md` nebo development menu v aplikaci.

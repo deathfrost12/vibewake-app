@@ -48,7 +48,7 @@ function RootLayoutNav() {
         // await pushNotificationService.initialize();
         console.log('⏸️ Push notifications temporarily disabled');
 
-        // Initialize AudioManager globally  
+        // Initialize AudioManager globally
         console.log('🎵 Initializing AudioManager...');
         await AudioManager.initialize();
         console.log('✅ AudioManager initialized');

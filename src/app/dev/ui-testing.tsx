@@ -11,14 +11,18 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../../components/ui/button';
-import { useThemedStyles, useThemedCard, useThemedText } from '../../theme/useThemedStyles';
+import {
+  useThemedStyles,
+  useThemedCard,
+  useThemedText,
+} from '../../theme/useThemedStyles';
 
 export default function UiTestingScreen() {
   const { screen, spacing, colors } = useThemedStyles();
   const headingStyle = useThemedText('heading');
   const sectionHeadingStyle = useThemedText('subheading');
   const cardStyle = useThemedCard('clickable');
-  
+
   const testAction = (actionName: string) => {
     Alert.alert('Test Action', `${actionName} byl spuštěn!`);
   };
@@ -26,15 +30,17 @@ export default function UiTestingScreen() {
   return (
     <SafeAreaView style={screen}>
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-      }}>
-        <TouchableOpacity 
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <TouchableOpacity
           style={{ padding: spacing.sm, marginRight: spacing.sm }}
           onPress={() => router.back()}
         >
@@ -82,14 +88,22 @@ export default function UiTestingScreen() {
 
           <View style={{ gap: spacing.md }}>
             {/* Primary Colors */}
-            <View style={[
-              {
-                backgroundColor: colors.interactive.accent,
-                borderRadius: 16,
-                padding: spacing.md,
-              }
-            ]}>
-              <Text style={{ color: 'white', fontWeight: '600', marginBottom: spacing.xs }}>
+            <View
+              style={[
+                {
+                  backgroundColor: colors.interactive.accent,
+                  borderRadius: 16,
+                  padding: spacing.md,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  marginBottom: spacing.xs,
+                }}
+              >
                 Primary Color
               </Text>
               <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
@@ -98,63 +112,101 @@ export default function UiTestingScreen() {
             </View>
 
             {/* Secondary Colors */}
-            <View style={[
-              {
-                backgroundColor: colors.secondary,
-                borderRadius: 16,
-                padding: spacing.md,
-              }
-            ]}>
-              <Text style={{ color: colors.text.primary, fontWeight: '600', marginBottom: spacing.xs }}>
+            <View
+              style={[
+                {
+                  backgroundColor: colors.secondary,
+                  borderRadius: 16,
+                  padding: spacing.md,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: colors.text.primary,
+                  fontWeight: '600',
+                  marginBottom: spacing.xs,
+                }}
+              >
                 Secondary Background
               </Text>
-              <Text style={{ color: colors.text.secondary, fontSize: 14 }}>#F8F9FA - Light Gray</Text>
+              <Text style={{ color: colors.text.secondary, fontSize: 14 }}>
+                #F8F9FA - Light Gray
+              </Text>
             </View>
 
-            <View style={[
-              {
-                backgroundColor: colors.text.secondary,
-                borderRadius: 16,
-                padding: spacing.md,
-              }
-            ]}>
-              <Text style={{ color: 'white', fontWeight: '600', marginBottom: spacing.xs }}>
+            <View
+              style={[
+                {
+                  backgroundColor: colors.text.secondary,
+                  borderRadius: 16,
+                  padding: spacing.md,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  marginBottom: spacing.xs,
+                }}
+              >
                 Secondary Medium
               </Text>
-              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>#718096 - Gray</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
+                #718096 - Gray
+              </Text>
             </View>
 
             {/* Educational Colors */}
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-              <View style={[
-                {
-                  flex: 1,
-                  backgroundColor: colors.status.success,
-                  borderRadius: 12,
-                  padding: spacing.sm,
-                }
-              ]}>
-                <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Success</Text>
+              <View
+                style={[
+                  {
+                    flex: 1,
+                    backgroundColor: colors.status.success,
+                    borderRadius: 12,
+                    padding: spacing.sm,
+                  },
+                ]}
+              >
+                <Text
+                  style={{ color: 'white', fontSize: 14, fontWeight: '500' }}
+                >
+                  Success
+                </Text>
               </View>
-              <View style={[
-                {
-                  flex: 1,
-                  backgroundColor: colors.status.warning,
-                  borderRadius: 12,
-                  padding: spacing.sm,
-                }
-              ]}>
-                <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Warning</Text>
+              <View
+                style={[
+                  {
+                    flex: 1,
+                    backgroundColor: colors.status.warning,
+                    borderRadius: 12,
+                    padding: spacing.sm,
+                  },
+                ]}
+              >
+                <Text
+                  style={{ color: 'white', fontSize: 14, fontWeight: '500' }}
+                >
+                  Warning
+                </Text>
               </View>
-              <View style={[
-                {
-                  flex: 1,
-                  backgroundColor: colors.status.error,
-                  borderRadius: 12,
-                  padding: spacing.sm,
-                }
-              ]}>
-                <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Error</Text>
+              <View
+                style={[
+                  {
+                    flex: 1,
+                    backgroundColor: colors.status.error,
+                    borderRadius: 12,
+                    padding: spacing.sm,
+                  },
+                ]}
+              >
+                <Text
+                  style={{ color: 'white', fontSize: 14, fontWeight: '500' }}
+                >
+                  Error
+                </Text>
               </View>
             </View>
           </View>
@@ -185,17 +237,19 @@ export default function UiTestingScreen() {
                   borderRadius: 24,
                   paddingVertical: spacing.md,
                   paddingHorizontal: spacing['2xl'],
-                }
+                },
               ]}
             >
-              <Text style={[
-                {
-                  textAlign: 'center',
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  color: 'black',
-                }
-              ]}>
+              <Text
+                style={[
+                  {
+                    textAlign: 'center',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: 'black',
+                  },
+                ]}
+              >
                 Try for free
               </Text>
             </LinearGradient>

@@ -10,13 +10,17 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnalyticsTestComponent } from '../../components/common/analytics-test';
-import { useThemedStyles, useThemedCard, useThemedText } from '../../theme/useThemedStyles';
+import {
+  useThemedStyles,
+  useThemedCard,
+  useThemedText,
+} from '../../theme/useThemedStyles';
 
 export default function AnalyticsScreen() {
   const { screen, spacing, colors } = useThemedStyles();
   const headingStyle = useThemedText('heading');
   const sectionHeadingStyle = useThemedText('subheading');
-  
+
   const testAnalytics = () =>
     Alert.alert('Info', 'Analytics test - TODO: implement');
   const testSentry = () => Alert.alert('Info', 'Sentry test - TODO: implement');
@@ -47,23 +51,23 @@ export default function AnalyticsScreen() {
   return (
     <SafeAreaView style={screen}>
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-      }}>
-        <TouchableOpacity 
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <TouchableOpacity
           style={{ padding: spacing.sm, marginRight: spacing.sm }}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={[headingStyle, { fontSize: 20 }]}>
-          Analytics Testing
-        </Text>
+        <Text style={[headingStyle, { fontSize: 20 }]}>Analytics Testing</Text>
       </View>
 
       <ScrollView style={{ flex: 1, padding: spacing.lg }}>
@@ -87,16 +91,27 @@ export default function AnalyticsScreen() {
                     flexDirection: 'row',
                     alignItems: 'center',
                   },
-                  { shadowColor: colors.interactive.accent, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 }
+                  {
+                    shadowColor: colors.interactive.accent,
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  },
                 ]}
                 onPress={item.action}
               >
                 <Ionicons name={item.icon} size={20} color="white" />
                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                  <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
+                  <Text
+                    style={{ color: 'white', fontWeight: '600', fontSize: 16 }}
+                  >
                     {item.title}
                   </Text>
-                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>{item.subtitle}</Text>
+                  <Text
+                    style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}
+                  >
+                    {item.subtitle}
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>

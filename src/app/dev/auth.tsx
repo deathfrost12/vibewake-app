@@ -9,15 +9,20 @@ import {
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemedStyles, useThemedCard, useThemedText } from '../../theme/useThemedStyles';
+import {
+  useThemedStyles,
+  useThemedCard,
+  useThemedText,
+} from '../../theme/useThemedStyles';
 import { useAuthStore } from '../../stores/auth-store';
 
 export default function AuthScreen() {
   const { screen, spacing, colors } = useThemedStyles();
   const headingStyle = useThemedText('heading');
   const sectionHeadingStyle = useThemedText('subheading');
-  const { signInWithGoogle, signInWithApple, loading, user, signOut } = useAuthStore();
-  
+  const { signInWithGoogle, signInWithApple, loading, user, signOut } =
+    useAuthStore();
+
   const testGoogleAuth = async () => {
     try {
       const result = await signInWithGoogle();
@@ -27,10 +32,13 @@ export default function AuthScreen() {
         Alert.alert('Error', result.error || 'Google sign-in failed');
       }
     } catch (error) {
-      Alert.alert('Error', 'Google sign-in failed: ' + (error as Error).message);
+      Alert.alert(
+        'Error',
+        'Google sign-in failed: ' + (error as Error).message
+      );
     }
   };
-  
+
   const testAppleAuth = async () => {
     try {
       const result = await signInWithApple();
@@ -43,7 +51,7 @@ export default function AuthScreen() {
       Alert.alert('Error', 'Apple sign-in failed: ' + (error as Error).message);
     }
   };
-  
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -71,23 +79,23 @@ export default function AuthScreen() {
   return (
     <SafeAreaView style={screen}>
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-      }}>
-        <TouchableOpacity 
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <TouchableOpacity
           style={{ padding: spacing.sm, marginRight: spacing.sm }}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={[headingStyle, { fontSize: 20 }]}>
-          Auth Testing
-        </Text>
+        <Text style={[headingStyle, { fontSize: 20 }]}>Auth Testing</Text>
       </View>
 
       <ScrollView style={{ flex: 1, padding: spacing.lg }}>
@@ -127,15 +135,23 @@ export default function AuthScreen() {
 
           <View style={{ gap: spacing.sm }}>
             <Link href="/auth/login" asChild>
-              <TouchableOpacity style={[useThemedCard('clickable'), { marginBottom: spacing.sm }]}>
-                <Text style={useThemedText('subheading')}>
-                  🔑 Login Screen
-                </Text>
+              <TouchableOpacity
+                style={[
+                  useThemedCard('clickable'),
+                  { marginBottom: spacing.sm },
+                ]}
+              >
+                <Text style={useThemedText('subheading')}>🔑 Login Screen</Text>
               </TouchableOpacity>
             </Link>
 
             <Link href="/auth/register" asChild>
-              <TouchableOpacity style={[useThemedCard('clickable'), { marginBottom: spacing.sm }]}>
+              <TouchableOpacity
+                style={[
+                  useThemedCard('clickable'),
+                  { marginBottom: spacing.sm },
+                ]}
+              >
                 <Text style={useThemedText('subheading')}>
                   📝 Register Screen
                 </Text>
@@ -162,17 +178,28 @@ export default function AuthScreen() {
                     alignItems: 'center',
                     opacity: loading ? 0.6 : 1,
                   },
-                  { shadowColor: colors.interactive.accent, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 }
+                  {
+                    shadowColor: colors.interactive.accent,
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  },
                 ]}
                 onPress={item.action}
                 disabled={loading}
               >
                 <Ionicons name={item.icon} size={20} color="white" />
                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                  <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
+                  <Text
+                    style={{ color: 'white', fontWeight: '600', fontSize: 16 }}
+                  >
                     {item.title}
                   </Text>
-                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>{item.subtitle}</Text>
+                  <Text
+                    style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}
+                  >
+                    {item.subtitle}
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>

@@ -18,7 +18,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '🌅',
     fileName: 'wake-up-song.mp3',
     description: 'Classic morning alarm sound',
-    category: 'classic'
+    category: 'classic',
   },
   {
     id: 'gentle',
@@ -26,7 +26,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '☀️',
     fileName: 'gentle-morning.mp3',
     description: 'Soft and peaceful wake up',
-    category: 'gentle'
+    category: 'gentle',
   },
   {
     id: 'energetic',
@@ -34,7 +34,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '⚡',
     fileName: 'energy-boost.mp3',
     description: 'High energy start to your day',
-    category: 'energetic'
+    category: 'energetic',
   },
   {
     id: 'nature',
@@ -42,7 +42,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '🐦',
     fileName: 'birds-singing.mp3',
     description: 'Natural bird sounds',
-    category: 'nature'
+    category: 'nature',
   },
   {
     id: 'classical',
@@ -50,7 +50,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '🎼',
     fileName: 'classical-rise.mp3',
     description: 'Elegant classical music',
-    category: 'classic'
+    category: 'classic',
   },
   {
     id: 'electronic',
@@ -58,7 +58,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '🎵',
     fileName: 'electronic-beat.mp3',
     description: 'Modern electronic alarm',
-    category: 'energetic'
+    category: 'energetic',
   },
   {
     id: 'jazz',
@@ -66,7 +66,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '🎷',
     fileName: 'jazz-morning.mp3',
     description: 'Smooth jazz wake up',
-    category: 'gentle'
+    category: 'gentle',
   },
   {
     id: 'acoustic',
@@ -74,7 +74,7 @@ export const PREDEFINED_SOUNDS: PredefinedSound[] = [
     emoji: '🎸',
     fileName: 'acoustic-guitar.mp3',
     description: 'Gentle acoustic guitar melody',
-    category: 'gentle'
+    category: 'gentle',
   },
 ];
 
@@ -95,7 +95,9 @@ class SoundLibraryClass {
     return PREDEFINED_SOUNDS.find(sound => sound.id === id);
   }
 
-  getSoundsByCategory(category: PredefinedSound['category']): PredefinedSound[] {
+  getSoundsByCategory(
+    category: PredefinedSound['category']
+  ): PredefinedSound[] {
     return PREDEFINED_SOUNDS.filter(sound => sound.category === category);
   }
 
@@ -121,13 +123,13 @@ class SoundLibraryClass {
     // These require() statements bundle the audio files with the app
     const localAssets: Record<string, any> = {
       'wake-up': require('../../assets/sounds/wake-up-song.wav'),
-      'gentle': require('../../assets/sounds/gentle-morning.wav'),
-      'energetic': require('../../assets/sounds/energy-boost.wav'),
-      'nature': require('../../assets/sounds/birds-singing.wav'),
-      'classical': require('../../assets/sounds/classical-rise.wav'),
-      'electronic': require('../../assets/sounds/electronic-beat.wav'),
-      'jazz': require('../../assets/sounds/jazz-morning.wav'),
-      'acoustic': require('../../assets/sounds/acoustic-guitar.wav'),
+      gentle: require('../../assets/sounds/gentle-morning.wav'),
+      energetic: require('../../assets/sounds/energy-boost.wav'),
+      nature: require('../../assets/sounds/birds-singing.wav'),
+      classical: require('../../assets/sounds/classical-rise.wav'),
+      electronic: require('../../assets/sounds/electronic-beat.wav'),
+      jazz: require('../../assets/sounds/jazz-morning.wav'),
+      acoustic: require('../../assets/sounds/acoustic-guitar.wav'),
     };
 
     try {
@@ -143,7 +145,9 @@ class SoundLibraryClass {
   }
 
   // Method to add custom sounds (for future expansion)
-  addCustomSound(sound: Omit<PredefinedSound, 'id'> & { uri: string }): AudioTrack {
+  addCustomSound(
+    sound: Omit<PredefinedSound, 'id'> & { uri: string }
+  ): AudioTrack {
     const customSound: AudioTrack = {
       id: `custom-${Date.now()}`,
       name: sound.name,
@@ -156,7 +160,9 @@ class SoundLibraryClass {
   // Method to validate audio file format
   isValidAudioFormat(fileName: string): boolean {
     const validExtensions = ['.mp3', '.m4a', '.wav', '.aac'];
-    const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    const extension = fileName
+      .toLowerCase()
+      .substring(fileName.lastIndexOf('.'));
     return validExtensions.includes(extension);
   }
 
@@ -167,26 +173,26 @@ class SoundLibraryClass {
         name: 'Gentle',
         description: 'Soft and peaceful sounds',
         icon: '🌸',
-        color: '#E8F5E8'
+        color: '#E8F5E8',
       },
       energetic: {
         name: 'Energetic',
         description: 'High energy wake up sounds',
         icon: '⚡',
-        color: '#FFF3E0'
+        color: '#FFF3E0',
       },
       nature: {
         name: 'Nature',
         description: 'Natural environmental sounds',
         icon: '🌿',
-        color: '#E0F2E0'
+        color: '#E0F2E0',
       },
       classic: {
         name: 'Classic',
         description: 'Traditional alarm sounds',
         icon: '🎼',
-        color: '#F0F8FF'
-      }
+        color: '#F0F8FF',
+      },
     };
   }
 }

@@ -8,7 +8,10 @@ interface ThemeSwitcherProps {
   showLabel?: boolean;
 }
 
-export function ThemeSwitcher({ className, showLabel = true }: ThemeSwitcherProps) {
+export function ThemeSwitcher({
+  className,
+  showLabel = true,
+}: ThemeSwitcherProps) {
   const { themeMode, setThemeMode } = useTheme();
 
   const handleThemeChange = (mode: ThemeMode) => {
@@ -22,13 +25,20 @@ export function ThemeSwitcher({ className, showLabel = true }: ThemeSwitcherProp
       { label: 'System Default', value: 'system' as const },
     ];
 
-    const buttons = options.map((option) => ({
+    const buttons = options.map(option => ({
       text: option.label,
       onPress: () => handleThemeChange(option.value),
-      style: (themeMode === option.value ? 'destructive' : 'default') as 'default' | 'cancel' | 'destructive',
+      style: (themeMode === option.value ? 'destructive' : 'default') as
+        | 'default'
+        | 'cancel'
+        | 'destructive',
     }));
 
-    buttons.push({ text: 'Cancel', onPress: () => {}, style: 'cancel' as 'cancel' });
+    buttons.push({
+      text: 'Cancel',
+      onPress: () => {},
+      style: 'cancel' as 'cancel',
+    });
 
     Alert.alert('Choose Theme', 'Select your preferred theme mode', buttons);
   };
@@ -94,9 +104,7 @@ export function SimpleThemeToggle({ className }: { className?: string }) {
         backgroundColor: isDark ? '#374151' : '#E5E7EB',
       }}
     >
-      <Text style={{ fontSize: 20 }}>
-        {isDark ? '☀️' : '🌙'}
-      </Text>
+      <Text style={{ fontSize: 20 }}>{isDark ? '☀️' : '🌙'}</Text>
     </TouchableOpacity>
   );
 }

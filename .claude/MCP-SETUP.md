@@ -326,13 +326,13 @@ claude --debug
 ### ✅ AKTIVNÍ MCP SERVERY (6/6):
 
 1. **brave-search** ✅ - Fixed s absolutním path
-2. **github-mcp** ✅ - Fixed s absolutním path + env variables  
+2. **github-mcp** ✅ - Fixed s absolutním path + env variables
 3. **react-native-debugger-mcp** ✅ - Funguje
 
 ### ✅ VŠECHNY AKTIVNÍ MCP SERVERY (6/6):
 
 4. **context7** ✅ - HTTP transport, aktuální dokumentace
-5. **context7-sse** ✅ - SSE transport, backup endpoint  
+5. **context7-sse** ✅ - SSE transport, backup endpoint
 6. **memory-mcp** ✅ - Project continuity a dlouhodobá paměť
 
 ### ✅ ÚSPĚŠNĚ DOKONČENO:
@@ -361,7 +361,7 @@ claude --debug
 ## 🎯 Aktuální MCP Servery pro VibeWake:
 
 1. **Brave Search** - Nejnovější React Native/Expo dokumentace a řešení problémů
-2. **GitHub MCP** - Automatizace pro vibewake-app repository 
+2. **GitHub MCP** - Automatizace pro vibewake-app repository
 3. **React Native Debugger** - Debugging mobilní aplikace během vývoje
 
 **Supabase** - Používáme standardní @supabase/supabase-js client místo MCP

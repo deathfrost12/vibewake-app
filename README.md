@@ -5,6 +5,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 ## 🚀 Quick Start
 
 **1. Clone and install:**
+
 ```bash
 git clone https://github.com/yourusername/your-app-name.git
 cd your-app-name
@@ -12,12 +13,14 @@ npm install
 ```
 
 **2. Setup environment:**
+
 ```bash
 cp .env.template .env
 # Edit .env with your API keys
 ```
 
 **3. Start development:**
+
 ```bash
 npm run dev
 ```
@@ -65,12 +68,14 @@ npm run quality             # Run quality checks
 ## 🎯 Template Features
 
 ### Core Architecture
+
 - File-based routing with Expo Router
 - Component-based UI architecture
 - Centralized state management
 - Type-safe API integration
 
 ### Production Services
+
 - **Database**: Supabase with RLS policies
 - **Authentication**: Google/Apple OAuth + email/password
 - **Analytics**: PostHog with GDPR compliance
@@ -79,6 +84,7 @@ npm run quality             # Run quality checks
 - **Push Notifications**: Expo notifications
 
 ### UI/UX Features
+
 - Responsive design for all screen sizes
 - Light/dark mode with system preference
 - Loading states and error boundaries
@@ -86,6 +92,7 @@ npm run quality             # Run quality checks
 - Premium gates and paywall components
 
 ### Development Tools
+
 - Development menu (`/dev-menu`) for testing
 - Mock data service for rapid prototyping
 - TypeScript strict mode enabled
@@ -95,7 +102,7 @@ npm run quality             # Run quality checks
 ## 🚀 Getting Started
 
 1. **Use the setup guide**: Follow [SETUP-TEMPLATE.md](SETUP-TEMPLATE.md) for complete project setup
-2. **Configure services**: Set up Supabase, PostHog, Sentry according to the guide  
+2. **Configure services**: Set up Supabase, PostHog, Sentry according to the guide
 3. **Customize branding**: Update colors, icons, and app metadata
 4. **Add your features**: Build on the universal foundation
 

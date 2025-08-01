@@ -14,8 +14,16 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/theme-context';
 import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
-import { ThemedView, ThemedText, ThemedCard } from '../../components/ui/themed-view';
-import { spotifyAuth, SpotifyTrack, SpotifyPlaylist } from '../../services/auth/spotify-auth';
+import {
+  ThemedView,
+  ThemedText,
+  ThemedCard,
+} from '../../components/ui/themed-view';
+import {
+  spotifyAuth,
+  SpotifyTrack,
+  SpotifyPlaylist,
+} from '../../services/auth/spotify-auth';
 import { AudioTrack } from '../../services/audio/types';
 import { TrackCard } from '../../components/spotify/TrackCard';
 
@@ -23,7 +31,9 @@ import { TrackCard } from '../../components/spotify/TrackCard';
 let selectedSpotifyTrack: SpotifyTrack | null = null;
 
 export const getSelectedSpotifyTrack = () => selectedSpotifyTrack;
-export const clearSelectedSpotifyTrack = () => { selectedSpotifyTrack = null; };
+export const clearSelectedSpotifyTrack = () => {
+  selectedSpotifyTrack = null;
+};
 
 export default function SpotifySelectorScreen() {
   const { isDark } = useTheme();
@@ -33,18 +43,19 @@ export default function SpotifySelectorScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Content state
   const [recentlyPlayed, setRecentlyPlayed] = useState<SpotifyTrack[]>([]);
   const [savedTracks, setSavedTracks] = useState<SpotifyTrack[]>([]);
   const [userPlaylists, setUserPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [recommendations, setRecommendations] = useState<SpotifyTrack[]>([]);
-  
+
   // Loading states
   const [isLoadingRecent, setIsLoadingRecent] = useState(false);
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState(false);
 
   // Audio preview state
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
@@ -131,7 +142,7 @@ export default function SpotifySelectorScreen() {
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) return;
-    
+
     setIsSearching(true);
     try {
       const results = await spotifyAuth.searchTracks(query);
@@ -147,17 +158,16 @@ export default function SpotifySelectorScreen() {
   const handleTrackSelect = (track: SpotifyTrack) => {
     // Store selected track globally
     selectedSpotifyTrack = track;
-    
+
     // Navigate back with selected track
     router.back();
   };
-
 
   const renderTrackItem = ({ item }: { item: SpotifyTrack }) => (
     <TrackCard
       track={item}
       onPress={handleTrackSelect}
-      onPreviewPress={(track) => {
+      onPreviewPress={track => {
         // TODO: Implement preview playback
         console.log('🎵 Preview track:', track.name);
       }}
@@ -167,11 +177,10 @@ export default function SpotifySelectorScreen() {
   const renderPlaylistItem = ({ item }: { item: SpotifyPlaylist }) => (
     <TouchableOpacity
       style={{
-        width: '48%',
+        width: 120,
         backgroundColor: theme.elevated,
         borderRadius: 8,
         padding: 12,
-        marginBottom: 12,
       }}
       onPress={() => {
         // TODO: Navigate to playlist tracks or handle playlist selection
@@ -179,15 +188,22 @@ export default function SpotifySelectorScreen() {
       activeOpacity={0.8}
     >
       <Image
-        source={{ 
-          uri: item.images?.[0]?.url || 'https://via.placeholder.com/160x160/333/fff?text=Playlist'
+        source={{
+          uri:
+            item.images?.[0]?.url ||
+            'https://via.placeholder.com/120x120/333/fff?text=Playlist',
         }}
-        style={{ width: '100%', aspectRatio: 1, borderRadius: 4, marginBottom: 8 }}
+        style={{
+          width: '100%',
+          aspectRatio: 1,
+          borderRadius: 4,
+          marginBottom: 8,
+        }}
       />
-      <ThemedText style={{ fontSize: 14, fontWeight: '600' }} numberOfLines={2}>
+      <ThemedText style={{ fontSize: 12, fontWeight: '600' }} numberOfLines={2}>
         {item.name}
       </ThemedText>
-      <ThemedText style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>
+      <ThemedText style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}>
         {item.tracks.total} tracks
       </ThemedText>
     </TouchableOpacity>
@@ -206,26 +222,46 @@ export default function SpotifySelectorScreen() {
       activeOpacity={0.8}
     >
       <Image
-        source={{ 
-          uri: item.album?.images?.[1]?.url || item.album?.images?.[0]?.url || 'https://via.placeholder.com/120x120/333/fff?text=♪'
+        source={{
+          uri:
+            item.album?.images?.[1]?.url ||
+            item.album?.images?.[0]?.url ||
+            'https://via.placeholder.com/120x120/333/fff?text=♪',
         }}
-        style={{ width: '100%', aspectRatio: 1, borderRadius: 4, marginBottom: 8 }}
+        style={{
+          width: '100%',
+          aspectRatio: 1,
+          borderRadius: 4,
+          marginBottom: 8,
+        }}
       />
       <ThemedText style={{ fontSize: 12, fontWeight: '600' }} numberOfLines={2}>
         {item.name}
       </ThemedText>
-      <ThemedText style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }} numberOfLines={1}>
+      <ThemedText
+        style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}
+        numberOfLines={1}
+      >
         {item.artists[0]?.name}
       </ThemedText>
     </TouchableOpacity>
   );
 
   const renderSectionHeader = (title: string, isLoading: boolean = false) => (
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, marginTop: 24 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+        marginTop: 24,
+      }}
+    >
       <ThemedText style={{ fontSize: 20, fontWeight: 'bold', flex: 1 }}>
         {title}
       </ThemedText>
-      {isLoading && <ActivityIndicator size="small" color={APP_COLORS.primary} />}
+      {isLoading && (
+        <ActivityIndicator size="small" color={APP_COLORS.primary} />
+      )}
     </View>
   );
 
@@ -233,31 +269,44 @@ export default function SpotifySelectorScreen() {
     <ThemedView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         {/* Header */}
-        <View style={{ 
-          flexDirection: 'row', 
-          alignItems: 'center', 
-          paddingHorizontal: 16, 
-          paddingVertical: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.border,
-        }}>
-          <TouchableOpacity 
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+          }}
+        >
+          <TouchableOpacity
             onPress={() => router.back()}
             style={{ marginRight: 16 }}
           >
-            <Ionicons name="chevron-back" size={24} color={APP_COLORS.success} />
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color={APP_COLORS.success}
+            />
           </TouchableOpacity>
-          
-          <View style={{ 
-            flex: 1, 
-            flexDirection: 'row', 
-            alignItems: 'center',
-            backgroundColor: theme.elevated,
-            borderRadius: 20,
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-          }}>
-            <Ionicons name="search" size={20} color={theme.text.muted} style={{ marginRight: 8 }} />
+
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: theme.elevated,
+              borderRadius: 20,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            }}
+          >
+            <Ionicons
+              name="search"
+              size={20}
+              color={theme.text.muted}
+              style={{ marginRight: 8 }}
+            />
             <TextInput
               style={{
                 flex: 1,
@@ -269,7 +318,9 @@ export default function SpotifySelectorScreen() {
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
-            {isSearching && <ActivityIndicator size="small" color={APP_COLORS.primary} />}
+            {isSearching && (
+              <ActivityIndicator size="small" color={APP_COLORS.primary} />
+            )}
           </View>
         </View>
 
@@ -287,11 +338,20 @@ export default function SpotifySelectorScreen() {
                     <FlatList
                       data={searchResults}
                       renderItem={renderTrackItem}
-                      keyExtractor={(item) => item.id}
-                      scrollEnabled={false}
+                      keyExtractor={item => item.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      ItemSeparatorComponent={() => <View style={{width: 12}} />}
+                      contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
                     />
                   ) : !isSearching ? (
-                    <ThemedText style={{ textAlign: 'center', opacity: 0.7, marginBottom: 24 }}>
+                    <ThemedText
+                      style={{
+                        textAlign: 'center',
+                        opacity: 0.7,
+                        marginBottom: 24,
+                      }}
+                    >
                       No results found for "{searchQuery}"
                     </ThemedText>
                   ) : null}
@@ -301,10 +361,13 @@ export default function SpotifySelectorScreen() {
                   {renderSectionHeader('Recommended', isLoadingRecommendations)}
                   {recommendations.length > 0 ? (
                     <FlatList
-                      data={recommendations.slice(0, 6)}
+                      data={recommendations.slice(0, 10)}
                       renderItem={renderTrackItem}
-                      keyExtractor={(item) => item.id}
-                      scrollEnabled={false}
+                      keyExtractor={item => item.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      ItemSeparatorComponent={() => <View style={{width: 12}} />}
+                      contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
                     />
                   ) : null}
                 </>
@@ -322,7 +385,13 @@ export default function SpotifySelectorScreen() {
                   contentContainerStyle={{ paddingBottom: 8 }}
                 />
               ) : (
-                <ThemedText style={{ textAlign: 'center', opacity: 0.7, marginBottom: 16 }}>
+                <ThemedText
+                  style={{
+                    textAlign: 'center',
+                    opacity: 0.7,
+                    marginBottom: 16,
+                  }}
+                >
                   No recently played tracks
                 </ThemedText>
               )}
@@ -331,13 +400,22 @@ export default function SpotifySelectorScreen() {
               {renderSectionHeader('Songs', isLoadingSaved)}
               {savedTracks.length > 0 ? (
                 <FlatList
-                  data={savedTracks.slice(0, 10)}
+                  data={savedTracks.slice(0, 15)}
                   renderItem={renderTrackItem}
-                  keyExtractor={(item) => item.id}
-                  scrollEnabled={false}
+                  keyExtractor={item => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  ItemSeparatorComponent={() => <View style={{width: 12}} />}
+                  contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
                 />
               ) : (
-                <ThemedText style={{ textAlign: 'center', opacity: 0.7, marginBottom: 16 }}>
+                <ThemedText
+                  style={{
+                    textAlign: 'center',
+                    opacity: 0.7,
+                    marginBottom: 16,
+                  }}
+                >
                   No saved tracks
                 </ThemedText>
               )}
@@ -348,13 +426,20 @@ export default function SpotifySelectorScreen() {
                 <FlatList
                   data={userPlaylists}
                   renderItem={renderPlaylistItem}
-                  keyExtractor={(item) => item.id}
-                  numColumns={2}
-                  columnWrapperStyle={{ justifyContent: 'space-between' }}
-                  scrollEnabled={false}
+                  keyExtractor={item => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  ItemSeparatorComponent={() => <View style={{width: 12}} />}
+                  contentContainerStyle={{paddingHorizontal: 4, paddingBottom: 8}}
                 />
               ) : (
-                <ThemedText style={{ textAlign: 'center', opacity: 0.7, marginBottom: 16 }}>
+                <ThemedText
+                  style={{
+                    textAlign: 'center',
+                    opacity: 0.7,
+                    marginBottom: 16,
+                  }}
+                >
                   No playlists found
                 </ThemedText>
               )}

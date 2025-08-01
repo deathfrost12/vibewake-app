@@ -13,7 +13,12 @@ interface TrackCardProps {
   showPreview?: boolean;
 }
 
-export function TrackCard({ track, onPress, onPreviewPress, showPreview = true }: TrackCardProps) {
+export function TrackCard({
+  track,
+  onPress,
+  onPreviewPress,
+  showPreview = true,
+}: TrackCardProps) {
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
@@ -37,16 +42,25 @@ export function TrackCard({ track, onPress, onPreviewPress, showPreview = true }
       activeOpacity={0.8}
     >
       <Image
-        source={{ 
-          uri: track.album?.images?.[2]?.url || track.album?.images?.[0]?.url || 'https://via.placeholder.com/64x64/333/fff?text=♪'
+        source={{
+          uri:
+            track.album?.images?.[2]?.url ||
+            track.album?.images?.[0]?.url ||
+            'https://via.placeholder.com/64x64/333/fff?text=♪',
         }}
         style={{ width: 48, height: 48, borderRadius: 4 }}
       />
       <View style={{ flex: 1, marginLeft: 12 }}>
-        <ThemedText style={{ fontSize: 16, fontWeight: '600' }} numberOfLines={1}>
+        <ThemedText
+          style={{ fontSize: 16, fontWeight: '600' }}
+          numberOfLines={1}
+        >
           {track.name}
         </ThemedText>
-        <ThemedText style={{ fontSize: 14, opacity: 0.7, marginTop: 2 }} numberOfLines={1}>
+        <ThemedText
+          style={{ fontSize: 14, opacity: 0.7, marginTop: 2 }}
+          numberOfLines={1}
+        >
           {track.artists.map(a => a.name).join(', ')}
         </ThemedText>
       </View>
@@ -57,7 +71,7 @@ export function TrackCard({ track, onPress, onPreviewPress, showPreview = true }
         {showPreview && track.preview_url && onPreviewPress && (
           <TouchableOpacity
             style={{ marginTop: 4, padding: 4 }}
-            onPress={(e) => {
+            onPress={e => {
               e.stopPropagation();
               onPreviewPress(track);
             }}

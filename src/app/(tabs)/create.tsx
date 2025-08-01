@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  SafeAreaView, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
   ScrollView,
   Switch,
   Platform,
-  Alert
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemedView, ThemedText, ThemedCard } from '../../components/ui/themed-view';
+import {
+  ThemedView,
+  ThemedText,
+  ThemedCard,
+} from '../../components/ui/themed-view';
 import { useTheme } from '../../contexts/theme-context';
 import { AudioPicker } from '../../components/audio/AudioPicker';
 import { AudioTrack } from '../../services/audio/types';
@@ -34,13 +38,14 @@ export default function AddAlarmScreen() {
     const initializeDefaultAudio = async () => {
       try {
         const defaultSound = SoundLibrary.getAllSounds()[0];
-        const defaultTrack = await SoundLibrary.convertToAudioTrack(defaultSound);
+        const defaultTrack =
+          await SoundLibrary.convertToAudioTrack(defaultSound);
         setSelectedAudio(defaultTrack);
       } catch (error) {
         console.error('Failed to initialize default audio:', error);
       }
     };
-    
+
     if (!selectedAudio) {
       initializeDefaultAudio();
     }
@@ -55,7 +60,10 @@ export default function AddAlarmScreen() {
 
   // Handle opening audio picker
   const handleOpenAudioPicker = () => {
-    console.log('🎵 Opening audio picker, current state:', { selectedAudio, showAudioPicker });
+    console.log('🎵 Opening audio picker, current state:', {
+      selectedAudio,
+      showAudioPicker,
+    });
     setShowAudioPicker(true);
   };
 
@@ -63,10 +71,10 @@ export default function AddAlarmScreen() {
 
   // Format time as 24h European format
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('cs-CZ', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('cs-CZ', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: false 
+      hour12: false,
     });
   };
 
@@ -102,23 +110,19 @@ export default function AddAlarmScreen() {
       // Get existing alarms
       const existingAlarms = await AsyncStorage.getItem('alarms');
       const alarms = existingAlarms ? JSON.parse(existingAlarms) : [];
-      
+
       // Add new alarm
       alarms.push(newAlarm);
-      
+
       // Save back to storage
       await AsyncStorage.setItem('alarms', JSON.stringify(alarms));
-      
-      Alert.alert(
-        'Success', 
-        `Alarm set for ${formatTime(selectedTime)}`,
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back()
-          }
-        ]
-      );
+
+      Alert.alert('Success', `Alarm set for ${formatTime(selectedTime)}`, [
+        {
+          text: 'OK',
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error) {
       console.error('Error saving alarm:', error);
       Alert.alert('Error', 'Failed to save alarm');
@@ -130,40 +134,84 @@ export default function AddAlarmScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView style={{ flex: 1, paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={{ flex: 1, paddingHorizontal: 24 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, marginBottom: 24 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 16,
+              marginBottom: 24,
+            }}
+          >
             <TouchableOpacity
               onPress={() => router.back()}
-              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+              style={{
+                width: 40,
+                height: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              <Ionicons name="close" size={24} color={isDark ? "#FFFFFF" : "#0F172A"} />
+              <Ionicons
+                name="close"
+                size={24}
+                color={isDark ? '#FFFFFF' : '#0F172A'}
+              />
             </TouchableOpacity>
             <ThemedText style={{ fontSize: 24, fontWeight: 'bold' }}>
               Add Alarm
             </ThemedText>
-            <TouchableOpacity 
-              style={{ backgroundColor: '#5CFFF0', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8 }}
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#5CFFF0',
+                borderRadius: 8,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+              }}
               onPress={saveAlarm}
               disabled={isLoading}
             >
-              <Text style={{ fontSize: 16, color: '#000000', fontWeight: '600' }}>
+              <Text
+                style={{ fontSize: 16, color: '#000000', fontWeight: '600' }}
+              >
                 {isLoading ? 'Saving...' : 'Save'}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* Time Picker */}
-          <ThemedCard style={{ padding: 24, marginBottom: 24, borderRadius: 12 }}>
-            <ThemedText style={{ fontSize: 12, color: '#5CFFF0', fontWeight: '600', marginBottom: 16 }}>
+          <ThemedCard
+            style={{ padding: 24, marginBottom: 24, borderRadius: 12 }}
+          >
+            <ThemedText
+              style={{
+                fontSize: 12,
+                color: '#5CFFF0',
+                fontWeight: '600',
+                marginBottom: 16,
+              }}
+            >
               ⏰ ALARM TIME
             </ThemedText>
-            
-            <TouchableOpacity 
-              style={{ backgroundColor: isDark ? '#0D1A1A' : '#F8FAFC', borderRadius: 8, paddingHorizontal: 24, paddingVertical: 32, alignItems: 'center' }}
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: isDark ? '#0D1A1A' : '#F8FAFC',
+                borderRadius: 8,
+                paddingHorizontal: 24,
+                paddingVertical: 32,
+                alignItems: 'center',
+              }}
               onPress={() => setShowTimePicker(true)}
             >
-              <ThemedText style={{ fontSize: 48, fontWeight: '800', textAlign: 'center' }}>
+              <ThemedText
+                style={{ fontSize: 48, fontWeight: '800', textAlign: 'center' }}
+              >
                 {formatTime(selectedTime)}
               </ThemedText>
               <ThemedText style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>
@@ -189,14 +237,14 @@ export default function AddAlarmScreen() {
             <Text className="text-caption text-neon-aqua font-semibold mb-4">
               📅 REPEAT DAYS
             </Text>
-            
+
             <View className="flex-row flex-wrap justify-between">
-              {weekDays.map((day) => (
+              {weekDays.map(day => (
                 <TouchableOpacity
                   key={day}
                   className={`w-12 h-12 rounded-full items-center justify-center mb-2 ${
-                    days.includes(day) 
-                      ? 'bg-gradient-mint border border-neon-mint' 
+                    days.includes(day)
+                      ? 'bg-gradient-mint border border-neon-mint'
                       : 'bg-bg-clickable border border-border-DEFAULT'
                   }`}
                   onPress={() => {
@@ -207,9 +255,11 @@ export default function AddAlarmScreen() {
                     }
                   }}
                 >
-                  <Text className={`text-small font-semibold ${
-                    days.includes(day) ? 'text-black' : 'text-text-secondary'
-                  }`}>
+                  <Text
+                    className={`text-small font-semibold ${
+                      days.includes(day) ? 'text-black' : 'text-text-secondary'
+                    }`}
+                  >
                     {day}
                   </Text>
                 </TouchableOpacity>
@@ -218,7 +268,7 @@ export default function AddAlarmScreen() {
           </View>
 
           {/* Audio Selection */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={{
               backgroundColor: isDark ? '#1A2626' : '#FFFFFF',
               borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
@@ -229,34 +279,58 @@ export default function AddAlarmScreen() {
             }}
             onPress={handleOpenAudioPicker}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <ThemedText style={{ fontSize: 12, color: '#9BFF93', fontWeight: '600' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 8,
+              }}
+            >
+              <ThemedText
+                style={{ fontSize: 12, color: '#9BFF93', fontWeight: '600' }}
+              >
                 🎵 ALARM SOUND
               </ThemedText>
               <Ionicons name="chevron-forward" size={20} color="#A8B4B6" />
             </View>
-            
+
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="musical-notes" size={20} color="#66F0FF" />
               <ThemedText style={{ fontSize: 16, marginLeft: 12, flex: 1 }}>
                 {selectedAudio?.name || 'Loading...'}
               </ThemedText>
               {selectedAudio && (
-                <View style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  backgroundColor: selectedAudio.type === 'predefined' ? '#E8F5E8' : 
-                                  selectedAudio.type === 'uploaded' ? '#E0F2E0' : '#F0F8FF',
-                  borderRadius: 4,
-                }}>
-                  <Text style={{ 
-                    fontSize: 10, 
-                    color: selectedAudio.type === 'predefined' ? '#10B981' : 
-                           selectedAudio.type === 'uploaded' ? '#059669' : '#3B82F6',
-                    fontWeight: '600'
-                  }}>
-                    {selectedAudio.type === 'predefined' ? 'Built-in' : 
-                     selectedAudio.type === 'uploaded' ? 'Custom' : 'Spotify'}
+                <View
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    backgroundColor:
+                      selectedAudio.type === 'predefined'
+                        ? '#E8F5E8'
+                        : selectedAudio.type === 'uploaded'
+                          ? '#E0F2E0'
+                          : '#F0F8FF',
+                    borderRadius: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color:
+                        selectedAudio.type === 'predefined'
+                          ? '#10B981'
+                          : selectedAudio.type === 'uploaded'
+                            ? '#059669'
+                            : '#3B82F6',
+                      fontWeight: '600',
+                    }}
+                  >
+                    {selectedAudio.type === 'predefined'
+                      ? 'Built-in'
+                      : selectedAudio.type === 'uploaded'
+                        ? 'Custom'
+                        : 'Spotify'}
                   </Text>
                 </View>
               )}
@@ -265,18 +339,43 @@ export default function AddAlarmScreen() {
 
           {/* Audio Picker Modal */}
           {showAudioPicker && (
-            <ThemedCard style={{ padding: 0, marginBottom: 24, borderRadius: 12, height: 500 }}>
-              <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <ThemedCard
+              style={{
+                padding: 0,
+                marginBottom: 24,
+                borderRadius: 12,
+                height: 500,
+              }}
+            >
+              <View
+                style={{
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: isDark
+                    ? 'rgba(255,255,255,0.1)'
+                    : 'rgba(0,0,0,0.1)',
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <ThemedText style={{ fontSize: 18, fontWeight: 'bold' }}>
                     Choose Alarm Sound
                   </ThemedText>
                   <TouchableOpacity onPress={() => setShowAudioPicker(false)}>
-                    <Ionicons name="close" size={24} color={isDark ? '#A8B4B6' : '#64748B'} />
+                    <Ionicons
+                      name="close"
+                      size={24}
+                      color={isDark ? '#A8B4B6' : '#64748B'}
+                    />
                   </TouchableOpacity>
                 </View>
               </View>
-              
+
               <View style={{ flex: 1, padding: 16 }}>
                 <AudioPicker
                   selectedAudio={selectedAudio || undefined}
@@ -289,9 +388,9 @@ export default function AddAlarmScreen() {
           {/* Settings */}
           <View className="bg-bg-elevated border border-border-visible rounded-xl p-6 mb-6">
             <Text className="text-caption text-neon-primary font-semibold mb-4">
-              ⚙️ SETTINGS  
+              ⚙️ SETTINGS
             </Text>
-            
+
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Ionicons name="phone-portrait" size={20} color="#75FFB0" />

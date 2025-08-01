@@ -9,14 +9,18 @@ import {
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemedStyles, useThemedCard, useThemedText } from '../../theme/useThemedStyles';
+import {
+  useThemedStyles,
+  useThemedCard,
+  useThemedText,
+} from '../../theme/useThemedStyles';
 
 export default function SystemScreen() {
   const { screen, spacing, colors } = useThemedStyles();
   const headingStyle = useThemedText('heading');
   const sectionHeadingStyle = useThemedText('subheading');
   const cardStyle = useThemedCard('clickable');
-  
+
   const resetAllStores = () => {
     Alert.alert(
       'Reset All Stores',
@@ -58,23 +62,23 @@ export default function SystemScreen() {
   return (
     <SafeAreaView style={screen}>
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-      }}>
-        <TouchableOpacity 
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <TouchableOpacity
           style={{ padding: spacing.sm, marginRight: spacing.sm }}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={[headingStyle, { fontSize: 20 }]}>
-          System Testing
-        </Text>
+        <Text style={[headingStyle, { fontSize: 20 }]}>System Testing</Text>
       </View>
 
       <ScrollView style={{ flex: 1, padding: spacing.lg }}>
@@ -87,7 +91,13 @@ export default function SystemScreen() {
           <View style={{ gap: spacing.sm }}>
             <Link href="/(tabs)/dashboard" asChild>
               <TouchableOpacity style={cardStyle}>
-                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.primary }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: colors.text.primary,
+                  }}
+                >
                   📊 Dashboard Screen
                 </Text>
               </TouchableOpacity>
@@ -95,7 +105,13 @@ export default function SystemScreen() {
 
             <Link href="/(tabs)/profile" asChild>
               <TouchableOpacity style={cardStyle}>
-                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.primary }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: colors.text.primary,
+                  }}
+                >
                   ⚙️ Settings Screen
                 </Text>
               </TouchableOpacity>
@@ -103,7 +119,13 @@ export default function SystemScreen() {
 
             <Link href="/songmaker-demo" asChild>
               <TouchableOpacity style={cardStyle}>
-                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.primary }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: colors.text.primary,
+                  }}
+                >
                   🎵 SongMaker Demo
                 </Text>
               </TouchableOpacity>
@@ -117,14 +139,26 @@ export default function SystemScreen() {
                   padding: spacing.md,
                   borderWidth: 1,
                   borderColor: colors.interactive.accent + '33',
-                }
+                },
               ]}
               onPress={() => router.push('/testing-screen-1')}
             >
-              <Text style={{ fontSize: 16, fontWeight: '500', color: colors.interactive.accent }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: colors.interactive.accent,
+                }}
+              >
                 🧪 Testing Screen 1 - Gradient Button
               </Text>
-              <Text style={{ fontSize: 14, color: colors.text.secondary, marginTop: spacing.xs }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.text.secondary,
+                  marginTop: spacing.xs,
+                }}
+              >
                 Magický zelený gradient button demo
               </Text>
             </TouchableOpacity>
@@ -148,16 +182,27 @@ export default function SystemScreen() {
                     flexDirection: 'row',
                     alignItems: 'center',
                   },
-                  { shadowColor: colors.interactive.accent, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 }
+                  {
+                    shadowColor: colors.interactive.accent,
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  },
                 ]}
                 onPress={item.action}
               >
                 <Ionicons name={item.icon} size={20} color="white" />
                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                  <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
+                  <Text
+                    style={{ color: 'white', fontWeight: '600', fontSize: 16 }}
+                  >
                     {item.title}
                   </Text>
-                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>{item.subtitle}</Text>
+                  <Text
+                    style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}
+                  >
+                    {item.subtitle}
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -165,19 +210,35 @@ export default function SystemScreen() {
         </View>
 
         {/* Warning */}
-        <View style={[
-          {
-            backgroundColor: colors.status.warning + '1A',
-            borderWidth: 1,
-            borderColor: colors.status.warning + '33',
-            borderRadius: 16,
-            padding: spacing.md,
-            marginTop: spacing.xl,
-          }
-        ]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
+        <View
+          style={[
+            {
+              backgroundColor: colors.status.warning + '1A',
+              borderWidth: 1,
+              borderColor: colors.status.warning + '33',
+              borderRadius: 16,
+              padding: spacing.md,
+              marginTop: spacing.xl,
+            },
+          ]}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: spacing.sm,
+            }}
+          >
             <Ionicons name="warning" size={20} color={colors.status.warning} />
-            <Text style={[{ color: colors.status.warning, fontWeight: '600', marginLeft: spacing.sm }]}>
+            <Text
+              style={[
+                {
+                  color: colors.status.warning,
+                  fontWeight: '600',
+                  marginLeft: spacing.sm,
+                },
+              ]}
+            >
               Development Only
             </Text>
           </View>

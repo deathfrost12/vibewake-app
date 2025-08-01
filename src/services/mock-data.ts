@@ -95,7 +95,8 @@ export const MOCK_POSTS: MockPost[] = [
   {
     id: '1',
     title: 'Getting Started with Mobile Development',
-    content: 'A comprehensive guide to building your first mobile application using modern frameworks and best practices.',
+    content:
+      'A comprehensive guide to building your first mobile application using modern frameworks and best practices.',
     category: 'Development',
     author: {
       id: '1',
@@ -115,7 +116,8 @@ export const MOCK_POSTS: MockPost[] = [
   {
     id: '2',
     title: 'Advanced UI/UX Design Patterns',
-    content: 'Exploring modern design patterns and user experience principles for creating intuitive mobile interfaces.',
+    content:
+      'Exploring modern design patterns and user experience principles for creating intuitive mobile interfaces.',
     category: 'Design',
     author: {
       id: '2',
@@ -135,7 +137,8 @@ export const MOCK_POSTS: MockPost[] = [
   {
     id: '3',
     title: 'Performance Optimization Techniques',
-    content: 'Best practices for optimizing mobile app performance, including memory management and efficient rendering.',
+    content:
+      'Best practices for optimizing mobile app performance, including memory management and efficient rendering.',
     category: 'Performance',
     author: {
       id: '1',
@@ -203,7 +206,8 @@ export const MOCK_NOTIFICATIONS: MockNotification[] = [
   {
     id: '1',
     title: 'Welcome to the App!',
-    message: 'Thank you for joining our community. Explore all the features available to you.',
+    message:
+      'Thank you for joining our community. Explore all the features available to you.',
     type: 'info',
     isRead: false,
     createdAt: '2024-01-20T10:00:00Z',
@@ -212,7 +216,8 @@ export const MOCK_NOTIFICATIONS: MockNotification[] = [
   {
     id: '2',
     title: 'New Feature Released',
-    message: 'Check out our latest feature that will help you be more productive.',
+    message:
+      'Check out our latest feature that will help you be more productive.',
     type: 'success',
     isRead: false,
     createdAt: '2024-01-19T15:30:00Z',
@@ -256,8 +261,9 @@ export const MockDataService = {
 
   getUserStats: () => ({
     totalUsers: MOCK_USERS.length,
-    activeUsers: MOCK_USERS.filter(u => 
-      new Date(u.lastActive) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    activeUsers: MOCK_USERS.filter(
+      u =>
+        new Date(u.lastActive) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     ).length,
     premiumUsers: MOCK_USERS.filter(u => u.plan === 'premium').length,
   }),
@@ -294,7 +300,9 @@ export const MockApiService = {
     return MockDataService.getCategories();
   },
 
-  async createPost(post: Omit<MockPost, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>): Promise<MockPost> {
+  async createPost(
+    post: Omit<MockPost, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>
+  ): Promise<MockPost> {
     await delay(600);
     const newPost: MockPost = {
       ...post,
@@ -310,7 +318,10 @@ export const MockApiService = {
     return newPost;
   },
 
-  async updatePost(id: string, updates: Partial<MockPost>): Promise<MockPost | null> {
+  async updatePost(
+    id: string,
+    updates: Partial<MockPost>
+  ): Promise<MockPost | null> {
     await delay(400);
     const post = MockDataService.getPostById(id);
     if (!post) return null;

@@ -18,9 +18,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark'); // VibeWake is dark-first
   const [forceUpdate, setForceUpdate] = useState(0); // Force re-render trigger
-  
+
   // Calculate if we should use dark mode
-  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemColorScheme === 'dark');
+  const isDark =
+    themeMode === 'dark' ||
+    (themeMode === 'system' && systemColorScheme === 'dark');
 
   // Load theme from storage on mount
   useEffect(() => {
@@ -56,8 +58,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const updateThemeClass = () => {
     // Debug logging
-    console.log('🎨 Theme updated:', { themeMode, isDark, systemColorScheme, forceUpdate });
-    
+    console.log('🎨 Theme updated:', {
+      themeMode,
+      isDark,
+      systemColorScheme,
+      forceUpdate,
+    });
+
     // For web, update the document class
     if (typeof document !== 'undefined') {
       console.log('🎨 Updating document class, isDark:', isDark);
@@ -65,7 +72,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.add(isDark ? 'dark' : 'light');
       console.log('🎨 Document classes:', document.documentElement.className);
     }
-    
+
     // For React Native, we'll use the context state directly
     // The force update will trigger re-render of all components
   };
@@ -94,27 +101,27 @@ export function useTheme() {
 // Hook to get theme-aware styles
 export function useThemeStyles() {
   const { isDark } = useTheme();
-  
+
   return {
     // Background colors
     background: isDark ? '#111827' : '#FFFFFF',
     surface: isDark ? '#1F2937' : '#F9FAFB',
     card: isDark ? '#374151' : '#FFFFFF',
-    
+
     // Text colors
     text: isDark ? '#F9FAFB' : '#111827',
     textSecondary: isDark ? '#D1D5DB' : '#4B5563',
     textMuted: isDark ? '#9CA3AF' : '#6B7280',
-    
+
     // Border colors
     border: isDark ? '#374151' : '#E5E7EB',
-    
+
     // Status colors (same for both themes)
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
     info: '#3B82F6',
-    
+
     // Helper utilities
     isDark,
     isLight: !isDark,

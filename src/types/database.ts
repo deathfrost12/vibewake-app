@@ -382,23 +382,32 @@ export type PostInsert = Database['public']['Tables']['posts']['Insert'];
 export type PostUpdate = Database['public']['Tables']['posts']['Update'];
 
 export type Category = Database['public']['Tables']['categories']['Row'];
-export type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
-export type CategoryUpdate = Database['public']['Tables']['categories']['Update'];
+export type CategoryInsert =
+  Database['public']['Tables']['categories']['Insert'];
+export type CategoryUpdate =
+  Database['public']['Tables']['categories']['Update'];
 
 export type Notification = Database['public']['Tables']['notifications']['Row'];
-export type NotificationInsert = Database['public']['Tables']['notifications']['Insert'];
-export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
+export type NotificationInsert =
+  Database['public']['Tables']['notifications']['Insert'];
+export type NotificationUpdate =
+  Database['public']['Tables']['notifications']['Update'];
 
 export type UserSession = Database['public']['Tables']['user_sessions']['Row'];
-export type UserSessionInsert = Database['public']['Tables']['user_sessions']['Insert'];
-export type UserSessionUpdate = Database['public']['Tables']['user_sessions']['Update'];
+export type UserSessionInsert =
+  Database['public']['Tables']['user_sessions']['Insert'];
+export type UserSessionUpdate =
+  Database['public']['Tables']['user_sessions']['Update'];
 
 export type AppSetting = Database['public']['Tables']['app_settings']['Row'];
-export type AppSettingInsert = Database['public']['Tables']['app_settings']['Insert'];
-export type AppSettingUpdate = Database['public']['Tables']['app_settings']['Update'];
+export type AppSettingInsert =
+  Database['public']['Tables']['app_settings']['Insert'];
+export type AppSettingUpdate =
+  Database['public']['Tables']['app_settings']['Update'];
 
 // View types
-export type PostWithAuthor = Database['public']['Views']['posts_with_author']['Row'];
+export type PostWithAuthor =
+  Database['public']['Views']['posts_with_author']['Row'];
 export type UserStats = Database['public']['Views']['user_stats']['Row'];
 
 // Common filter types

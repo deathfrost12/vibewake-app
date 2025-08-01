@@ -44,15 +44,27 @@ class AudioManagerClass {
 
       console.log('🎵 Loading audio:', track.name, 'URI:', track.uri);
       console.log('🎵 Track type:', track.type);
-      
-      // Validate URI
-      if (!track.uri || track.uri.trim() === '') {
-        throw new Error('Invalid audio URI: empty or undefined');
+
+      // Handle Spotify tracks
+      if (track.type === 'spotify') {
+        if (!track.uri || track.uri.trim() === '') {
+          throw new Error(
+            'This Spotify track does not have a preview available. Please choose a different track.'
+          );
+        }
+
+        // Spotify preview URLs are direct audio streams, should work with expo-av
+        console.log('🎵 Loading Spotify preview URL:', track.uri);
+      } else {
+        // Validate URI for other track types
+        if (!track.uri || track.uri.trim() === '') {
+          throw new Error('Invalid audio URI: empty or undefined');
+        }
       }
-      
+
       const { sound, status } = await Audio.Sound.createAsync(
         { uri: track.uri },
-        { 
+        {
           shouldPlay: false,
           volume: 1.0,
           rate: 1.0,
@@ -81,9 +93,9 @@ class AudioManagerClass {
       console.log('🎵 Playing audio');
       const status = await this.sound.getStatusAsync();
       console.log('🎵 Audio status before play:', status);
-      
+
       await this.sound.playAsync();
-      
+
       const statusAfter = await this.sound.getStatusAsync();
       console.log('🎵 Audio status after play:', statusAfter);
     } catch (error) {
@@ -191,7 +203,9 @@ class AudioManagerClass {
     this.playbackStatusListeners.push(listener);
   }
 
-  removePlaybackStatusListener(listener: (status: PlaybackState) => void): void {
+  removePlaybackStatusListener(
+    listener: (status: PlaybackState) => void
+  ): void {
     const index = this.playbackStatusListeners.indexOf(listener);
     if (index > -1) {
       this.playbackStatusListeners.splice(index, 1);

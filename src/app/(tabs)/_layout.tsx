@@ -22,19 +22,21 @@ function TabBarIcon({
 // Clean FAB button for center tab
 function CreateButton() {
   return (
-    <View style={{
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: APP_COLORS.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      elevation: 4,
-    }}>
+    <View
+      style={{
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: APP_COLORS.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+    >
       <Ionicons name="add" size={32} color="#FFFFFF" />
     </View>
   );
@@ -49,7 +51,7 @@ export default function TabLayout() {
   useEffect(() => {
     // Initialize alarm store when app loads
     loadAlarms();
-    
+
     // Setup alarm notification listeners
     notificationService.setupAlarmListeners();
   }, [loadAlarms]);
@@ -60,7 +62,9 @@ export default function TabLayout() {
         tabBarActiveTintColor: APP_COLORS.primary,
         tabBarInactiveTintColor: theme.text.secondary,
         tabBarStyle: {
-          backgroundColor: isDark ? 'rgba(13, 26, 26, 0.9)' : 'rgba(248, 250, 252, 0.9)',
+          backgroundColor: isDark
+            ? 'rgba(13, 26, 26, 0.9)'
+            : 'rgba(248, 250, 252, 0.9)',
           borderTopWidth: 1,
           borderTopColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.1)',
           height: 88,
@@ -108,7 +112,9 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => <TabBarIcon name="settings" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="settings" color={color} />
+          ),
         }}
       />
     </Tabs>

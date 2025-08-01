@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, TouchableOpacity, Dimensions, Animated, StatusBar, Alert } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Dimensions,
+  Animated,
+  StatusBar,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import {
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 
 import { ThemedView, ThemedText } from '../../components/ui/themed-view';
@@ -22,21 +32,21 @@ export default function AlarmRingingScreen() {
   const { alarms, deleteAlarm } = useAlarmStore();
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
-  
+
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSliding, setIsSliding] = useState(false);
   const [tapCount, setTapCount] = useState(0);
-  
+
   const slideAnimation = useRef(new Animated.Value(0)).current;
   const pulseAnimation = useRef(new Animated.Value(1)).current;
   const backgroundPulse = useRef(new Animated.Value(0)).current;
-  
+
   const alarm = alarms.find(a => a.id === alarmId);
 
   useEffect(() => {
     // Hide status bar for immersive experience
     StatusBar.setHidden(true);
-    
+
     // Update time every second
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date());
@@ -72,7 +82,7 @@ export default function AlarmRingingScreen() {
         }
       }
     };
-    
+
     initializeAndPlayAudio();
 
     return () => {
@@ -84,10 +94,13 @@ export default function AlarmRingingScreen() {
 
   const handleSlideGesture = (event: PanGestureHandlerGestureEvent) => {
     const { translationX } = event.nativeEvent;
-    const progress = Math.max(0, Math.min(translationX, SLIDER_WIDTH - THUMB_SIZE));
-    
+    const progress = Math.max(
+      0,
+      Math.min(translationX, SLIDER_WIDTH - THUMB_SIZE)
+    );
+
     slideAnimation.setValue(progress);
-    
+
     // Haptic feedback when sliding
     if (progress > 20 && !isSliding) {
       setIsSliding(true);
@@ -97,7 +110,7 @@ export default function AlarmRingingScreen() {
 
   const handleSlideEnd = (event: PanGestureHandlerGestureEvent) => {
     const { translationX } = event.nativeEvent;
-    
+
     if (translationX >= SLIDE_THRESHOLD) {
       // Dismiss alarm
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -115,12 +128,12 @@ export default function AlarmRingingScreen() {
   const handleDismissAlarm = async () => {
     try {
       await AudioManager.stopAsync();
-      
+
       if (alarm && !alarm.repeatDays?.length) {
         // Delete one-time alarms
         await deleteAlarm(alarm.id);
       }
-      
+
       router.replace('/(tabs)/dashboard');
     } catch (error) {
       console.error('Failed to dismiss alarm:', error);
@@ -129,17 +142,13 @@ export default function AlarmRingingScreen() {
 
   const handleSnooze = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
-    Alert.alert(
-      'Snooze Alarm',
-      'How long would you like to snooze?',
-      [
-        { text: '5 minutes', onPress: () => snoozeAlarm(5) },
-        { text: '10 minutes', onPress: () => snoozeAlarm(10) },
-        { text: '15 minutes', onPress: () => snoozeAlarm(15) },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+
+    Alert.alert('Snooze Alarm', 'How long would you like to snooze?', [
+      { text: '5 minutes', onPress: () => snoozeAlarm(5) },
+      { text: '10 minutes', onPress: () => snoozeAlarm(10) },
+      { text: '15 minutes', onPress: () => snoozeAlarm(15) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const snoozeAlarm = async (minutes: number) => {
@@ -151,37 +160,39 @@ export default function AlarmRingingScreen() {
 
   const handleEmergencyStop = () => {
     setTapCount(prev => prev + 1);
-    
+
     if (tapCount >= 4) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       handleDismissAlarm();
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
+
       // Reset tap count after 2 seconds
       setTimeout(() => setTapCount(0), 2000);
     }
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: false 
+      hour12: false,
     });
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString([], { 
+    return date.toLocaleDateString([], {
       weekday: 'long',
-      month: 'long', 
-      day: 'numeric' 
+      month: 'long',
+      day: 'numeric',
     });
   };
 
   if (!alarm) {
     return (
-      <ThemedView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ThemedView
+        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+      >
         <ThemedText>Alarm not found</ThemedText>
       </ThemedView>
     );
@@ -193,74 +204,127 @@ export default function AlarmRingingScreen() {
         {/* Clean Background - no animation */}
 
         {/* Header - Emergency Stop */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 16 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 24,
+            paddingVertical: 16,
+          }}
+        >
           <TouchableOpacity onPress={handleEmergencyStop}>
             <ThemedText style={{ fontSize: 12, opacity: 0.7 }}>
-              {tapCount > 0 ? `Tap ${5 - tapCount} more times to stop` : 'Emergency stop'}
+              {tapCount > 0
+                ? `Tap ${5 - tapCount} more times to stop`
+                : 'Emergency stop'}
             </ThemedText>
           </TouchableOpacity>
-          
-          <View style={{ backgroundColor: APP_COLORS.primary, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 }}>
-            <ThemedText style={{ fontSize: 10, fontWeight: '600', color: '#FFFFFF' }}>
+
+          <View
+            style={{
+              backgroundColor: APP_COLORS.primary,
+              borderRadius: 16,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+            }}
+          >
+            <ThemedText
+              style={{ fontSize: 10, fontWeight: '600', color: '#FFFFFF' }}
+            >
               ALARM
             </ThemedText>
           </View>
         </View>
 
         {/* Main Content */}
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingHorizontal: 24,
+          }}
+        >
           {/* Alarm Icon */}
           <View style={{ marginBottom: 40 }}>
-            <View style={{ 
-              backgroundColor: APP_COLORS.primary, 
-              borderRadius: 50, 
-              padding: 32,
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <View
+              style={{
+                backgroundColor: APP_COLORS.primary,
+                borderRadius: 50,
+                padding: 32,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <Ionicons name="alarm" size={80} color="#FFFFFF" />
             </View>
           </View>
 
           {/* Time Display */}
           <View style={{ alignItems: 'center', marginBottom: 32 }}>
-            <ThemedText style={{ 
-              fontSize: 72, 
-              fontWeight: '800',
-              color: APP_COLORS.primary,
-              textAlign: 'center',
-            }}>
+            <ThemedText
+              style={{
+                fontSize: 72,
+                fontWeight: '800',
+                color: APP_COLORS.primary,
+                textAlign: 'center',
+              }}
+            >
               {formatTime(currentTime)}
             </ThemedText>
-            
-            <ThemedText style={{ 
-              fontSize: 18,
-              marginTop: 8,
-              textAlign: 'center',
-              opacity: 0.7
-            }}>
+
+            <ThemedText
+              style={{
+                fontSize: 18,
+                marginTop: 8,
+                textAlign: 'center',
+                opacity: 0.7,
+              }}
+            >
               {formatDate(currentTime)}
             </ThemedText>
           </View>
 
           {/* Alarm Info */}
-          <View style={{
-            backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-            borderWidth: 1,
-            borderColor: isDark ? '#374151' : '#E5E7EB',
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 48,
-            width: '100%'
-          }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-              <Ionicons name="musical-notes" size={20} color={APP_COLORS.accent} />
-              <ThemedText style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
+          <View
+            style={{
+              backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+              borderWidth: 1,
+              borderColor: isDark ? '#374151' : '#E5E7EB',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 48,
+              width: '100%',
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Ionicons
+                name="musical-notes"
+                size={20}
+                color={APP_COLORS.accent}
+              />
+              <ThemedText
+                style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}
+              >
                 {alarm.audioTrack.name}
               </ThemedText>
             </View>
-            
-            <ThemedText style={{ fontSize: 12, textAlign: 'center', marginTop: 8, opacity: 0.7 }}>
+
+            <ThemedText
+              style={{
+                fontSize: 12,
+                textAlign: 'center',
+                marginTop: 8,
+                opacity: 0.7,
+              }}
+            >
               {alarm.title}
             </ThemedText>
           </View>
@@ -282,7 +346,9 @@ export default function AlarmRingingScreen() {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="time" size={24} color={APP_COLORS.accent} />
-              <ThemedText style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
+              <ThemedText
+                style={{ fontSize: 16, fontWeight: '600', marginLeft: 8 }}
+              >
                 Snooze
               </ThemedText>
             </View>
@@ -297,8 +363,8 @@ export default function AlarmRingingScreen() {
             </ThemedText>
           </View>
 
-          <View 
-            style={{ 
+          <View
+            style={{
               height: THUMB_SIZE,
               width: SLIDER_WIDTH,
               marginHorizontal: (SCREEN_WIDTH - SLIDER_WIDTH) / 2,
@@ -308,17 +374,19 @@ export default function AlarmRingingScreen() {
             }}
           >
             {/* Slider Track */}
-            <View style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              borderRadius: 35,
-              borderWidth: 1,
-              borderColor: theme.border,
-            }} />
-            
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: 35,
+                borderWidth: 1,
+                borderColor: theme.border,
+              }}
+            />
+
             {/* Progress Fill */}
             <Animated.View
               style={{
@@ -340,8 +408,11 @@ export default function AlarmRingingScreen() {
             <PanGestureHandler
               onGestureEvent={handleSlideGesture}
               onHandlerStateChange={({ nativeEvent }) => {
-                if (nativeEvent.state === 5) { // End state
-                  handleSlideEnd({ nativeEvent } as PanGestureHandlerGestureEvent);
+                if (nativeEvent.state === 5) {
+                  // End state
+                  handleSlideEnd({
+                    nativeEvent,
+                  } as PanGestureHandlerGestureEvent);
                 }
               }}
             >
@@ -362,26 +433,28 @@ export default function AlarmRingingScreen() {
                   left: slideAnimation,
                 }}
               >
-                <Ionicons 
-                  name="chevron-forward" 
-                  size={24} 
-                  color={isSliding ? APP_COLORS.primary : "#666666"} 
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={isSliding ? APP_COLORS.primary : '#666666'}
                 />
               </Animated.View>
             </PanGestureHandler>
 
             {/* Slide Text */}
-            <View style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <ThemedText 
-                style={{ 
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ThemedText
+                style={{
                   fontSize: 16,
                   fontWeight: '600',
                   opacity: isSliding ? 0 : 0.7,

@@ -9,7 +9,8 @@ export const containers = {
   safeScreen: 'flex-1 bg-white dark:bg-gray-900 pt-safe',
   modal: 'flex-1 bg-white dark:bg-gray-800 rounded-t-3xl px-6 pt-6',
   card: 'bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm',
-  cardBordered: 'bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700',
+  cardBordered:
+    'bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700',
 };
 
 // Universal gray theme colors
@@ -93,7 +94,8 @@ export const shadows = {
 
 // Generic app components with light/dark mode support
 export const components = {
-  featureCard: 'bg-white dark:bg-gray-800 rounded-xl p-4 border-l-4 border-l-primary dark:border-l-primary-400 shadow-sm',
+  featureCard:
+    'bg-white dark:bg-gray-800 rounded-xl p-4 border-l-4 border-l-primary dark:border-l-primary-400 shadow-sm',
   progressBar: 'bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden',
   progressFill: 'bg-primary dark:bg-primary-400 h-full rounded-full',
   badge: 'bg-primary-100 dark:bg-primary-800 rounded-full px-3 py-1',

@@ -8,34 +8,38 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemedStyles, useThemedCard, useThemedText } from '../../theme/useThemedStyles';
+import {
+  useThemedStyles,
+  useThemedCard,
+  useThemedText,
+} from '../../theme/useThemedStyles';
 
 export default function RevenueCatScreen() {
   const { screen, spacing, colors } = useThemedStyles();
   const headingStyle = useThemedText('heading');
   const sectionHeadingStyle = useThemedText('subheading');
   const cardStyle = useThemedCard('clickable');
-  
+
   return (
     <SafeAreaView style={screen}>
       {/* Header */}
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-      }}>
-        <TouchableOpacity 
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <TouchableOpacity
           style={{ padding: spacing.sm, marginRight: spacing.sm }}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={[headingStyle, { fontSize: 20 }]}>
-          RevenueCat Testing
-        </Text>
+        <Text style={[headingStyle, { fontSize: 20 }]}>RevenueCat Testing</Text>
       </View>
 
       <ScrollView style={{ flex: 1, padding: spacing.lg }}>
@@ -53,7 +57,12 @@ export default function RevenueCatScreen() {
               alignItems: 'center',
               marginBottom: spacing.md,
             },
-            { shadowColor: colors.interactive.accent, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 }
+            {
+              shadowColor: colors.interactive.accent,
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            },
           ]}
           onPress={() => router.push('/revenuecat-demo')}
         >
@@ -70,7 +79,15 @@ export default function RevenueCatScreen() {
 
         {/* Další testy mohou být přidány zde v budoucnu */}
         <View style={[cardStyle, { marginTop: spacing.md }]}>
-          <Text style={[{ color: colors.text.primary, fontWeight: '500', marginBottom: spacing.sm }]}>
+          <Text
+            style={[
+              {
+                color: colors.text.primary,
+                fontWeight: '500',
+                marginBottom: spacing.sm,
+              },
+            ]}
+          >
             📝 Plánované testy:
           </Text>
           <Text style={{ color: colors.text.secondary, fontSize: 14 }}>

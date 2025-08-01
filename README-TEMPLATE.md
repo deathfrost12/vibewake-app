@@ -5,6 +5,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 ## 🚀 Features
 
 ### Core Architecture
+
 - **Expo SDK 53** with React Native 0.79.5
 - **TypeScript** for type safety
 - **Expo Router** for file-based navigation
@@ -13,6 +14,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 - **TanStack React Query** for server state
 
 ### Production Services
+
 - **Supabase** - Database and authentication
 - **PostHog** - User analytics (EU compliant)
 - **Sentry** - Error tracking
@@ -20,6 +22,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 - **Google/Apple OAuth** - Social authentication
 
 ### UI/UX
+
 - **Light/Dark mode** with system preference support
 - **Responsive design** for all screen sizes
 - **Accessibility** features built-in
@@ -27,6 +30,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 - **Toast notifications** system
 
 ### Development Experience
+
 - **Development menu** for testing all features
 - **Hot reloading** and fast refresh
 - **TypeScript strict mode** enabled
@@ -36,6 +40,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 ## 📱 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Expo CLI (`npm install -g @expo/cli`)
 - iOS Simulator (macOS) or Android Studio
@@ -44,6 +49,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
 ### Installation
 
 1. **Clone and setup:**
+
    ```bash
    git clone <your-repo-url>
    cd your-app-name
@@ -51,6 +57,7 @@ A production-ready React Native template built with Expo, TypeScript, and modern
    ```
 
 2. **Configure environment:**
+
    ```bash
    cp .env.template .env
    # Edit .env with your actual API keys
@@ -106,6 +113,7 @@ src/
 ## 🔧 Development Commands
 
 ### Development
+
 ```bash
 npm run dev                  # Start with dev client
 npm run dev:clear           # Start with cleared cache
@@ -114,6 +122,7 @@ npm run android:dev         # Run on Android device
 ```
 
 ### Building
+
 ```bash
 npm run build:ios           # iOS development build
 npm run build:android       # Android development build
@@ -121,6 +130,7 @@ npm run build:production    # Production build
 ```
 
 ### Quality
+
 ```bash
 npm run type-check          # TypeScript validation
 npm run quality             # Run all quality checks
@@ -130,23 +140,27 @@ npm run fix                 # Auto-fix issues
 ## 📊 Services Setup
 
 ### Supabase Database
+
 1. Create project at [supabase.com](https://supabase.com)
 2. Run the database migrations in `supabase/migrations/`
 3. Configure RLS policies for security
 4. Add your URL and anon key to `.env`
 
 ### PostHog Analytics
+
 1. Create account at [posthog.com](https://posthog.com)
 2. Choose EU instance for GDPR compliance
 3. Add your API key to `.env`
 4. Test with the analytics development panel
 
 ### Sentry Error Tracking
+
 1. Create project at [sentry.io](https://sentry.io)
 2. Add your DSN to `.env`
 3. Configure source maps for better debugging
 
 ### RevenueCat Subscriptions
+
 1. Create account at [revenuecat.com](https://revenuecat.com)
 2. Configure your iOS and Android apps
 3. Add API keys to `.env`
@@ -157,12 +171,13 @@ npm run fix                 # Auto-fix issues
 The app includes a universal gray theme with light/dark mode support:
 
 ### Using Theme
+
 ```tsx
 import { useTheme } from '../contexts/theme-context';
 
 function MyComponent() {
   const { isDark, setThemeMode } = useTheme();
-  
+
   return (
     <View className="bg-white dark:bg-gray-900">
       <Text className="text-gray-900 dark:text-white">
@@ -174,6 +189,7 @@ function MyComponent() {
 ```
 
 ### Theme Colors
+
 - **Primary**: Gray-based (`#6B7280`)
 - **Background**: White/Dark gray
 - **Text**: Adaptive contrast
@@ -182,12 +198,14 @@ function MyComponent() {
 ## 🔒 Authentication
 
 ### Google OAuth Setup
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Create OAuth 2.0 credentials
 3. Configure for iOS and Android
 4. Add client IDs to `.env`
 
 ### Apple Sign-In
+
 1. Enable in Apple Developer Console
 2. Configure in Xcode project
 3. No additional keys needed
@@ -195,6 +213,7 @@ function MyComponent() {
 ## 🚀 Deployment
 
 ### EAS Build
+
 ```bash
 # Development builds
 eas build --platform ios --profile development
@@ -205,6 +224,7 @@ eas build --platform all --profile production
 ```
 
 ### App Store Deployment
+
 ```bash
 # Submit to stores
 eas submit --platform all
@@ -213,7 +233,9 @@ eas submit --platform all
 ## 🧪 Testing
 
 ### Development Menu
+
 Access the development menu at `/dev-menu` to test:
+
 - Analytics events
 - Error tracking
 - Authentication flows
@@ -222,6 +244,7 @@ Access the development menu at `/dev-menu` to test:
 - Mock data scenarios
 
 ### Running Tests
+
 ```bash
 npm run test-screens        # Test screen implementations
 npm run diagnose-network    # Network diagnostics
@@ -230,11 +253,13 @@ npm run diagnose-network    # Network diagnostics
 ## 📱 Platform-Specific Notes
 
 ### iOS
+
 - Requires Apple Developer account for device testing
 - Enable Developer Mode in Settings
 - Local Network permission needed for Metro
 
 ### Android
+
 - Enable Developer Options
 - USB Debugging required
 - May need to accept Metro server certificate
@@ -242,16 +267,19 @@ npm run diagnose-network    # Network diagnostics
 ## 🔧 Customization
 
 ### App Configuration
+
 1. Update `app.config.ts` with your app details
 2. Replace icons and splash screen in `assets/`
 3. Configure deep linking in `app.config.ts`
 
 ### Database Schema
+
 1. Modify `src/types/database.ts` for your data structure
 2. Update `src/services/mock-data.ts` with relevant mock data
 3. Create Supabase migrations for schema changes
 
 ### Styling
+
 1. Update `tailwind.config.js` for custom colors
 2. Modify `src/utils/constants/styles.ts` for component styles
 3. Customize theme in `src/contexts/theme-context.tsx`
@@ -261,33 +289,39 @@ npm run diagnose-network    # Network diagnostics
 ### Common Issues
 
 **"Failed to resolve plugin for module expo-router" po git clone:**
+
 ```bash
 npm install  # Nejprve nainstalujte závislosti!
 ```
 
 **Metro bundler issues:**
+
 ```bash
 npm run clear-cache
 npm run reset-metro
 ```
 
 **iOS build issues:**
+
 ```bash
 npm run clear-ios
 cd ios && pod install
 ```
 
 **Android build issues:**
+
 ```bash
 npm run clear-android
 ```
 
 **Network connectivity:**
+
 ```bash
 npm run diagnose-network
 ```
 
 ### Getting Help
+
 - Check the development menu for diagnostic tools
 - Review error logs in Sentry dashboard
 - Use PostHog to understand user behavior

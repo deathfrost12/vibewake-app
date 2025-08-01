@@ -10,12 +10,7 @@ export function ThemedView({ style, ...props }: ViewProps) {
     backgroundColor: isDark ? '#000000' : '#F8FAFC', // Light gray background for light mode
   };
 
-  return (
-    <View 
-      style={[themeStyle, style]} 
-      {...props}
-    />
-  );
+  return <View style={[themeStyle, style]} {...props} />;
 }
 
 // Theme-aware Text component
@@ -26,12 +21,7 @@ export function ThemedText({ style, ...props }: TextProps) {
     color: isDark ? '#FFFFFF' : '#1F2937', // Darker text for better contrast in light mode
   };
 
-  return (
-    <Text 
-      style={[themeStyle, style]} 
-      {...props}
-    />
-  );
+  return <Text style={[themeStyle, style]} {...props} />;
 }
 
 // Theme-aware Card component
@@ -50,10 +40,7 @@ export function ThemedCard({ style, children, ...props }: ViewProps) {
   };
 
   return (
-    <View 
-      style={[themeStyle, style]} 
-      {...props}
-    >
+    <View style={[themeStyle, style]} {...props}>
       {children}
     </View>
   );
