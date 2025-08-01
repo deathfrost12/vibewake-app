@@ -10,6 +10,7 @@ const SPOTIFY_SCOPES = [
   'playlist-read-private',
   'playlist-read-collaborative',
   'user-library-read',
+  'user-read-recently-played',
   'streaming',
 ].join(' ');
 
@@ -22,6 +23,11 @@ export type SpotifyTrack = {
   preview_url: string | null;
   external_urls: { spotify: string };
   duration_ms: number;
+  album?: {
+    id: string;
+    name: string;
+    images: Array<{ url: string; width?: number; height?: number }>;
+  };
 };
 
 export type SpotifyPlaylist = {
@@ -187,6 +193,87 @@ class SpotifyAuthService {
     
     // Return all tracks for now, we'll handle preview_url in UI
     return allTracks;
+  }
+
+  async getUserRecentlyPlayed(limit: number = 10): Promise<SpotifyTrack[]> {
+    await this.ensureValidToken();
+    
+    const response = await fetch(
+      `https://api.spotify.com/v1/me/player/recently-played?limit=${limit}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('🎵 Failed to fetch recently played tracks:', response.status, errorText);
+      throw new Error(`Failed to fetch recently played tracks: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`🎵 Recently played: ${data.items.length} tracks`);
+    
+    // Extract tracks from recently played items
+    const tracks = data.items.map((item: any) => item.track).filter((track: any) => track && track.id);
+    
+    return tracks;
+  }
+
+  async getUserSavedTracks(limit: number = 20): Promise<SpotifyTrack[]> {
+    await this.ensureValidToken();
+    
+    const response = await fetch(
+      `https://api.spotify.com/v1/me/tracks?limit=${limit}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('🎵 Failed to fetch saved tracks:', response.status, errorText);
+      throw new Error(`Failed to fetch saved tracks: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`🎵 Saved tracks: ${data.items.length} tracks`);
+    
+    // Extract tracks from saved items
+    const tracks = data.items.map((item: any) => item.track).filter((track: any) => track && track.id);
+    
+    return tracks;
+  }
+
+  async getRecommendations(limit: number = 20): Promise<SpotifyTrack[]> {
+    await this.ensureValidToken();
+    
+    // Get recommendations based on user's top tracks and current popular genres
+    const response = await fetch(
+      `https://api.spotify.com/v1/recommendations?limit=${limit}&seed_genres=pop,electronic,hip-hop`,
+      {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('🎵 Failed to fetch recommendations:', response.status, errorText);
+      throw new Error(`Failed to fetch recommendations: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`🎵 Recommendations: ${data.tracks.length} tracks`);
+    
+    const tracks = data.tracks.filter((track: SpotifyTrack) => track && track.id);
+    
+    return tracks;
   }
 
   private async ensureValidToken(): Promise<void> {

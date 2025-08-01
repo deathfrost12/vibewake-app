@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../contexts/theme-context';
 import { ThemedView, ThemedText, ThemedCard } from '../ui/themed-view';
 import { AudioManager } from '../../services/audio/AudioManager';
@@ -16,6 +18,7 @@ import { AudioTrack } from '../../services/audio/types';
 import { SoundLibrary, PredefinedSound } from '../../services/audio/SoundLibrary';
 import { FileUploadService, UploadedAudioFile } from '../../services/audio/FileUploadService';
 import { spotifyAuth, SpotifyTrack, SpotifyPlaylist } from '../../services/auth/spotify-auth';
+import { getSelectedSpotifyTrack, clearSelectedSpotifyTrack } from '../../app/alarms/spotify-selector';
 
 export interface AudioPickerProps {
   selectedAudio?: AudioTrack;
@@ -48,9 +51,43 @@ export function AudioPicker({ selectedAudio, onAudioSelect, className }: AudioPi
   useEffect(() => {
     initializeServices();
     loadUploadedFiles();
+    
+    // Check for selected Spotify track when component mounts/updates
+    const selectedTrack = getSelectedSpotifyTrack();
+    if (selectedTrack) {
+      const audioTrack: AudioTrack = {
+        id: selectedTrack.id,
+        name: selectedTrack.name,
+        uri: selectedTrack.external_urls.spotify,
+        type: 'spotify',
+        duration: Math.floor(selectedTrack.duration_ms / 1000),
+      };
+      
+      onAudioSelect(audioTrack);
+      clearSelectedSpotifyTrack();
+    }
     loadPredefinedTracks();
     checkSpotifyAuth();
   }, []);
+
+  // Handle returning from Spotify selector
+  useFocusEffect(
+    useCallback(() => {
+      const selectedTrack = getSelectedSpotifyTrack();
+      if (selectedTrack) {
+        const audioTrack: AudioTrack = {
+          id: selectedTrack.id,
+          name: selectedTrack.name,
+          uri: selectedTrack.external_urls.spotify,
+          type: 'spotify',
+          duration: Math.floor(selectedTrack.duration_ms / 1000),
+        };
+        
+        onAudioSelect(audioTrack);
+        clearSelectedSpotifyTrack();
+      }
+    }, [onAudioSelect])
+  );
 
   const checkSpotifyAuth = () => {
     setIsSpotifyAuthenticated(spotifyAuth.isAuthenticated());
@@ -457,7 +494,9 @@ export function AudioPicker({ selectedAudio, onAudioSelect, className }: AudioPi
       setIsSpotifyLoading(true);
       await spotifyAuth.authenticate();
       setIsSpotifyAuthenticated(true);
-      await loadSpotifyPlaylists();
+      
+      // Navigate to Spotify selector screen
+      router.push('/alarms/spotify-selector');
     } catch (error: any) {
       console.error('Spotify authentication failed:', error);
       Alert.alert('Spotify Login Failed', error.message || 'Unable to connect to Spotify');
