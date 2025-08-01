@@ -236,7 +236,7 @@ export default function DevMenu() {
             ].map(screen => (
               <TouchableOpacity
                 key={screen.route}
-                onPress={() => router.push(screen.route)}
+                onPress={() => router.push(screen.route as any)}
                 style={[
                   useThemedCard('clickable'),
                   {
@@ -253,7 +253,7 @@ export default function DevMenu() {
                   color={colors.text.secondary}
                   style={{ marginBottom: spacing.xs }}
                 />
-                <Text style={[useThemedText('caption'), { textAlign: 'center', fontSize: 10 }]}>
+                <Text style={[useThemedText('secondary'), { textAlign: 'center', fontSize: 10 }]}>
                   {screen.title}
                 </Text>
               </TouchableOpacity>
