@@ -88,7 +88,13 @@ function RootLayoutNav() {
         <Stack.Screen name="songmaker-demo" options={{ headerShown: false }} />
         <Stack.Screen name="revenuecat-demo" options={{ headerShown: false }} />
         <Stack.Screen name="alarms/create" options={{ headerShown: false }} />
-        <Stack.Screen name="alarms/ringing" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="alarms/ringing"
+          options={{
+            headerShown: false,
+            gestureEnabled: false, // Disable iOS swipe-back gesture
+          }}
+        />
         <Stack.Screen
           name="alarms/spotify-selector"
           options={{ headerShown: false }}

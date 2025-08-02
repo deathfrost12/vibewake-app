@@ -38,6 +38,12 @@ export default function AlarmRingingScreen() {
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
   const { spotifyToken } = useAuthStore();
 
+  // Prevent multiple instances - early return if no alarmId
+  if (!alarmId) {
+    console.error('❌ AlarmRingingScreen mounted without alarmId');
+    return null;
+  }
+
   const [showSpotifyPlayer, setShowSpotifyPlayer] = useState(false);
   const [spotifyTrack, setSpotifyTrack] = useState<SpotifyTrack | null>(null);
 
@@ -51,11 +57,12 @@ export default function AlarmRingingScreen() {
 
   const alarm = alarms.find(a => a.id === alarmId);
 
-  // Prevent back navigation
+  // Prevent back navigation and duplicate screen mounting
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
         // Prevent back navigation - user must use slide to dismiss or snooze
+        console.log('🚫 Back navigation blocked - use slide to dismiss');
         return true; // This prevents the default back action
       };
 
@@ -64,8 +71,14 @@ export default function AlarmRingingScreen() {
         onBackPress
       );
 
-      return () => subscription.remove();
-    }, [])
+      // Log when screen becomes focused to track duplicates
+      console.log(`📱 Alarm ringing screen focused for alarm: ${alarmId}`);
+
+      return () => {
+        subscription.remove();
+        console.log(`📱 Alarm ringing screen unfocused for alarm: ${alarmId}`);
+      };
+    }, [alarmId])
   );
 
   useEffect(() => {

@@ -26,6 +26,7 @@ export class AlarmService {
   private static instance: AlarmService;
   private currentRingingAlarm: AlarmRingingState | null = null;
   private isNavigatingToRingingScreen: boolean = false;
+  private isOnRingingScreen: boolean = false;
 
   static getInstance(): AlarmService {
     if (!AlarmService.instance) {
@@ -36,6 +37,7 @@ export class AlarmService {
 
   constructor() {
     this.setupNotificationListeners();
+    this.setupAppStateListener();
   }
 
   /**
@@ -200,6 +202,7 @@ export class AlarmService {
       // Clear state
       this.currentRingingAlarm = null;
       this.isNavigatingToRingingScreen = false; // Reset navigation flag
+      this.isOnRingingScreen = false; // Reset screen state flag
 
       console.log(`✅ Alarm stopped ringing: ${alarmId}`);
     } catch (error) {
@@ -208,6 +211,7 @@ export class AlarmService {
       // Force clear state even if stopping failed
       this.currentRingingAlarm = null;
       this.isNavigatingToRingingScreen = false; // Reset navigation flag
+      this.isOnRingingScreen = false; // Reset screen state flag
       throw error;
     }
   }
@@ -236,6 +240,7 @@ export class AlarmService {
       // Clear state
       this.currentRingingAlarm = null;
       this.isNavigatingToRingingScreen = false; // Reset navigation flag
+      this.isOnRingingScreen = false; // Reset screen state flag
 
       // Also try to stop any orphaned audio
       try {
@@ -253,6 +258,7 @@ export class AlarmService {
       // Always clear state regardless
       this.currentRingingAlarm = null;
       this.isNavigatingToRingingScreen = false; // Reset navigation flag
+      this.isOnRingingScreen = false; // Reset screen state flag
     }
   }
 
@@ -310,6 +316,46 @@ export class AlarmService {
    */
   isAlarmRinging(): boolean {
     return this.currentRingingAlarm?.isRinging || false;
+  }
+
+  /**
+   * Setup AppState listener to handle app becoming active during alarms
+   */
+  private setupAppStateListener(): void {
+    const { AppState } = require('react-native');
+
+    AppState.addEventListener('change', (nextAppState: string) => {
+      console.log(`📱 AppState changed to: ${nextAppState}`);
+
+      // When app becomes active, check if alarm is ringing
+      if (nextAppState === 'active' && this.currentRingingAlarm) {
+        console.log(
+          `🔔 App became active during alarm: ${this.currentRingingAlarm.alarmId}`
+        );
+        console.log(
+          `📍 Currently on ringing screen: ${this.isOnRingingScreen}`
+        );
+        console.log(
+          `📍 Currently navigating: ${this.isNavigatingToRingingScreen}`
+        );
+
+        // Only navigate if we're not already on the ringing screen
+        if (!this.isOnRingingScreen && !this.isNavigatingToRingingScreen) {
+          console.log('🚀 Navigating to ringing screen...');
+
+          // Small delay to ensure app is fully active before navigation
+          setTimeout(() => {
+            if (this.currentRingingAlarm && !this.isOnRingingScreen) {
+              this.navigateToRingingScreen(this.currentRingingAlarm.alarmId);
+            }
+          }, 100);
+        } else {
+          console.log(
+            '⚠️ Skipping navigation - already on ringing screen or navigating'
+          );
+        }
+      }
+    });
   }
 
   /**
@@ -447,16 +493,40 @@ export class AlarmService {
         return;
       }
 
-      this.isNavigatingToRingingScreen = true;
       const { router } = require('expo-router');
 
-      // Navigate and reset flag after a delay
-      router.push(`/alarms/ringing?alarmId=${alarmId}`);
+      // More robust route checking
+      try {
+        const currentRoute = router?.state?.routes?.[router.state.index];
+        const routeName = currentRoute?.name;
+        console.log(`📍 Current route: ${routeName}`);
+
+        if (routeName === 'alarms/ringing') {
+          console.log(
+            '⚠️ Already on ringing screen, updating state and skipping navigation'
+          );
+          this.isOnRingingScreen = true;
+          return;
+        }
+      } catch (routerError) {
+        console.log(
+          '⚠️ Could not check current route, proceeding with navigation'
+        );
+      }
+
+      this.isNavigatingToRingingScreen = true;
+
+      // Use replace to prevent stacking multiple alarm screens
+      router.replace(`/alarms/ringing?alarmId=${alarmId}`);
+      console.log(`📱 Navigating to alarm screen: ${alarmId}`);
+
+      // Set that we're now on the ringing screen
+      this.isOnRingingScreen = true;
 
       // Reset navigation flag after navigation completes
       setTimeout(() => {
         this.isNavigatingToRingingScreen = false;
-      }, 2000); // 2 second protection window
+      }, 1000);
     } catch (error) {
       console.error('❌ Failed to navigate to ringing screen:', error);
       this.isNavigatingToRingingScreen = false;
