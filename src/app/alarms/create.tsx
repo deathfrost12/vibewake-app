@@ -68,18 +68,16 @@ export default function CreateAlarmScreen() {
 
     try {
       if (isEditing && editId) {
-        // Update existing alarm
+        // Update existing alarm - always enable it when updating
         await updateAlarm(editId, {
           time: alarmTime,
           audioTrack: selectedAudio,
           repeatDays: selectedDays.length > 0 ? selectedDays : undefined,
+          isActive: true, // Auto-enable alarm on update
         });
 
-        Alert.alert(
-          'Alarm Updated!',
-          'Your alarm has been updated successfully.',
-          [{ text: 'OK', onPress: () => router.back() }]
-        );
+        // Navigate directly to dashboard without showing alert
+        router.replace('/(tabs)/dashboard');
       } else {
         // Create new alarm
         await createAlarm({
@@ -90,11 +88,8 @@ export default function CreateAlarmScreen() {
           repeatDays: selectedDays.length > 0 ? selectedDays : undefined,
         });
 
-        Alert.alert(
-          'Alarm Created!',
-          'Your alarm has been scheduled successfully.',
-          [{ text: 'OK', onPress: () => router.back() }]
-        );
+        // Navigate directly to dashboard without showing alert
+        router.replace('/(tabs)/dashboard');
       }
     } catch (error: any) {
       console.error(
