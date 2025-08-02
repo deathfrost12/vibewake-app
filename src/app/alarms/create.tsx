@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -27,13 +27,22 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function CreateAlarmScreen() {
-  const { createAlarm, isLoading } = useAlarmStore();
+  const { createAlarm, updateAlarm, alarms, isLoading } = useAlarmStore();
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
-  const [alarmTime, setAlarmTime] = useState(new Date());
-  const [selectedDays, setSelectedDays] = useState<number[]>([]);
-  const [selectedAudio, setSelectedAudio] = useState<AudioTrack | null>(null);
+  // Get editId from params to determine if we're editing
+  const { editId } = useLocalSearchParams<{ editId?: string }>();
+  const isEditing = !!editId;
+  const editingAlarm = isEditing ? alarms.find(a => a.id === editId) : null;
+
+  const [alarmTime, setAlarmTime] = useState(editingAlarm?.time || new Date());
+  const [selectedDays, setSelectedDays] = useState<number[]>(
+    editingAlarm?.repeatDays || []
+  );
+  const [selectedAudio, setSelectedAudio] = useState<AudioTrack | null>(
+    editingAlarm?.audioTrack || null
+  );
   const [showAudioPicker, setShowAudioPicker] = useState(false);
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
@@ -48,7 +57,7 @@ export default function CreateAlarmScreen() {
     );
   };
 
-  const handleCreateAlarm = async () => {
+  const handleSaveAlarm = async () => {
     if (!selectedAudio) {
       Alert.alert(
         'Missing Audio',
@@ -58,22 +67,44 @@ export default function CreateAlarmScreen() {
     }
 
     try {
-      await createAlarm({
-        title: 'Alarm',
-        time: alarmTime,
-        isActive: true,
-        audioTrack: selectedAudio,
-        repeatDays: selectedDays.length > 0 ? selectedDays : undefined,
-      });
+      if (isEditing && editId) {
+        // Update existing alarm
+        await updateAlarm(editId, {
+          time: alarmTime,
+          audioTrack: selectedAudio,
+          repeatDays: selectedDays.length > 0 ? selectedDays : undefined,
+        });
 
-      Alert.alert(
-        'Alarm Created!',
-        'Your alarm has been scheduled successfully.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+        Alert.alert(
+          'Alarm Updated!',
+          'Your alarm has been updated successfully.',
+          [{ text: 'OK', onPress: () => router.back() }]
+        );
+      } else {
+        // Create new alarm
+        await createAlarm({
+          title: 'Alarm',
+          time: alarmTime,
+          isActive: true,
+          audioTrack: selectedAudio,
+          repeatDays: selectedDays.length > 0 ? selectedDays : undefined,
+        });
+
+        Alert.alert(
+          'Alarm Created!',
+          'Your alarm has been scheduled successfully.',
+          [{ text: 'OK', onPress: () => router.back() }]
+        );
+      }
     } catch (error: any) {
-      console.error('Failed to create alarm:', error);
-      Alert.alert('Error', error.message || 'Failed to create alarm');
+      console.error(
+        `Failed to ${isEditing ? 'update' : 'create'} alarm:`,
+        error
+      );
+      Alert.alert(
+        'Error',
+        error.message || `Failed to ${isEditing ? 'update' : 'create'} alarm`
+      );
     }
   };
 
@@ -132,7 +163,7 @@ export default function CreateAlarmScreen() {
               <ThemedText
                 style={{ fontSize: 32, fontWeight: 'bold', lineHeight: 40 }}
               >
-                Create Alarm
+                {isEditing ? 'Edit Alarm' : 'Create Alarm'}
               </ThemedText>
             </View>
           </View>
@@ -395,9 +426,9 @@ export default function CreateAlarmScreen() {
             )}
           </ThemedCard>
 
-          {/* Create Button */}
+          {/* Save Button */}
           <TouchableOpacity
-            onPress={handleCreateAlarm}
+            onPress={handleSaveAlarm}
             disabled={isLoading}
             style={{
               backgroundColor: APP_COLORS.primary,
@@ -415,7 +446,13 @@ export default function CreateAlarmScreen() {
                 color: '#000000',
               }}
             >
-              {isLoading ? 'Creating Alarm...' : 'Create Alarm'}
+              {isLoading
+                ? isEditing
+                  ? 'Updating Alarm...'
+                  : 'Creating Alarm...'
+                : isEditing
+                  ? 'Update Alarm'
+                  : 'Create Alarm'}
             </ThemedText>
           </TouchableOpacity>
 

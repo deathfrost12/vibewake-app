@@ -6,9 +6,10 @@ import {
   Animated,
   StatusBar,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import {
   PanGestureHandler,
@@ -50,6 +51,23 @@ export default function AlarmRingingScreen() {
 
   const alarm = alarms.find(a => a.id === alarmId);
 
+  // Prevent back navigation
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Prevent back navigation - user must use slide to dismiss or snooze
+        return true; // This prevents the default back action
+      };
+
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [])
+  );
+
   useEffect(() => {
     // Hide status bar for immersive experience
     StatusBar.setHidden(true);
@@ -85,14 +103,18 @@ export default function AlarmRingingScreen() {
           const spotifyTrackForPlayer: SpotifyTrack = {
             id: alarm.audioTrack.id.replace('spotify_', ''),
             name: alarm.audioTrack.name,
-            artists: alarm.audioTrack.artist ? [{ name: alarm.audioTrack.artist }] : [],
+            artists: alarm.audioTrack.artist
+              ? [{ name: alarm.audioTrack.artist }]
+              : [],
             preview_url: alarm.audioTrack.uri,
             external_urls: { spotify: '' },
             duration_ms: alarm.audioTrack.duration || 0,
             album: {
               id: '',
               name: 'Album',
-              images: alarm.audioTrack.artworkUrl ? [{ url: alarm.audioTrack.artworkUrl }] : [],
+              images: alarm.audioTrack.artworkUrl
+                ? [{ url: alarm.audioTrack.artworkUrl }]
+                : [],
             },
           };
           setSpotifyTrack(spotifyTrackForPlayer);
@@ -149,8 +171,9 @@ export default function AlarmRingingScreen() {
       await alarmService.stopRingingAlarm();
 
       if (alarm && !alarm.repeatDays?.length) {
-        // Delete one-time alarms
-        await deleteAlarm(alarm.id);
+        // Deactivate one-time alarms instead of deleting them
+        const { updateAlarm } = useAlarmStore.getState();
+        await updateAlarm(alarm.id, { isActive: false });
       }
 
       router.replace('/(tabs)/dashboard');
@@ -172,6 +195,13 @@ export default function AlarmRingingScreen() {
 
   const snoozeAlarm = async (minutes: number) => {
     await alarmService.stopRingingAlarm();
+
+    // For one-time alarms, also deactivate them after snooze
+    if (alarm && !alarm.repeatDays?.length) {
+      const { updateAlarm } = useAlarmStore.getState();
+      await updateAlarm(alarm.id, { isActive: false });
+    }
+
     // Here you would implement snooze logic
     console.log(`Snoozed for ${minutes} minutes`);
     router.replace('/(tabs)/dashboard');
@@ -219,7 +249,7 @@ export default function AlarmRingingScreen() {
 
   return (
     <ThemedView style={{ flex: 1, backgroundColor: '#000000' }}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         {/* Spotify Player Modal */}
         {spotifyTrack && (
           <SpotifyWebPlayer

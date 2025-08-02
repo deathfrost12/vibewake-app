@@ -25,6 +25,7 @@ export interface AlarmRingingState {
 export class AlarmService {
   private static instance: AlarmService;
   private currentRingingAlarm: AlarmRingingState | null = null;
+  private isNavigatingToRingingScreen: boolean = false;
 
   static getInstance(): AlarmService {
     if (!AlarmService.instance) {
@@ -198,13 +199,15 @@ export class AlarmService {
 
       // Clear state
       this.currentRingingAlarm = null;
+      this.isNavigatingToRingingScreen = false; // Reset navigation flag
 
       console.log(`✅ Alarm stopped ringing: ${alarmId}`);
     } catch (error) {
       console.error('❌ Failed to stop ringing alarm:', error);
-      
+
       // Force clear state even if stopping failed
       this.currentRingingAlarm = null;
+      this.isNavigatingToRingingScreen = false; // Reset navigation flag
       throw error;
     }
   }
@@ -219,20 +222,29 @@ export class AlarmService {
       // Stop any current audio
       if (this.currentRingingAlarm?.soundObject) {
         try {
-          await audioService.stopAlarmSound(this.currentRingingAlarm.soundObject);
+          await audioService.stopAlarmSound(
+            this.currentRingingAlarm.soundObject
+          );
         } catch (error) {
-          console.warn('⚠️ Failed to stop alarm sound during force cleanup:', error);
+          console.warn(
+            '⚠️ Failed to stop alarm sound during force cleanup:',
+            error
+          );
         }
       }
 
       // Clear state
       this.currentRingingAlarm = null;
+      this.isNavigatingToRingingScreen = false; // Reset navigation flag
 
       // Also try to stop any orphaned audio
       try {
         await audioService.stopAllAudio();
       } catch (error) {
-        console.warn('⚠️ Failed to stop all audio during force cleanup:', error);
+        console.warn(
+          '⚠️ Failed to stop all audio during force cleanup:',
+          error
+        );
       }
 
       console.log('✅ Force cleanup completed');
@@ -240,6 +252,7 @@ export class AlarmService {
       console.error('❌ Force cleanup failed:', error);
       // Always clear state regardless
       this.currentRingingAlarm = null;
+      this.isNavigatingToRingingScreen = false; // Reset navigation flag
     }
   }
 
@@ -331,7 +344,10 @@ export class AlarmService {
           this.handleAlarmTrigger(String(alarmId), audioTrack as any);
         } else {
           // App is backgrounded - start background audio immediately
-          console.log('🔔 Alarm notification received in background - starting background audio:', alarmId);
+          console.log(
+            '🔔 Alarm notification received in background - starting background audio:',
+            alarmId
+          );
           this.handleBackgroundAlarmTrigger(String(alarmId), audioTrack as any);
         }
       }
@@ -348,7 +364,10 @@ export class AlarmService {
     try {
       // Check if this alarm is already ringing - prevent duplicates
       if (this.currentRingingAlarm?.alarmId === alarmId) {
-        console.log('⚠️ Alarm already ringing, ignoring duplicate trigger:', alarmId);
+        console.log(
+          '⚠️ Alarm already ringing, ignoring duplicate trigger:',
+          alarmId
+        );
         return;
       }
 
@@ -380,7 +399,10 @@ export class AlarmService {
 
       // Check if this alarm is already ringing - prevent duplicates
       if (this.currentRingingAlarm?.alarmId === alarmId) {
-        console.log('⚠️ Alarm already ringing in background, ignoring duplicate trigger:', alarmId);
+        console.log(
+          '⚠️ Alarm already ringing in background, ignoring duplicate trigger:',
+          alarmId
+        );
         return;
       }
 
@@ -396,7 +418,7 @@ export class AlarmService {
       console.log('✅ Background alarm audio started successfully:', alarmId);
     } catch (error) {
       console.error('❌ Failed to handle background alarm trigger:', error);
-      
+
       // Fallback: try system default sound
       try {
         console.log('🔄 Attempting fallback with system default sound');
@@ -413,14 +435,31 @@ export class AlarmService {
   }
 
   /**
-   * Navigate to alarm ringing screen
+   * Navigate to alarm ringing screen with duplicate prevention
    */
   private navigateToRingingScreen(alarmId: string): void {
     try {
+      // Prevent duplicate navigation
+      if (this.isNavigatingToRingingScreen) {
+        console.log(
+          '⚠️ Already navigating to ringing screen, ignoring duplicate request'
+        );
+        return;
+      }
+
+      this.isNavigatingToRingingScreen = true;
       const { router } = require('expo-router');
+
+      // Navigate and reset flag after a delay
       router.push(`/alarms/ringing?alarmId=${alarmId}`);
+
+      // Reset navigation flag after navigation completes
+      setTimeout(() => {
+        this.isNavigatingToRingingScreen = false;
+      }, 2000); // 2 second protection window
     } catch (error) {
       console.error('❌ Failed to navigate to ringing screen:', error);
+      this.isNavigatingToRingingScreen = false;
       // Navigation failed, but alarm should still ring via background audio
     }
   }

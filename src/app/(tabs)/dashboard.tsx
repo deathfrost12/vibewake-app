@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -25,9 +25,21 @@ export default function AlarmsScreen() {
     useAlarmStore();
   const { isDark } = useTheme();
 
+  // State to force re-render countdown every second
+  const [currentTime, setCurrentTime] = useState(new Date());
+
   // Load alarms only once on mount
   useEffect(() => {
     loadAlarms();
+  }, []);
+
+  // Update time every second to refresh countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Handle alarm deletion with confirmation
@@ -170,8 +182,15 @@ export default function AlarmsScreen() {
             minTimeToNext = timeToNext;
             nextAlarm = alarm;
           }
+        } else {
+          // One-time alarm has passed today - check if it's for tomorrow
+          // (treat one-time alarms as "next day" if they've passed today)
+          const timeToNext = 24 * 60 + alarmMinutes - currentTime;
+          if (timeToNext < minTimeToNext) {
+            minTimeToNext = timeToNext;
+            nextAlarm = alarm;
+          }
         }
-        // Note: one-time alarms that have passed today are not considered for future days
         return;
       }
 
@@ -209,7 +228,7 @@ export default function AlarmsScreen() {
   const nextAlarm = getNextAlarm();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
-  // Get time until next alarm
+  // Get time until next alarm with real-time seconds
   const getTimeToNextAlarm = useCallback(() => {
     if (!nextAlarm) return null;
 
@@ -217,7 +236,8 @@ export default function AlarmsScreen() {
     const alarm = nextAlarm as Alarm;
 
     const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const currentTime =
+      now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60; // Include seconds for precision
     const currentDay = now.getDay();
 
     const alarmTime = new Date(alarm.time);
@@ -227,8 +247,12 @@ export default function AlarmsScreen() {
 
     // One-time alarm
     if (!alarm.repeatDays || alarm.repeatDays.length === 0) {
-      if (alarmMinutes > currentTime) {
+      if (alarmMinutes > Math.floor(currentTime)) {
+        // Today, calculate precise time including seconds
         timeToNext = alarmMinutes - currentTime;
+      } else {
+        // Tomorrow - one-time alarm has passed today
+        timeToNext = 24 * 60 + alarmMinutes - currentTime;
       }
     } else {
       // Repeating alarm - find next occurrence
@@ -237,7 +261,7 @@ export default function AlarmsScreen() {
         const isAlarmDay = alarm.repeatDays.includes(checkDay);
 
         if (isAlarmDay) {
-          if (daysAhead === 0 && alarmMinutes > currentTime) {
+          if (daysAhead === 0 && alarmMinutes > Math.floor(currentTime)) {
             timeToNext = alarmMinutes - currentTime;
           } else if (daysAhead > 0) {
             timeToNext = daysAhead * 24 * 60 + alarmMinutes - currentTime;
@@ -249,15 +273,19 @@ export default function AlarmsScreen() {
       }
     }
 
-    const hours = Math.floor(timeToNext / 60);
-    const minutes = timeToNext % 60;
+    const totalSeconds = Math.floor(timeToNext * 60);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m`;
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
     } else {
-      return `${minutes}m`;
+      return `${seconds}s`;
     }
-  }, [nextAlarm]);
+  }, [nextAlarm, currentTime]);
 
   // Render week days row or "Jednorázový" - pro top left pozici
   const renderWeekDays = useCallback(
@@ -343,7 +371,7 @@ export default function AlarmsScreen() {
               minHeight: 140, // Ensure consistent height
             }}
             activeOpacity={0.8}
-            onPress={() => router.push('/alarms/create')}
+            onPress={() => router.push(`/alarms/create?editId=${alarm.id}`)}
           >
             {/* Main layout container */}
             <View style={{ flex: 1 }}>
@@ -544,7 +572,9 @@ export default function AlarmsScreen() {
                     >
                       <TouchableOpacity
                         activeOpacity={0.8}
-                        onPress={() => router.push('/alarms/create')}
+                        onPress={() =>
+                          router.push(`/alarms/create?editId=${alarm.id}`)
+                        }
                       >
                         {/* Main layout container */}
                         <View style={{ flex: 1 }}>
