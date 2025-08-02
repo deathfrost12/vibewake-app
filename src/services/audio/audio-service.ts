@@ -133,6 +133,25 @@ export class AudioService {
       throw error;
     }
   }
+
+  /**
+   * Emergency stop all audio - force cleanup
+   */
+  async stopAllAudio(): Promise<void> {
+    try {
+      // Stop all sound instances across the app
+      await Audio.setIsEnabledAsync(false);
+      await Audio.setIsEnabledAsync(true);
+      
+      // Re-configure audio for next use
+      await this.configureAudio();
+      
+      console.log('✅ All audio stopped and reset');
+    } catch (error) {
+      console.error('❌ Failed to stop all audio:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

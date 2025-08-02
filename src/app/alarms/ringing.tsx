@@ -18,7 +18,7 @@ import * as Haptics from 'expo-haptics';
 
 import { ThemedView, ThemedText } from '../../components/ui/themed-view';
 import { useAlarmStore } from '../../stores/alarm-store';
-import { AudioManager } from '../../services/audio/AudioManager';
+import { alarmService } from '../../services/alarms/alarm-service';
 import { useTheme } from '../../contexts/theme-context';
 import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
 import { SpotifyWebPlayer } from '../../components/spotify/SpotifyWebPlayer';
@@ -77,46 +77,36 @@ export default function AlarmRingingScreen() {
       ])
     ).start();
 
-    // Initialize and play alarm audio
-    const initializeAndPlayAudio = async () => {
+    // Check if alarm is already ringing (audio should already be playing via AlarmService)
+    const checkAlarmState = () => {
       if (alarm?.audioTrack) {
-        try {
-          await AudioManager.initialize();
-          await AudioManager.playAlarmAudio({
-            preferredTrack: alarm.audioTrack,
-            onSpotifyPlayerNeeded: track => {
-              if (track.type === 'spotify') {
-                // Convert AudioTrack back to a SpotifyTrack-like object for the player
-                const spotifyTrackForPlayer: SpotifyTrack = {
-                  id: track.id.replace('spotify_', ''),
-                  name: track.name,
-                  artists: track.artist ? [{ name: track.artist }] : [],
-                  preview_url: track.uri,
-                  external_urls: { spotify: '' },
-                  duration_ms: track.duration || 0,
-                  album: {
-                    id: '',
-                    name: 'Album',
-                    images: track.artworkUrl ? [{ url: track.artworkUrl }] : [],
-                  },
-                };
-                setSpotifyTrack(spotifyTrackForPlayer);
-                setShowSpotifyPlayer(true);
-              }
+        // Check if this is a Spotify track that needs the web player
+        if (alarm.audioTrack.type === 'spotify') {
+          const spotifyTrackForPlayer: SpotifyTrack = {
+            id: alarm.audioTrack.id.replace('spotify_', ''),
+            name: alarm.audioTrack.name,
+            artists: alarm.audioTrack.artist ? [{ name: alarm.audioTrack.artist }] : [],
+            preview_url: alarm.audioTrack.uri,
+            external_urls: { spotify: '' },
+            duration_ms: alarm.audioTrack.duration || 0,
+            album: {
+              id: '',
+              name: 'Album',
+              images: alarm.audioTrack.artworkUrl ? [{ url: alarm.audioTrack.artworkUrl }] : [],
             },
-          });
-        } catch (error) {
-          console.error('Failed to play alarm audio:', error);
+          };
+          setSpotifyTrack(spotifyTrackForPlayer);
+          setShowSpotifyPlayer(true);
         }
       }
     };
 
-    initializeAndPlayAudio();
+    checkAlarmState();
 
     return () => {
       clearInterval(timeInterval);
       StatusBar.setHidden(false);
-      AudioManager.stopAsync().catch(console.error);
+      // Audio cleanup is handled by AlarmService, not here
     };
   }, [alarm]);
 
@@ -156,7 +146,7 @@ export default function AlarmRingingScreen() {
   const handleDismissAlarm = async () => {
     setShowSpotifyPlayer(false); // Close player on dismiss
     try {
-      await AudioManager.stopAsync();
+      await alarmService.stopRingingAlarm();
 
       if (alarm && !alarm.repeatDays?.length) {
         // Delete one-time alarms
@@ -181,7 +171,7 @@ export default function AlarmRingingScreen() {
   };
 
   const snoozeAlarm = async (minutes: number) => {
-    await AudioManager.stopAsync();
+    await alarmService.stopRingingAlarm();
     // Here you would implement snooze logic
     console.log(`Snoozed for ${minutes} minutes`);
     router.replace('/(tabs)/dashboard');
