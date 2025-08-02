@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeNavigation } from '../../hooks/use-safe-navigation';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import {
@@ -30,6 +31,7 @@ export default function CreateAlarmScreen() {
   const { createAlarm, updateAlarm, alarms, isLoading } = useAlarmStore();
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
+  const { replace, goBack, canNavigate } = useSafeNavigation();
 
   // Get editId from params to determine if we're editing
   const { editId } = useLocalSearchParams<{ editId?: string }>();
@@ -77,7 +79,7 @@ export default function CreateAlarmScreen() {
         });
 
         // Navigate directly to dashboard without showing alert
-        router.replace('/(tabs)/dashboard');
+        await replace('/(tabs)/dashboard');
       } else {
         // Create new alarm
         await createAlarm({
@@ -89,7 +91,7 @@ export default function CreateAlarmScreen() {
         });
 
         // Navigate directly to dashboard without showing alert
-        router.replace('/(tabs)/dashboard');
+        await replace('/(tabs)/dashboard');
       }
     } catch (error: any) {
       console.error(
@@ -147,7 +149,16 @@ export default function CreateAlarmScreen() {
               marginBottom: 32,
             }}
           >
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity 
+              onPress={async () => {
+                const success = await goBack();
+                if (!success) {
+                  console.log('Navigation blocked due to cooldown');
+                }
+              }}
+              disabled={!canNavigate}
+              style={{ opacity: canNavigate ? 1 : 0.7 }}
+            >
               <Ionicons
                 name="chevron-back"
                 size={24}

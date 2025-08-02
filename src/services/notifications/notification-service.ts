@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { AudioTrack } from '../audio/types';
 import { audioService } from '../audio/audio-service';
+import { safeNavigate } from '../../utils/navigation-utils';
 
 export interface AlarmNotification {
   id: string;
@@ -33,14 +34,23 @@ class NotificationService {
       console.error('❌ Failed to configure background audio:', error);
     }
 
-    // Configure notification handler
+    // Configure notification handler with iOS-specific critical alert support
     Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowBanner: true,
-        shouldShowList: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-      }),
+      handleNotification: async notification => {
+        const isAlarm = notification.request.content.data?.type === 'alarm';
+
+        return {
+          shouldShowBanner: true,
+          shouldShowList: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+          // For iOS: High priority for alarms (iOS doesn't have IosNotificationPriority in expo-notifications)
+          ...(Platform.OS === 'ios' &&
+            isAlarm && {
+              priority: Notifications.AndroidNotificationPriority.HIGH, // Expo uses Android enum for both platforms
+            }),
+        };
+      },
     });
 
     // Set up Android notification channel for alarms
@@ -73,7 +83,22 @@ class NotificationService {
     let finalStatus = existingStatus;
 
     if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
+      // Request permissions with iOS critical alert support for alarms
+      const permissionRequest =
+        Platform.OS === 'ios'
+          ? {
+              ios: {
+                allowAlert: true,
+                allowBadge: true,
+                allowSound: true,
+                allowCriticalAlerts: true, // Critical for alarm apps
+                provideAppNotificationSettings: true,
+              },
+            }
+          : {};
+
+      const { status } =
+        await Notifications.requestPermissionsAsync(permissionRequest);
       finalStatus = status;
     }
 
@@ -99,10 +124,17 @@ class NotificationService {
       body: `Wake up! Your alarm is ringing 🔔`,
       sound: Platform.OS === 'android' ? 'default' : true,
       priority: Notifications.AndroidNotificationPriority.MAX,
+      // iOS-specific high priority configuration
+      ...(Platform.OS === 'ios' && {
+        priority: Notifications.AndroidNotificationPriority.HIGH, // Expo uses Android enum for both platforms
+        // Note: Critical alerts and interruptionLevel require special Apple entitlements
+        // For now, using high priority which should work for most cases
+      }),
       data: {
         alarmId: alarm.id,
         audioTrack: alarm.audioTrack,
         type: 'alarm',
+        scheduledTime: alarm.time.toISOString(), // Backup for time detection
       },
     };
 
@@ -164,6 +196,10 @@ class NotificationService {
               content: {
                 ...content,
                 title: `${alarm.title} (${this.getDayName(weekday)})`,
+                data: {
+                  ...content.data,
+                  scheduledTime: nextOccurrence.toISOString(), // Backup for time detection
+                },
               },
               trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -188,6 +224,10 @@ class NotificationService {
               content: {
                 ...content,
                 title: `${alarm.title} (${this.getDayName(weekday)})`,
+                data: {
+                  ...content.data,
+                  scheduledTime: nextWeek.toISOString(), // Backup for time detection
+                },
               },
               trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -367,12 +407,16 @@ class NotificationService {
     });
   }
 
-  private navigateToAlarmRinging(alarmId: string) {
-    // Use Expo Router to navigate to alarm ringing screen
-    // Note: This requires the router to be available globally or passed in
+  private async navigateToAlarmRinging(alarmId: string) {
+    // Use safe navigation to prevent duplicate screens
     try {
-      const { router } = require('expo-router');
-      router.push(`/alarms/ringing?alarmId=${alarmId}`);
+      const success = await safeNavigate(`/alarms/ringing?alarmId=${alarmId}`, {
+        bypassCooldown: true // Emergency navigation for alarms
+      });
+      
+      if (!success) {
+        console.warn('⏰ Alarm navigation was blocked or failed');
+      }
     } catch (error) {
       console.error('⏰ Failed to navigate to alarm ringing screen:', error);
     }

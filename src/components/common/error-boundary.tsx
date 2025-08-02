@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import * as Sentry from '@sentry/react-native';
+import { safeReplace } from '../../utils/navigation-utils';
 import { reportError, reportEvent } from '../../lib/sentry';
 
 interface ErrorBoundaryState {
@@ -76,11 +76,9 @@ const ErrorFallbackUI: React.FC<ErrorFallbackUIProps> = ({
   message,
   showDetails = false,
 }) => {
-  const router = useRouter();
-
-  const handleGoHome = () => {
+  const handleGoHome = async () => {
     try {
-      router.replace('/(tabs)/dashboard');
+      await safeReplace('/(tabs)/dashboard', { bypassCooldown: true });
     } catch (navError) {
       console.error('Navigation error:', navError);
       // Fallback restart

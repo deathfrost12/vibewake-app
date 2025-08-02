@@ -9,8 +9,9 @@ import {
   BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeNavigation } from '../../hooks/use-safe-navigation';
 import {
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
@@ -37,6 +38,7 @@ export default function AlarmRingingScreen() {
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
   const { spotifyToken } = useAuthStore();
+  const { replace } = useSafeNavigation();
 
   // Prevent multiple instances - early return if no alarmId
   if (!alarmId) {
@@ -189,7 +191,7 @@ export default function AlarmRingingScreen() {
         await updateAlarm(alarm.id, { isActive: false });
       }
 
-      router.replace('/(tabs)/dashboard');
+      await replace('/(tabs)/dashboard');
     } catch (error) {
       console.error('Failed to dismiss alarm:', error);
     }
@@ -217,7 +219,7 @@ export default function AlarmRingingScreen() {
 
     // Here you would implement snooze logic
     console.log(`Snoozed for ${minutes} minutes`);
-    router.replace('/(tabs)/dashboard');
+    await replace('/(tabs)/dashboard');
   };
 
   const handleEmergencyStop = () => {

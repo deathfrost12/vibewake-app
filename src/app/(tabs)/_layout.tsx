@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import React, { useEffect } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useSafeNavigationBasic } from '../../hooks/use-safe-navigation';
 import { useAlarmStore } from '../../stores/alarm-store';
 import { notificationService } from '../../services/notifications/notification-service';
 import { useTheme } from '../../contexts/theme-context';
@@ -43,7 +43,7 @@ function CreateButton() {
 }
 
 export default function TabLayout() {
-  const router = useRouter();
+  const { navigate } = useSafeNavigationBasic();
   const { loadAlarms } = useAlarmStore();
   const { isDark } = useTheme();
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
@@ -100,7 +100,12 @@ export default function TabLayout() {
                   marginTop: -12,
                 }}
                 activeOpacity={0.7}
-                onPress={() => router.push('/alarms/create')}
+                onPress={async () => {
+                  const success = await navigate('/alarms/create');
+                  if (!success) {
+                    console.log('Navigation blocked due to cooldown');
+                  }
+                }}
               >
                 <CreateButton />
               </TouchableOpacity>

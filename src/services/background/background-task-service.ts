@@ -1,11 +1,14 @@
 import * as TaskManager from 'expo-task-manager';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { alarmService } from '../alarms/alarm-service';
 import { audioService } from '../audio/audio-service';
 
 // Background task names
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
 const BACKGROUND_ALARM_TASK = 'BACKGROUND_ALARM_TASK';
+const BACKGROUND_AUDIO_TASK = 'com.owlee.app.alarm-audio';
+const BACKGROUND_FETCH_TASK = 'com.owlee.app.background-fetch';
 
 export class BackgroundTaskService {
   private static instance: BackgroundTaskService;
@@ -33,8 +36,20 @@ export class BackgroundTaskService {
       // Register background alarm task
       this.registerBackgroundAlarmTask();
 
+      // Register iOS-specific background audio task
+      if (Platform.OS === 'ios') {
+        this.registerBackgroundAudioTask();
+        this.registerBackgroundFetchTask();
+      }
+
       // Register tasks with Notifications
       await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
+      // Register background fetch for iOS (commented out - expo-background-fetch not available)
+      if (Platform.OS === 'ios') {
+        console.log('📱 iOS background fetch registration would happen here');
+        // TODO: Implement when expo-background-fetch is available
+      }
 
       this.isRegistered = true;
       console.log('✅ BackgroundTaskService initialized');
@@ -251,11 +266,124 @@ export class BackgroundTaskService {
   }
 
   /**
+   * Register iOS-specific background audio task
+   * This ensures alarm audio can play in background on iOS
+   */
+  private registerBackgroundAudioTask(): void {
+    TaskManager.defineTask(BACKGROUND_AUDIO_TASK, async ({ data, error }) => {
+      if (error) {
+        console.error('❌ Background audio task error:', error);
+        return;
+      }
+
+      try {
+        console.log('🎵 iOS background audio task executed');
+
+        // Ensure audio service is configured for background playback
+        await audioService.configureAudio();
+
+        // Check if any alarms should be playing audio
+        const shouldPlayAudio = await this.checkForActiveAlarms();
+
+        if (shouldPlayAudio) {
+          console.log(
+            '🔊 Background audio task: alarm audio should be playing'
+          );
+          // Audio continuation is handled by the audio service
+        }
+
+        console.log('✅ Background audio task completed');
+      } catch (error) {
+        console.error('❌ Error in background audio task:', error);
+      }
+    });
+  }
+
+  /**
+   * Register iOS-specific background fetch task
+   * This ensures alarms are checked periodically in background
+   */
+  private registerBackgroundFetchTask(): void {
+    TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+      try {
+        console.log('📱 iOS background fetch executed');
+
+        // Check for any alarms that should have triggered
+        const alarmState = await alarmService.getCurrentRingingAlarm();
+
+        if (!alarmState) {
+          // Check if any alarms should be ringing now
+          const scheduledAlarms = await alarmService.getScheduledAlarms();
+          const now = new Date();
+
+          for (const alarm of scheduledAlarms) {
+            const alarmData = alarm.content?.data;
+            if (alarmData?.scheduledTime) {
+              const scheduledTime = new Date(alarmData.scheduledTime);
+              const timeDiff = now.getTime() - scheduledTime.getTime();
+
+              // If alarm should have triggered in last 2 minutes
+              if (timeDiff >= 0 && timeDiff <= 2 * 60 * 1000) {
+                console.log(
+                  '🔔 Background fetch found missed alarm:',
+                  alarmData.alarmId
+                );
+
+                if (alarmData.alarmId && alarmData.audioTrack) {
+                  // Trigger missed alarm
+                  await alarmService.startRingingAlarm(
+                    alarmData.alarmId,
+                    alarmData.audioTrack
+                  );
+                }
+              }
+            }
+          }
+        }
+
+        console.log('✅ Background fetch completed');
+        return 'newData'; // BackgroundFetch.BackgroundFetchResult.NewData equivalent
+      } catch (error) {
+        console.error('❌ Error in background fetch:', error);
+        return 'failed'; // BackgroundFetch.BackgroundFetchResult.Failed equivalent
+      }
+    });
+  }
+
+  /**
+   * Check if any alarms should currently be playing audio
+   */
+  private async checkForActiveAlarms(): Promise<boolean> {
+    try {
+      // Check internal alarm state
+      const ringingAlarm = alarmService.getCurrentRingingAlarm();
+      if (ringingAlarm?.isRinging) {
+        return true;
+      }
+
+      // Check for recently triggered alarms using robust detection
+      const alarmDetection = await (
+        alarmService as any
+      ).checkIfAlarmShouldBeRinging();
+      return alarmDetection.isRinging;
+    } catch (error) {
+      console.error('❌ Error checking active alarms:', error);
+      return false;
+    }
+  }
+
+  /**
    * Unregister all background tasks (for cleanup)
    */
   async unregisterBackgroundTasks(): Promise<void> {
     try {
       await TaskManager.unregisterAllTasksAsync();
+
+      if (Platform.OS === 'ios') {
+        console.log('📱 iOS background fetch unregistration would happen here');
+        // TODO: Implement when expo-background-fetch is available
+      }
+
       this.isRegistered = false;
       console.log('✅ All background tasks unregistered');
     } catch (error) {

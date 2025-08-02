@@ -26,7 +26,12 @@
         "UIBackgroundModes": [
           "audio",
           "background-processing",
+          "background-fetch",
           "remote-notification"
+        ],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "com.owlee.app.alarm-audio",
+          "com.owlee.app.background-fetch"
         ]
       },
       "entitlements": {
@@ -89,7 +94,9 @@
           "icon": "./assets/notification-icon.png",
           "color": "#5CFFF0",
           "defaultChannel": "alarms",
-          "enableBackgroundRemoteNotifications": true
+          "enableBackgroundRemoteNotifications": true,
+          "requestPermissionsAsync": true,
+          "allowCriticalAlerts": true
         }
       ],
       "expo-task-manager",

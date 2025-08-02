@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeNavigation } from '../../hooks/use-safe-navigation';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/theme-context';
 import { THEME_COLORS, APP_COLORS } from '../../theme/colors';
@@ -24,6 +24,7 @@ export default function AlarmsScreen() {
   const { alarms, isLoading, loadAlarms, toggleAlarm, deleteAlarm } =
     useAlarmStore();
   const { isDark } = useTheme();
+  const { navigate, canNavigate } = useSafeNavigation();
 
   // State to force re-render countdown every second
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -361,6 +362,14 @@ export default function AlarmsScreen() {
           renderRightActions={() => renderDeleteAction(alarm.id)}
         >
           <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={async () => {
+              const success = await navigate(`/alarms/create?editId=${alarm.id}`);
+              if (!success) {
+                console.log('Navigation blocked due to cooldown');
+              }
+            }}
+            disabled={!canNavigate}
             style={{
               backgroundColor: theme.elevated,
               borderWidth: 1,
@@ -369,9 +378,8 @@ export default function AlarmsScreen() {
               padding: 24,
               marginBottom: 12,
               minHeight: 140, // Ensure consistent height
+              opacity: canNavigate ? 1 : 0.7,
             }}
-            activeOpacity={0.8}
-            onPress={() => router.push(`/alarms/create?editId=${alarm.id}`)}
           >
             {/* Main layout container */}
             <View style={{ flex: 1 }}>
@@ -524,6 +532,8 @@ export default function AlarmsScreen() {
       toggleAlarm,
       renderWeekDays,
       handleThreeDotsMenu,
+      navigate,
+      canNavigate,
     ]
   );
 
@@ -572,9 +582,14 @@ export default function AlarmsScreen() {
                     >
                       <TouchableOpacity
                         activeOpacity={0.8}
-                        onPress={() =>
-                          router.push(`/alarms/create?editId=${alarm.id}`)
-                        }
+                        onPress={async () => {
+                          const success = await navigate(`/alarms/create?editId=${alarm.id}`);
+                          if (!success) {
+                            console.log('Navigation blocked due to cooldown');
+                          }
+                        }}
+                        disabled={!canNavigate}
+                        style={{ opacity: canNavigate ? 1 : 0.7 }}
                       >
                         {/* Main layout container */}
                         <View style={{ flex: 1 }}>
@@ -724,7 +739,14 @@ export default function AlarmsScreen() {
                 >
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => router.push('/alarms/create')}
+                    onPress={async () => {
+                      const success = await navigate('/alarms/create');
+                      if (!success) {
+                        console.log('Navigation blocked due to cooldown');
+                      }
+                    }}
+                    disabled={!canNavigate}
+                    style={{ opacity: canNavigate ? 1 : 0.7 }}
                   >
                     <View style={{ alignItems: 'center', paddingVertical: 16 }}>
                       <Ionicons

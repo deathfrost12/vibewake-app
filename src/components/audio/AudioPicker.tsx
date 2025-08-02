@@ -9,8 +9,8 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeNavigationBasic } from '../../hooks/use-safe-navigation';
 import { useTheme } from '../../contexts/theme-context';
 import { ThemedView, ThemedText, ThemedCard } from '../ui/themed-view';
 import { AudioManager } from '../../services/audio/AudioManager';
@@ -47,6 +47,7 @@ export function AudioPicker({
   className,
 }: AudioPickerProps) {
   const { isDark } = useTheme();
+  const { navigate } = useSafeNavigationBasic();
   const [activeTab, setActiveTab] = useState<TabType>('predefined');
   const [predefinedSounds] = useState<PredefinedSound[]>(
     SoundLibrary.getAllSounds()
@@ -624,7 +625,10 @@ export function AudioPicker({
       setIsSpotifyAuthenticated(true);
 
       // Navigate to Spotify selector screen
-      router.push('/alarms/spotify-selector');
+      const success = await navigate('/alarms/spotify-selector');
+      if (!success) {
+        console.log('Navigation to Spotify selector blocked due to cooldown');
+      }
     } catch (error: any) {
       console.error('Spotify authentication failed:', error);
       Alert.alert(

@@ -102,6 +102,58 @@ These rules ensure maintainability, safety, and developer velocity for VibeWake 
 
 ---
 
+### 8 — Navigation & User Experience
+
+- **NAV-1 (MUST)** Use `useSafeNavigation()` hook instead of direct `router.push()` calls to prevent duplicate screen stacking.
+- **NAV-2 (MUST)** Never use `router.push()`, `router.replace()`, or `router.back()` directly in components.
+- **NAV-3 (MUST)** Import navigation utilities: `import { useSafeNavigation } from '../hooks/use-safe-navigation'`.
+- **NAV-4 (SHOULD)** Provide visual feedback (disabled state, opacity) during navigation cooldown periods.
+- **NAV-5 (SHOULD)** Use appropriate navigation hook variant:
+  - `useSafeNavigation()` - Standard use with UI feedback
+  - `useAlarmNavigation()` - For alarm-specific flows (longer cooldown)
+  - `useEmergencyNavigation()` - For critical/time-sensitive navigation only
+- **NAV-6 (MUST)** Handle navigation failures gracefully and provide user feedback when navigation is blocked.
+- **NAV-7 (SHOULD)** Use haptic feedback for navigation actions (enabled by default in safe navigation).
+
+**Example - Correct Navigation Usage:**
+```tsx
+// ✅ CORRECT - Use safe navigation hook
+const { navigate, canNavigate } = useSafeNavigation();
+
+const handleEditAlarm = async () => {
+  const success = await navigate(`/alarms/create?editId=${alarmId}`);
+  if (!success) {
+    console.log('Navigation blocked due to cooldown');
+  }
+};
+
+return (
+  <TouchableOpacity 
+    onPress={handleEditAlarm}
+    disabled={!canNavigate}
+    style={{ opacity: canNavigate ? 1 : 0.5 }}
+  >
+    <Text>Edit Alarm</Text>
+  </TouchableOpacity>
+);
+```
+
+**Anti-patterns to avoid:**
+```tsx
+// ❌ WRONG - Direct router usage causes duplicate screens
+<TouchableOpacity onPress={() => router.push('/alarms/create')}>
+
+// ❌ WRONG - No protection against rapid taps
+const handleEdit = () => {
+  router.push(`/alarms/create?editId=${alarmId}`);
+};
+
+// ❌ WRONG - Missing visual feedback for disabled state
+<TouchableOpacity onPress={handleNavigation}>
+```
+
+---
+
 ## Writing Functions Best Practices
 
 When evaluating whether a function you implemented is good or not, use this checklist:

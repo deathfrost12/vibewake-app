@@ -5,6 +5,7 @@ import {
 } from '../notifications/notification-service';
 import { audioService } from '../audio/audio-service';
 import { Audio } from 'expo-av';
+import { safeReplace } from '../../utils/navigation-utils';
 
 export interface Alarm {
   id: string;
@@ -364,22 +365,50 @@ export class AlarmService {
             // Extract notification time from different trigger types
             let notificationTime: Date | null = null;
 
-            if (
-              notification.trigger &&
-              'dateComponents' in notification.trigger &&
-              notification.trigger.dateComponents
-            ) {
-              // DateTrigger type
-              const dateComp = notification.trigger.dateComponents as any;
-              if (dateComp.date) {
-                notificationTime = new Date(dateComp.date);
+            console.log(
+              `🔍 Processing notification: ${notification.identifier}`
+            );
+            console.log(
+              `📊 Trigger type:`,
+              (notification.trigger as any)?.type
+            );
+            console.log(`📊 Full trigger:`, notification.trigger);
+
+            // Method 1: Check for direct date in trigger (expo-notifications DateTrigger)
+            if (notification.trigger && 'date' in notification.trigger) {
+              const triggerDate = (notification.trigger as any).date;
+              console.log(`📅 Found trigger.date:`, triggerDate);
+              if (triggerDate) {
+                notificationTime = new Date(triggerDate);
+                console.log(`📅 Parsed trigger date:`, notificationTime);
               }
-            } else if (notification.trigger && 'date' in notification.trigger) {
-              // Direct date property
-              notificationTime = new Date((notification.trigger as any).date);
             }
 
-            // Fallback: check if notification has a date property directly
+            // Method 2: Check for dateComponents (legacy or different trigger types)
+            if (
+              !notificationTime &&
+              notification.trigger &&
+              'dateComponents' in notification.trigger
+            ) {
+              const dateComp = (notification.trigger as any).dateComponents;
+              console.log(`📅 Found dateComponents:`, dateComp);
+              if (dateComp?.date) {
+                notificationTime = new Date(dateComp.date);
+              }
+            }
+
+            // Method 3: Check notification data for backup scheduledTime
+            if (
+              !notificationTime &&
+              notification.content?.data?.scheduledTime
+            ) {
+              const scheduledTime = notification.content.data
+                .scheduledTime as string;
+              console.log(`📅 Found backup scheduledTime:`, scheduledTime);
+              notificationTime = new Date(scheduledTime);
+            }
+
+            // Method 4: Fallback - check if notification has direct date property
             if (!notificationTime && (notification as any).date) {
               notificationTime = new Date((notification as any).date);
             }
@@ -387,7 +416,9 @@ export class AlarmService {
             if (!notificationTime) {
               console.log(
                 '⚠️ Could not determine notification time for:',
-                notification.identifier
+                notification.identifier,
+                'Available properties:',
+                Object.keys(notification)
               );
               return false;
             }
@@ -397,6 +428,13 @@ export class AlarmService {
             // Check if notification should have triggered in the last 5 minutes
             const shouldHaveTriggered =
               timeDiff >= 0 && timeDiff <= 5 * 60 * 1000; // 5 minutes
+
+            console.log(`📊 Time analysis for ${notification.identifier}:`, {
+              scheduledTime: notificationTime.toISOString(),
+              currentTime: now.toISOString(),
+              timeDiffSeconds: Math.round(timeDiff / 1000),
+              shouldHaveTriggered,
+            });
 
             if (shouldHaveTriggered) {
               console.log(
@@ -515,9 +553,9 @@ export class AlarmService {
               }
 
               // Small delay to ensure app is fully active before navigation
-              setTimeout(() => {
+              setTimeout(async () => {
                 if (alarmState.isRinging && !this.isOnRingingScreen) {
-                  this.navigateToRingingScreen(alarmState.alarmId!);
+                  await this.navigateToRingingScreen(alarmState.alarmId!);
                 }
               }, 100);
             } else {
@@ -537,9 +575,9 @@ export class AlarmService {
             !this.isNavigatingToRingingScreen
           ) {
             console.log('🔄 Falling back to simple alarm check...');
-            setTimeout(() => {
+            setTimeout(async () => {
               if (this.currentRingingAlarm && !this.isOnRingingScreen) {
-                this.navigateToRingingScreen(this.currentRingingAlarm.alarmId);
+                await this.navigateToRingingScreen(this.currentRingingAlarm.alarmId);
               }
             }, 100);
           }
@@ -678,7 +716,7 @@ export class AlarmService {
 
       // Navigate to alarm ringing screen if possible
       console.log('📱 Attempting navigation to ringing screen...');
-      this.navigateToRingingScreen(alarmId);
+      await this.navigateToRingingScreen(alarmId);
 
       console.log('✅ Alarm trigger handling completed successfully');
     } catch (error) {
@@ -789,7 +827,7 @@ export class AlarmService {
   /**
    * Navigate to alarm ringing screen with duplicate prevention
    */
-  private navigateToRingingScreen(alarmId: string): void {
+  private async navigateToRingingScreen(alarmId: string): Promise<void> {
     try {
       // Prevent duplicate navigation
       if (this.isNavigatingToRingingScreen) {
@@ -822,8 +860,10 @@ export class AlarmService {
 
       this.isNavigatingToRingingScreen = true;
 
-      // Use replace to prevent stacking multiple alarm screens
-      router.replace(`/alarms/ringing?alarmId=${alarmId}`);
+      // Use safe replace to prevent stacking multiple alarm screens
+      await safeReplace(`/alarms/ringing?alarmId=${alarmId}`, { 
+        bypassCooldown: true // Emergency navigation for alarms
+      });
       console.log(`📱 Navigating to alarm screen: ${alarmId}`);
 
       // Set that we're now on the ringing screen
