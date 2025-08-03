@@ -40,7 +40,7 @@ class NavigationManager {
   private canNavigate(): boolean {
     const now = Date.now();
     const timeSinceLastNav = now - this.state.lastNavigationTime;
-    
+
     if (this.state.isNavigating) {
       console.log('🚫 Navigation blocked: Currently navigating');
       return false;
@@ -82,23 +82,23 @@ class NavigationManager {
    */
   async safeNavigate(
     href: string,
-    options?: { 
+    options?: {
       hapticFeedback?: boolean;
       customCooldown?: number;
       bypassCooldown?: boolean;
     }
   ): Promise<boolean> {
-    const { 
-      hapticFeedback = true, 
-      customCooldown, 
-      bypassCooldown = false 
+    const {
+      hapticFeedback = true,
+      customCooldown,
+      bypassCooldown = false,
     } = options || {};
 
     // Set custom cooldown if provided
     if (customCooldown) {
       const originalCooldown = this.state.cooldownDuration;
       this.setCooldownDuration(customCooldown);
-      
+
       // Reset to original after this navigation
       setTimeout(() => {
         this.setCooldownDuration(originalCooldown);
@@ -120,10 +120,10 @@ class NavigationManager {
       this.setNavigationState(true);
 
       console.log(`🚀 Safe navigation to: ${href}`);
-      
+
       // Perform navigation
       router.push(href as any);
-      
+
       return true;
     } catch (error) {
       console.error('❌ Safe navigation failed:', error);
@@ -137,23 +137,23 @@ class NavigationManager {
    */
   async safeReplace(
     href: string,
-    options?: { 
+    options?: {
       hapticFeedback?: boolean;
       customCooldown?: number;
       bypassCooldown?: boolean;
     }
   ): Promise<boolean> {
-    const { 
-      hapticFeedback = true, 
-      customCooldown, 
-      bypassCooldown = false 
+    const {
+      hapticFeedback = true,
+      customCooldown,
+      bypassCooldown = false,
     } = options || {};
 
     // Set custom cooldown if provided
     if (customCooldown) {
       const originalCooldown = this.state.cooldownDuration;
       this.setCooldownDuration(customCooldown);
-      
+
       // Reset to original after this navigation
       setTimeout(() => {
         this.setCooldownDuration(originalCooldown);
@@ -175,10 +175,10 @@ class NavigationManager {
       this.setNavigationState(true);
 
       console.log(`🔄 Safe replace navigation to: ${href}`);
-      
+
       // Perform navigation
       router.replace(href as any);
-      
+
       return true;
     } catch (error) {
       console.error('❌ Safe replace navigation failed:', error);
@@ -190,24 +190,22 @@ class NavigationManager {
   /**
    * Safe back navigation with debouncing - replaces router.back()
    */
-  async safeGoBack(
-    options?: { 
-      hapticFeedback?: boolean;
-      customCooldown?: number;
-      bypassCooldown?: boolean;
-    }
-  ): Promise<boolean> {
-    const { 
-      hapticFeedback = true, 
-      customCooldown, 
-      bypassCooldown = false 
+  async safeGoBack(options?: {
+    hapticFeedback?: boolean;
+    customCooldown?: number;
+    bypassCooldown?: boolean;
+  }): Promise<boolean> {
+    const {
+      hapticFeedback = true,
+      customCooldown,
+      bypassCooldown = false,
     } = options || {};
 
     // Set custom cooldown if provided
     if (customCooldown) {
       const originalCooldown = this.state.cooldownDuration;
       this.setCooldownDuration(customCooldown);
-      
+
       // Reset to original after this navigation
       setTimeout(() => {
         this.setCooldownDuration(originalCooldown);
@@ -229,10 +227,10 @@ class NavigationManager {
       this.setNavigationState(true);
 
       console.log('⬅️ Safe back navigation');
-      
+
       // Perform navigation
       router.back();
-      
+
       return true;
     } catch (error) {
       console.error('❌ Safe back navigation failed:', error);
@@ -255,7 +253,7 @@ class NavigationManager {
     console.log('🛑 Force resetting navigation state');
     this.state.isNavigating = false;
     this.state.lastNavigationTime = 0;
-    
+
     if (this.pendingTimeout) {
       clearTimeout(this.pendingTimeout);
       this.pendingTimeout = null;

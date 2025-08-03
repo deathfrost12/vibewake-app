@@ -1,18 +1,10 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
+import { AlarmNotification } from '../../types/alarm';
 import { AudioTrack } from '../audio/types';
 import { audioService } from '../audio/audio-service';
 import { safeNavigate } from '../../utils/navigation-utils';
-
-export interface AlarmNotification {
-  id: string;
-  title: string;
-  time: Date;
-  isActive: boolean;
-  audioTrack: AudioTrack;
-  repeatDays?: number[]; // 0 = Sunday, 1 = Monday, etc.
-}
 
 export interface NotificationPermissionStatus {
   granted: boolean;
@@ -135,6 +127,10 @@ class NotificationService {
         audioTrack: alarm.audioTrack,
         type: 'alarm',
         scheduledTime: alarm.time.toISOString(), // Backup for time detection
+        // Additional backup data for reliable detection
+        triggerTimestamp: alarm.time.getTime(),
+        createdAt: new Date().toISOString(),
+        alarmType: 'standard',
       },
     };
 
@@ -199,6 +195,7 @@ class NotificationService {
                 data: {
                   ...content.data,
                   scheduledTime: nextOccurrence.toISOString(), // Backup for time detection
+                  triggerTimestamp: nextOccurrence.getTime(),
                 },
               },
               trigger: {
@@ -227,6 +224,7 @@ class NotificationService {
                 data: {
                   ...content.data,
                   scheduledTime: nextWeek.toISOString(), // Backup for time detection
+                  triggerTimestamp: nextWeek.getTime(),
                 },
               },
               trigger: {
@@ -411,9 +409,9 @@ class NotificationService {
     // Use safe navigation to prevent duplicate screens
     try {
       const success = await safeNavigate(`/alarms/ringing?alarmId=${alarmId}`, {
-        bypassCooldown: true // Emergency navigation for alarms
+        bypassCooldown: true, // Emergency navigation for alarms
       });
-      
+
       if (!success) {
         console.warn('⏰ Alarm navigation was blocked or failed');
       }

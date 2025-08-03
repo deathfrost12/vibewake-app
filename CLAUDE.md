@@ -116,6 +116,7 @@ These rules ensure maintainability, safety, and developer velocity for VibeWake 
 - **NAV-7 (SHOULD)** Use haptic feedback for navigation actions (enabled by default in safe navigation).
 
 **Example - Correct Navigation Usage:**
+
 ```tsx
 // ✅ CORRECT - Use safe navigation hook
 const { navigate, canNavigate } = useSafeNavigation();
@@ -128,7 +129,7 @@ const handleEditAlarm = async () => {
 };
 
 return (
-  <TouchableOpacity 
+  <TouchableOpacity
     onPress={handleEditAlarm}
     disabled={!canNavigate}
     style={{ opacity: canNavigate ? 1 : 0.5 }}
@@ -139,6 +140,7 @@ return (
 ```
 
 **Anti-patterns to avoid:**
+
 ```tsx
 // ❌ WRONG - Direct router usage causes duplicate screens
 <TouchableOpacity onPress={() => router.push('/alarms/create')}>

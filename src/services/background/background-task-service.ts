@@ -7,7 +7,6 @@ import { audioService } from '../audio/audio-service';
 // Background task names
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
 const BACKGROUND_ALARM_TASK = 'BACKGROUND_ALARM_TASK';
-const BACKGROUND_AUDIO_TASK = 'com.owlee.app.alarm-audio';
 const BACKGROUND_FETCH_TASK = 'com.owlee.app.background-fetch';
 
 export class BackgroundTaskService {
@@ -36,9 +35,8 @@ export class BackgroundTaskService {
       // Register background alarm task
       this.registerBackgroundAlarmTask();
 
-      // Register iOS-specific background audio task
+      // Register iOS-specific background fetch task
       if (Platform.OS === 'ios') {
-        this.registerBackgroundAudioTask();
         this.registerBackgroundFetchTask();
       }
 
@@ -263,40 +261,6 @@ export class BackgroundTaskService {
         isInitialized: false,
       };
     }
-  }
-
-  /**
-   * Register iOS-specific background audio task
-   * This ensures alarm audio can play in background on iOS
-   */
-  private registerBackgroundAudioTask(): void {
-    TaskManager.defineTask(BACKGROUND_AUDIO_TASK, async ({ data, error }) => {
-      if (error) {
-        console.error('❌ Background audio task error:', error);
-        return;
-      }
-
-      try {
-        console.log('🎵 iOS background audio task executed');
-
-        // Ensure audio service is configured for background playback
-        await audioService.configureAudio();
-
-        // Check if any alarms should be playing audio
-        const shouldPlayAudio = await this.checkForActiveAlarms();
-
-        if (shouldPlayAudio) {
-          console.log(
-            '🔊 Background audio task: alarm audio should be playing'
-          );
-          // Audio continuation is handled by the audio service
-        }
-
-        console.log('✅ Background audio task completed');
-      } catch (error) {
-        console.error('❌ Error in background audio task:', error);
-      }
-    });
   }
 
   /**

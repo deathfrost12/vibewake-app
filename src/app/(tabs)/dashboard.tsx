@@ -364,7 +364,9 @@ export default function AlarmsScreen() {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={async () => {
-              const success = await navigate(`/alarms/create?editId=${alarm.id}`);
+              const success = await navigate(
+                `/alarms/create?editId=${alarm.id}`
+              );
               if (!success) {
                 console.log('Navigation blocked due to cooldown');
               }
@@ -583,7 +585,9 @@ export default function AlarmsScreen() {
                       <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={async () => {
-                          const success = await navigate(`/alarms/create?editId=${alarm.id}`);
+                          const success = await navigate(
+                            `/alarms/create?editId=${alarm.id}`
+                          );
                           if (!success) {
                             console.log('Navigation blocked due to cooldown');
                           }

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  navigationManager, 
-  safeNavigate, 
-  safeReplace, 
+import {
+  navigationManager,
+  safeNavigate,
+  safeReplace,
   safeGoBack,
-  NavigationState 
+  NavigationState,
 } from '../utils/navigation-utils';
 
 interface UseSafeNavigationOptions {
@@ -37,23 +37,23 @@ interface BackNavigationOptions {
 
 /**
  * Custom hook for safe navigation with debouncing and state tracking
- * 
+ *
  * @param options Configuration options for the hook
  * @returns Navigation functions and state
- * 
+ *
  * @example
  * ```tsx
  * const { navigate, isNavigating, canNavigate } = useSafeNavigation();
- * 
+ *
  * const handleEditAlarm = async () => {
  *   const success = await navigate(`/alarms/create?editId=${alarmId}`);
  *   if (!success) {
  *     console.log('Navigation was blocked due to cooldown');
  *   }
  * };
- * 
+ *
  * return (
- *   <TouchableOpacity 
+ *   <TouchableOpacity
  *     onPress={handleEditAlarm}
  *     disabled={!canNavigate}
  *     style={{ opacity: canNavigate ? 1 : 0.5 }}
@@ -94,7 +94,10 @@ export function useSafeNavigation(
   }, [defaultCooldown]);
 
   const navigate = useCallback(
-    async (href: string, navOptions: NavigationOptions = {}): Promise<boolean> => {
+    async (
+      href: string,
+      navOptions: NavigationOptions = {}
+    ): Promise<boolean> => {
       const mergedOptions = {
         hapticFeedback: enableHaptics,
         ...navOptions,
@@ -106,7 +109,10 @@ export function useSafeNavigation(
   );
 
   const replace = useCallback(
-    async (href: string, navOptions: NavigationOptions = {}): Promise<boolean> => {
+    async (
+      href: string,
+      navOptions: NavigationOptions = {}
+    ): Promise<boolean> => {
       const mergedOptions = {
         hapticFeedback: enableHaptics,
         ...navOptions,
@@ -139,8 +145,10 @@ export function useSafeNavigation(
 
   // Derived state for easy UI integration
   const isNavigating = navigationState.isNavigating;
-  const canNavigate = !isNavigating && 
-    (Date.now() - navigationState.lastNavigationTime) >= navigationState.cooldownDuration;
+  const canNavigate =
+    !isNavigating &&
+    Date.now() - navigationState.lastNavigationTime >=
+      navigationState.cooldownDuration;
 
   return {
     navigate,
@@ -158,13 +166,19 @@ export function useSafeNavigation(
  * Use this when you don't need UI feedback and want minimal overhead
  */
 export function useSafeNavigationBasic() {
-  const navigate = useCallback(async (href: string, options?: NavigationOptions) => {
-    return await safeNavigate(href, options);
-  }, []);
+  const navigate = useCallback(
+    async (href: string, options?: NavigationOptions) => {
+      return await safeNavigate(href, options);
+    },
+    []
+  );
 
-  const replace = useCallback(async (href: string, options?: NavigationOptions) => {
-    return await safeReplace(href, options);
-  }, []);
+  const replace = useCallback(
+    async (href: string, options?: NavigationOptions) => {
+      return await safeReplace(href, options);
+    },
+    []
+  );
 
   const goBack = useCallback(async (options?: BackNavigationOptions) => {
     return await safeGoBack(options);

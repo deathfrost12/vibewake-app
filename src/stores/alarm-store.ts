@@ -1,19 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  AlarmNotification,
-  notificationService,
-} from '../services/notifications/notification-service';
+import { Alarm, AlarmCreateData, AlarmUpdateData } from '../types/alarm';
+
+// Re-export Alarm for backward compatibility
+export type { Alarm } from '../types/alarm';
+import { notificationService } from '../services/notifications/notification-service';
 import { AudioTrack } from '../services/audio/types';
 import { alarmService } from '../services/alarms/alarm-service';
 import { backgroundTaskService } from '../services/background/background-task-service';
-
-export interface Alarm extends AlarmNotification {
-  notificationId?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 interface AlarmState {
   alarms: Alarm[];
@@ -21,10 +16,8 @@ interface AlarmState {
   isLoading: boolean;
 
   // Actions
-  createAlarm: (
-    alarm: Omit<Alarm, 'id' | 'createdAt' | 'updatedAt' | 'notificationId'>
-  ) => Promise<string>;
-  updateAlarm: (id: string, updates: Partial<Alarm>) => Promise<void>;
+  createAlarm: (alarm: AlarmCreateData) => Promise<string>;
+  updateAlarm: (id: string, updates: AlarmUpdateData) => Promise<void>;
   deleteAlarm: (id: string) => Promise<void>;
   toggleAlarm: (id: string) => Promise<void>;
   checkPermissions: () => Promise<boolean>;

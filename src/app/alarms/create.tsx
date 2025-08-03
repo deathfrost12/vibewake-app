@@ -149,7 +149,7 @@ export default function CreateAlarmScreen() {
               marginBottom: 32,
             }}
           >
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={async () => {
                 const success = await goBack();
                 if (!success) {

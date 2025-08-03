@@ -96,7 +96,8 @@
           "defaultChannel": "alarms",
           "enableBackgroundRemoteNotifications": true,
           "requestPermissionsAsync": true,
-          "allowCriticalAlerts": true
+          "allowCriticalAlerts": true,
+          "sounds": ["./src/assets/sounds/alarm-short.caf"]
         }
       ],
       "expo-task-manager",

@@ -1,21 +1,12 @@
 import { AudioTrack } from '../audio/types';
-import {
-  notificationService,
-  AlarmNotification,
-} from '../notifications/notification-service';
+import { Alarm, AlarmNotification } from '../../types/alarm';
+import { notificationService } from '../notifications/notification-service';
+import { AudioManager } from '../audio/AudioManager';
 import { audioService } from '../audio/audio-service';
 import { Audio } from 'expo-av';
 import { safeReplace } from '../../utils/navigation-utils';
 
-export interface Alarm {
-  id: string;
-  time: Date;
-  isActive: boolean;
-  audioTrack: AudioTrack;
-  repeatDays?: number[]; // 0 = Sunday, 1 = Monday, etc.
-  label?: string;
-  notificationIds?: string[]; // Store notification IDs for cancellation
-}
+// Alarm interface is now imported from types/alarm.ts
 
 export interface AlarmRingingState {
   alarmId: string;
@@ -56,7 +47,7 @@ export class AlarmService {
       // Initialize notification service first
       await notificationService.initialize();
 
-      // Configure audio for background playback
+      // Configure audio service
       await audioService.configureAudio();
 
       console.log('✅ AlarmService initialized');
@@ -67,14 +58,14 @@ export class AlarmService {
   }
 
   /**
-   * Schedule alarm with both notification and background audio support
+   * Schedule alarm notification
    */
   async scheduleAlarm(alarm: Alarm): Promise<void> {
     try {
       // Create notification data
       const alarmNotification: AlarmNotification = {
         id: alarm.id,
-        title: alarm.label || 'Alarm',
+        title: alarm.title || 'Alarm',
         time: alarm.time,
         isActive: alarm.isActive,
         audioTrack: alarm.audioTrack,
@@ -152,42 +143,73 @@ export class AlarmService {
         await this.stopRingingAlarm();
       }
 
-      // Force audio configuration for background playback (always re-configure for alarms)
-      console.log('🎵 Force-configuring audio for alarm playback');
-      await audioService.configureAudio();
+      console.log(`🎵 Starting alarm with AudioManager: ${alarmId}`);
 
-      // Load and play the alarm sound
-      let soundObject: Audio.Sound;
+      // Use AudioManager for reliable playback with fallback support
+      const result = await AudioManager.playAlarmAudio({
+        preferredTrack: audioTrack,
+        fallbackSoundId: 'alarm-classic',
+        onSpotifyPlayerNeeded: track => {
+          console.log('🎵 Spotify player needed for:', track.name);
+          // Could trigger UI notification about opening Spotify
+        },
+        onPlaybackFailed: (error, fallbackUsed) => {
+          console.warn(
+            '⚠️ Audio playback issue:',
+            error.message,
+            'Used fallback:',
+            fallbackUsed
+          );
+        },
+      });
 
-      if (audioTrack.uri) {
-        soundObject = await audioService.loadAudio(audioTrack.uri);
-      } else {
-        // Fallback to system default sound
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: 'default' }, // Use system default notification sound
-          {
-            shouldPlay: false,
-            isLooping: true,
-            volume: 1.0,
-          }
+      if (result.success) {
+        // Enable looping for alarm
+        await AudioManager.setIsLoopingAsync(true);
+
+        // Store current ringing state
+        this.currentRingingAlarm = {
+          alarmId,
+          soundObject: null, // AudioManager handles the sound object internally
+          isRinging: true,
+        };
+
+        console.log(
+          `✅ Alarm started ringing: ${alarmId} (fallback: ${result.usedFallback})`
         );
-        soundObject = sound;
+      } else {
+        throw new Error('Failed to start alarm audio');
       }
-
-      // Start playing
-      await audioService.playAlarmSound(soundObject);
-
-      // Store current ringing state
-      this.currentRingingAlarm = {
-        alarmId,
-        soundObject,
-        isRinging: true,
-      };
-
-      console.log(`✅ Alarm started ringing: ${alarmId}`);
     } catch (error) {
       console.error(`❌ Failed to start ringing alarm ${alarmId}:`, error);
-      throw error;
+
+      // Fallback to legacy audio system
+      try {
+        console.log('🔄 Attempting fallback to legacy audio system');
+        await audioService.configureAudio();
+
+        let soundObject: Audio.Sound;
+        if (audioTrack.uri) {
+          soundObject = await audioService.loadAudio(audioTrack.uri);
+        } else {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: 'default' },
+            { shouldPlay: false, isLooping: true, volume: 1.0 }
+          );
+          soundObject = sound;
+        }
+
+        await audioService.playAlarmSound(soundObject);
+        this.currentRingingAlarm = { alarmId, soundObject, isRinging: true };
+
+        console.log(`✅ Alarm started with legacy fallback: ${alarmId}`);
+      } catch (fallbackError) {
+        console.error(
+          `❌ Even fallback failed for alarm ${alarmId}:`,
+          fallbackError
+        );
+        throw error;
+      }
     }
   }
 
@@ -203,14 +225,20 @@ export class AlarmService {
 
       const { soundObject, alarmId } = this.currentRingingAlarm;
 
-      if (soundObject) {
+      // Stop AudioManager or legacy sound object
+      if (!soundObject) {
+        console.log('🔇 Stopping AudioManager alarm playback');
+        await AudioManager.stopAsync();
+      } else {
+        // Stop legacy audio service
+        console.log('🔇 Stopping legacy alarm sound');
         await audioService.stopAlarmSound(soundObject);
       }
 
       // Clear state
       this.currentRingingAlarm = null;
-      this.isNavigatingToRingingScreen = false; // Reset navigation flag
-      this.isOnRingingScreen = false; // Reset screen state flag
+      this.isNavigatingToRingingScreen = false;
+      this.isOnRingingScreen = false;
 
       console.log(`✅ Alarm stopped ringing: ${alarmId}`);
     } catch (error) {
@@ -218,8 +246,16 @@ export class AlarmService {
 
       // Force clear state even if stopping failed
       this.currentRingingAlarm = null;
-      this.isNavigatingToRingingScreen = false; // Reset navigation flag
-      this.isOnRingingScreen = false; // Reset screen state flag
+      this.isNavigatingToRingingScreen = false;
+      this.isOnRingingScreen = false;
+
+      // Try emergency cleanup
+      try {
+        await AudioManager.stopAsync();
+      } catch (emergencyError) {
+        console.warn('⚠️ Emergency cleanup also failed:', emergencyError);
+      }
+
       throw error;
     }
   }
@@ -357,8 +393,8 @@ export class AlarmService {
         await notificationService.getAllScheduledAlarms();
       const now = new Date();
 
-      // Look for notifications that should have triggered within the last 5 minutes
-      // (accounting for notification delivery delays and background processing)
+      // Look for notifications that should have triggered within the last 30 minutes
+      // (accounting for notification delivery delays, background processing, and user behavior)
       const recentlyTriggeredNotifications = scheduledNotifications.filter(
         notification => {
           try {
@@ -373,6 +409,10 @@ export class AlarmService {
               (notification.trigger as any)?.type
             );
             console.log(`📊 Full trigger:`, notification.trigger);
+            console.log(
+              `📊 Notification content data:`,
+              notification.content?.data
+            );
 
             // Method 1: Check for direct date in trigger (expo-notifications DateTrigger)
             if (notification.trigger && 'date' in notification.trigger) {
@@ -381,6 +421,46 @@ export class AlarmService {
               if (triggerDate) {
                 notificationTime = new Date(triggerDate);
                 console.log(`📅 Parsed trigger date:`, notificationTime);
+              }
+            }
+
+            // Method 1b: Handle timeInterval triggers (iOS converts DATE to timeInterval)
+            if (
+              !notificationTime &&
+              notification.trigger &&
+              'seconds' in notification.trigger &&
+              'type' in notification.trigger &&
+              (notification.trigger as any).type === 'timeInterval'
+            ) {
+              const seconds = (notification.trigger as any).seconds;
+              console.log(`⏰ Found timeInterval trigger: ${seconds} seconds`);
+
+              // Calculate trigger time: current time + remaining seconds
+              // This gives us the actual scheduled alarm time
+              notificationTime = new Date(now.getTime() + seconds * 1000);
+              console.log(
+                `⏰ Calculated timeInterval trigger time:`,
+                notificationTime
+              );
+
+              // Log additional context for debugging
+              if (seconds <= 300) {
+                // 5 minutes or less
+                console.log(
+                  `🎯 TimeInterval notification is imminent: ${seconds}s remaining`
+                );
+              }
+              if (seconds <= 30) {
+                // 30 seconds or less
+                console.log(
+                  `🚨 TimeInterval notification is about to trigger: ${seconds}s remaining`
+                );
+              }
+              if (seconds <= 5) {
+                // 5 seconds or less
+                console.log(
+                  `🔥 TimeInterval notification should be triggering NOW: ${seconds}s remaining`
+                );
               }
             }
 
@@ -406,6 +486,39 @@ export class AlarmService {
                 .scheduledTime as string;
               console.log(`📅 Found backup scheduledTime:`, scheduledTime);
               notificationTime = new Date(scheduledTime);
+              console.log(`📅 Parsed backup scheduledTime:`, notificationTime);
+            }
+
+            // Method 3a: Check for triggerTimestamp backup
+            if (
+              !notificationTime &&
+              notification.content?.data?.triggerTimestamp
+            ) {
+              const timestamp = notification.content.data
+                .triggerTimestamp as number;
+              console.log(`📅 Found backup triggerTimestamp:`, timestamp);
+              notificationTime = new Date(timestamp);
+              console.log(`📅 Parsed backup timestamp:`, notificationTime);
+            }
+
+            // Method 3b: Enhanced backup calculation for timeInterval
+            // If we have timeInterval but no backup scheduledTime, try to reverse-engineer
+            if (
+              !notificationTime &&
+              notification.trigger &&
+              'seconds' in notification.trigger
+            ) {
+              const seconds = (notification.trigger as any).seconds;
+              // Estimate when this notification was scheduled (approximately)
+              // This is not perfect but gives us something to work with
+              const estimatedScheduleTime = new Date(
+                now.getTime() + seconds * 1000
+              );
+              console.log(
+                `🔮 Estimated schedule time from timeInterval:`,
+                estimatedScheduleTime
+              );
+              notificationTime = estimatedScheduleTime;
             }
 
             // Method 4: Fallback - check if notification has direct date property
@@ -424,21 +537,67 @@ export class AlarmService {
             }
 
             const timeDiff = now.getTime() - notificationTime.getTime();
+            const timeDiffSeconds = Math.round(timeDiff / 1000);
+            const timeDiffMinutes = Math.round(timeDiff / 60000);
 
-            // Check if notification should have triggered in the last 5 minutes
+            // Enhanced alarm detection logic - covers multiple scenarios:
+            // 1. Currently triggering alarms (±30 seconds)
+            // 2. Imminent alarms (next 5 minutes)
+            // 3. Recently triggered alarms (past 5 minutes)
+            // 4. Long-missed alarms (past 30 minutes)
+
+            const isCurrentlyTriggering = Math.abs(timeDiff) <= 30 * 1000; // ±30 seconds
+            const isImminentAlarm =
+              timeDiff < 0 && Math.abs(timeDiff) <= 5 * 60 * 1000; // Next 5 minutes
+            const isRecentlyTriggered =
+              timeDiff >= 0 && timeDiff <= 5 * 60 * 1000; // Past 5 minutes
+            const isMissedAlarm = timeDiff >= 0 && timeDiff <= 30 * 60 * 1000; // Past 30 minutes
+
             const shouldHaveTriggered =
-              timeDiff >= 0 && timeDiff <= 5 * 60 * 1000; // 5 minutes
+              isCurrentlyTriggering ||
+              isImminentAlarm ||
+              isRecentlyTriggered ||
+              isMissedAlarm;
+
+            // Enhanced logging with detection reason
+            let detectionReason = '';
+            if (isCurrentlyTriggering) detectionReason = 'CURRENTLY_TRIGGERING';
+            else if (isImminentAlarm) detectionReason = 'IMMINENT_ALARM';
+            else if (isRecentlyTriggered)
+              detectionReason = 'RECENTLY_TRIGGERED';
+            else if (isMissedAlarm) detectionReason = 'MISSED_ALARM';
+            else detectionReason = 'OUTSIDE_WINDOW';
 
             console.log(`📊 Time analysis for ${notification.identifier}:`, {
-              scheduledTime: notificationTime.toISOString(),
               currentTime: now.toISOString(),
-              timeDiffSeconds: Math.round(timeDiff / 1000),
+              scheduledTime: notificationTime.toISOString(),
+              timeDiffSeconds,
               shouldHaveTriggered,
+              detectionReason,
             });
 
             if (shouldHaveTriggered) {
               console.log(
-                `🎯 Found recently triggered notification: ${notification.identifier}, time diff: ${Math.round(timeDiff / 1000)}s`
+                `🎯 ALARM DETECTED (${detectionReason}): Found active notification: ${notification.identifier}`
+              );
+              if (timeDiff >= 0) {
+                console.log(
+                  `🎯 Time diff: ${timeDiffSeconds}s (${timeDiffMinutes} minutes ago)`
+                );
+              } else {
+                console.log(
+                  `🎯 Time diff: ${timeDiffSeconds}s (${Math.abs(timeDiffMinutes)} minutes in future)`
+                );
+              }
+              console.log(
+                `🎯 Alarm ID: ${notification.content?.data?.alarmId}`
+              );
+              console.log(
+                `🎯 Audio track: ${(notification.content?.data?.audioTrack as any)?.name || 'Unknown'}`
+              );
+            } else {
+              console.log(
+                `⏰ Notification outside detection window: ${timeDiffMinutes} minutes`
               );
             }
 
@@ -577,7 +736,9 @@ export class AlarmService {
             console.log('🔄 Falling back to simple alarm check...');
             setTimeout(async () => {
               if (this.currentRingingAlarm && !this.isOnRingingScreen) {
-                await this.navigateToRingingScreen(this.currentRingingAlarm.alarmId);
+                await this.navigateToRingingScreen(
+                  this.currentRingingAlarm.alarmId
+                );
               }
             }, 100);
           }
@@ -861,8 +1022,8 @@ export class AlarmService {
       this.isNavigatingToRingingScreen = true;
 
       // Use safe replace to prevent stacking multiple alarm screens
-      await safeReplace(`/alarms/ringing?alarmId=${alarmId}`, { 
-        bypassCooldown: true // Emergency navigation for alarms
+      await safeReplace(`/alarms/ringing?alarmId=${alarmId}`, {
+        bypassCooldown: true, // Emergency navigation for alarms
       });
       console.log(`📱 Navigating to alarm screen: ${alarmId}`);
 
