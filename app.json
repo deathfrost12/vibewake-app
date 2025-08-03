@@ -18,7 +18,6 @@
       "bundleIdentifier": "com.owlee.app",
       "jsEngine": "hermes",
       "buildNumber": "2",
-      "deploymentTarget": "26.0",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to photos for image features",
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
@@ -98,8 +97,7 @@
           "defaultChannel": "alarms",
           "enableBackgroundRemoteNotifications": true,
           "requestPermissionsAsync": true,
-          "allowCriticalAlerts": true,
-          "sounds": ["./src/assets/sounds/alarm-short.caf"]
+          "allowCriticalAlerts": true
         }
       ],
       "expo-task-manager",

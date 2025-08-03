@@ -119,5 +119,12 @@
   "bugs": {
     "url": "https://github.com/yourusername/your-app-name/issues"
   },
-  "homepage": "https://github.com/yourusername/your-app-name#readme"
+  "homepage": "https://github.com/yourusername/your-app-name#readme",
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["posthog-react-native"]
+      }
+    }
+  }
 }
