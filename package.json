@@ -121,6 +121,9 @@
   },
   "homepage": "https://github.com/yourusername/your-app-name#readme",
   "expo": {
+    "autolinking": {
+      "searchPaths": ["./modules"]
+    },
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": ["posthog-react-native"]
