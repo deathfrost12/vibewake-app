@@ -35,11 +35,6 @@
           "com.owlee.app.background-fetch"
         ]
       },
-      "entitlements": {
-        "com.apple.developer.applesignin": ["Default"],
-        "aps-environment": "development"
-      },
-      "associatedDomains": ["applinks:yourapp.com"]
     },
     "android": {
       "adaptiveIcon": {

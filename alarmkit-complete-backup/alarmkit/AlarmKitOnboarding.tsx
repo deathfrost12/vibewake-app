@@ -13,7 +13,7 @@ interface AlarmKitOnboardingProps {
   style?: any;
 }
 
-export const AlarmKitOnboarding = React.memo(function AlarmKitOnboarding({
+export function AlarmKitOnboarding({
   onPermissionGranted,
   onPermissionDenied,
   onDismiss,
@@ -284,6 +284,6 @@ export const AlarmKitOnboarding = React.memo(function AlarmKitOnboarding({
       </View>
     </ThemedCard>
   );
-});
+}
 
 export default AlarmKitOnboarding;

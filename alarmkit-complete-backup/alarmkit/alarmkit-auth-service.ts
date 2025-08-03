@@ -1,19 +1,6 @@
 import { Platform } from 'react-native';
-
-// AlarmKit types - fallback definitions when module is not available
-export type AlarmKitAuthorizationStatus = {
-  granted: boolean;
-  status: 'notDetermined' | 'authorized' | 'denied' | 'unavailable';
-};
-
-// Dynamic import fallback for AlarmKit module
-let ExpoAlarmkit: any = null;
-try {
-  // This will fail gracefully if module is not available
-  ExpoAlarmkit = require('../../../modules/expo-alarmkit');
-} catch {
-  console.log('💡 AlarmKit module not available - using fallback auth mode');
-}
+import * as ExpoAlarmkit from '../../../modules/expo-alarmkit/src';
+import type { AlarmKitAuthorizationStatus } from '../../../modules/expo-alarmkit/src';
 
 export interface AlarmKitAuthService {
   isAvailable(): Promise<boolean>;
@@ -39,17 +26,14 @@ class AlarmKitAuthorizationService implements AlarmKitAuthService {
    */
   async isAvailable(): Promise<boolean> {
     if (Platform.OS !== 'ios') {
-      return false;
-    }
-
-    // Check if ExpoAlarmkit module was loaded successfully
-    if (!ExpoAlarmkit) {
+      console.log('💡 AlarmKit is only available on iOS');
       return false;
     }
 
     try {
       const available = await ExpoAlarmkit.isAvailable();
-      return available === true; // Ensure boolean return
+      console.log(`💡 AlarmKit availability: ${available}`);
+      return available;
     } catch (error) {
       console.warn('⚠️ Failed to check AlarmKit availability:', error);
       return false;
@@ -63,19 +47,13 @@ class AlarmKitAuthorizationService implements AlarmKitAuthService {
     if (!(await this.isAvailable())) {
       return {
         granted: false,
-        status: 'unavailable',
-      };
-    }
-
-    if (!ExpoAlarmkit) {
-      return {
-        granted: false,
-        status: 'unavailable',
+        status: 'denied',
       };
     }
 
     try {
       const status = await ExpoAlarmkit.getAuthorizationStatus();
+      console.log('📋 AlarmKit authorization status:', status);
       return status;
     } catch (error) {
       console.error('❌ Failed to get AlarmKit authorization status:', error);
@@ -95,11 +73,6 @@ class AlarmKitAuthorizationService implements AlarmKitAuthService {
       return false;
     }
 
-    if (!ExpoAlarmkit) {
-      console.log('💡 AlarmKit module not loaded, cannot request authorization');
-      return false;
-    }
-
     try {
       console.log('🔐 Requesting AlarmKit authorization...');
       const granted = await ExpoAlarmkit.requestAuthorization();
@@ -110,7 +83,7 @@ class AlarmKitAuthorizationService implements AlarmKitAuthService {
         console.log('❌ AlarmKit authorization denied');
       }
 
-      return granted === true; // Ensure boolean return
+      return granted;
     } catch (error) {
       console.error('❌ Failed to request AlarmKit authorization:', error);
       return false;

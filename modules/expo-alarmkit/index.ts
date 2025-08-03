@@ -1,5 +1,21 @@
-// Reexport the native module. On web, it will be resolved to ExpoAlarmkitModule.web.ts
-// and on native platforms to ExpoAlarmkitModule.ts
+// Export all types
+export * from './src/ExpoAlarmkit.types';
+
+// Export module functions
+export {
+  isAvailable,
+  getVersion,
+  requestAuthorization,
+  getAuthorizationStatus,
+  scheduleAlarm,
+  cancelAlarm,
+  cancelAllAlarms,
+  getScheduledAlarms,
+  snoozeAlarm,
+  stopAlarm,
+  addListener as addAlarmEventListener,
+  removeSubscription as removeAlarmEventListener,
+} from './src/ExpoAlarmkitModule';
+
+// Export default module
 export { default } from './src/ExpoAlarmkitModule';
-export { default as ExpoAlarmkitView } from './src/ExpoAlarmkitView';
-export * from  './src/ExpoAlarmkit.types';

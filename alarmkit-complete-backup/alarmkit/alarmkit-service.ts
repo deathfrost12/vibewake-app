@@ -1,32 +1,12 @@
 import { Platform } from 'react-native';
+import * as ExpoAlarmkit from '../../../modules/expo-alarmkit/src';
+import type {
+  NativeAlarm,
+  AlarmKitEventListener,
+} from '../../../modules/expo-alarmkit/src';
 import { alarmKitAuthService } from './alarmkit-auth-service';
 import type { Alarm } from '../../types/alarm';
 import type { AudioTrack } from '../audio/types';
-
-// AlarmKit types - fallback definitions when module is not available
-export type NativeAlarm = {
-  id: string;
-  title: string;
-  date: Date;
-  soundName?: string;
-  repeatDays?: number[];
-  isActive: boolean;
-};
-
-export type AlarmKitEventListener = (event: {
-  type: string;
-  alarmId: string;
-  timestamp: number;
-}) => void;
-
-// Dynamic import fallback for AlarmKit module
-let ExpoAlarmkit: any = null;
-try {
-  // This will fail gracefully if module is not available
-  ExpoAlarmkit = require('../../../modules/expo-alarmkit');
-} catch {
-  console.log('💡 AlarmKit module not available - using fallback mode');
-}
 
 export interface AlarmKitService {
   initialize(): Promise<void>;
@@ -130,7 +110,7 @@ class AlarmKitManagementService implements AlarmKitService {
    * Schedule a native alarm using AlarmKit
    */
   async scheduleNativeAlarm(alarm: Alarm): Promise<string> {
-    if (!ExpoAlarmkit || !(await this.canUseAlarmKit())) {
+    if (!(await this.canUseAlarmKit())) {
       throw new Error('AlarmKit is not available or not authorized');
     }
 
@@ -152,7 +132,7 @@ class AlarmKitManagementService implements AlarmKitService {
    * Cancel a native alarm
    */
   async cancelNativeAlarm(alarmId: string): Promise<void> {
-    if (!ExpoAlarmkit || !(await this.isAlarmKitAvailable())) {
+    if (!(await this.isAlarmKitAvailable())) {
       console.log(
         '💡 AlarmKit not available, skipping native alarm cancellation'
       );
@@ -173,7 +153,7 @@ class AlarmKitManagementService implements AlarmKitService {
    * Cancel all native alarms
    */
   async cancelAllNativeAlarms(): Promise<void> {
-    if (!ExpoAlarmkit || !(await this.isAlarmKitAvailable())) {
+    if (!(await this.isAlarmKitAvailable())) {
       console.log(
         '💡 AlarmKit not available, skipping native alarm cancellation'
       );
@@ -194,7 +174,7 @@ class AlarmKitManagementService implements AlarmKitService {
    * Get all scheduled native alarms
    */
   async getScheduledNativeAlarms(): Promise<NativeAlarm[]> {
-    if (!ExpoAlarmkit || !(await this.isAlarmKitAvailable())) {
+    if (!(await this.isAlarmKitAvailable())) {
       return [];
     }
 
@@ -235,7 +215,7 @@ class AlarmKitManagementService implements AlarmKitService {
       };
 
       const subscription =
-        ExpoAlarmkit?.addAlarmEventListener?.(alarmEventListener);
+        ExpoAlarmkit.addAlarmEventListener(alarmEventListener);
       this.eventListeners.push({ listener: alarmEventListener, subscription });
 
       console.log('✅ AlarmKit event listeners setup completed');
@@ -291,7 +271,7 @@ class AlarmKitManagementService implements AlarmKitService {
 
     for (const { subscription } of this.eventListeners) {
       try {
-        ExpoAlarmkit?.removeAlarmEventListener?.(subscription);
+        ExpoAlarmkit.removeAlarmEventListener(subscription);
       } catch (error) {
         console.warn('⚠️ Failed to remove AlarmKit event listener:', error);
       }
@@ -316,7 +296,7 @@ class AlarmKitManagementService implements AlarmKitService {
     let version = 'N/A';
     let scheduledAlarmsCount = 0;
 
-    if (available && ExpoAlarmkit) {
+    if (available) {
       try {
         version = await ExpoAlarmkit.getVersion();
         const alarms = await this.getScheduledNativeAlarms();
