@@ -52,7 +52,9 @@ export class AlarmService {
     }
 
     // Check if AlarmKit is available and authorized
-    return await alarmKitService.canUseAlarmKit();
+    const canUse = await alarmKitService.canUseAlarmKit();
+    console.log(`🔍 DEBUG: shouldUseAlarmKit = ${canUse}`);
+    return canUse;
   }
 
   /**
@@ -113,7 +115,10 @@ export class AlarmService {
   async scheduleAlarm(alarm: Alarm): Promise<void> {
     try {
       // Try AlarmKit first if available and authorized
-      if (await this.shouldUseAlarmKit()) {
+      const shouldUse = await this.shouldUseAlarmKit();
+      console.log(`🔍 DEBUG: scheduleAlarm shouldUseAlarmKit = ${shouldUse} for ${alarm.id}`);
+      
+      if (shouldUse) {
         try {
           console.log(`🚀 Scheduling alarm with AlarmKit: ${alarm.id}`);
           const nativeAlarmId =

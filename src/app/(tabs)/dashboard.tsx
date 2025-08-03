@@ -595,8 +595,8 @@ export default function AlarmsScreen() {
                 </ThemedText>
               </View>
 
-              {/* AlarmKit Onboarding */}
-              <AlarmKitOnboarding
+              {/* AlarmKit Onboarding - Temporarily disabled due to flicker */}
+              {/* <AlarmKitOnboarding
                 onPermissionGranted={() => {
                   console.log(
                     '✅ AlarmKit permission granted - existing alarms can be migrated'
@@ -611,7 +611,7 @@ export default function AlarmsScreen() {
                   console.log('💭 AlarmKit onboarding dismissed');
                 }}
                 style={{ marginBottom: 16 }}
-              />
+              /> */}
 
               {/* Next Alarm Hero Card */}
               {nextAlarm ? (
