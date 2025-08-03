@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { AudioTrack } from '../audio/types';
 import { Alarm, AlarmNotification } from '../../types/alarm';
 import { notificationService } from '../notifications/notification-service';
@@ -5,6 +6,8 @@ import { AudioManager } from '../audio/AudioManager';
 import { audioService } from '../audio/audio-service';
 import { Audio } from 'expo-av';
 import { safeReplace } from '../../utils/navigation-utils';
+import { alarmKitService } from '../alarmkit/alarmkit-service';
+import { alarmKitAuthService } from '../alarmkit/alarmkit-auth-service';
 
 // Alarm interface is now imported from types/alarm.ts
 
@@ -26,6 +29,7 @@ export class AlarmService {
   private currentRingingAlarm: AlarmRingingState | null = null;
   private isNavigatingToRingingScreen: boolean = false;
   private isOnRingingScreen: boolean = false;
+  private alarmKitAvailable: boolean = false;
 
   static getInstance(): AlarmService {
     if (!AlarmService.instance) {
@@ -40,6 +44,29 @@ export class AlarmService {
   }
 
   /**
+   * Check if we should use AlarmKit for native iOS alarms
+   */
+  private async shouldUseAlarmKit(): Promise<boolean> {
+    if (Platform.OS !== 'ios') {
+      return false;
+    }
+
+    // Check if AlarmKit is available and authorized
+    return await alarmKitService.canUseAlarmKit();
+  }
+
+  /**
+   * Check if AlarmKit is available (but may not be authorized)
+   */
+  private async isAlarmKitAvailable(): Promise<boolean> {
+    if (Platform.OS !== 'ios') {
+      return false;
+    }
+
+    return await alarmKitService.isAlarmKitAvailable();
+  }
+
+  /**
    * Initialize alarm service
    */
   async initialize(): Promise<void> {
@@ -49,6 +76,29 @@ export class AlarmService {
 
       // Configure audio service
       await audioService.configureAudio();
+
+      // Initialize AlarmKit if available
+      try {
+        await alarmKitService.initialize();
+        this.alarmKitAvailable = await this.isAlarmKitAvailable();
+
+        if (this.alarmKitAvailable) {
+          const canUse = await this.shouldUseAlarmKit();
+          console.log(
+            `✅ AlarmKit initialized - Available: ${this.alarmKitAvailable}, Can use: ${canUse}`
+          );
+        } else {
+          console.log(
+            '💡 AlarmKit not available - using fallback notifications'
+          );
+        }
+      } catch (alarmKitError) {
+        console.warn(
+          '⚠️ Failed to initialize AlarmKit, using fallback:',
+          alarmKitError
+        );
+        this.alarmKitAvailable = false;
+      }
 
       console.log('✅ AlarmService initialized');
     } catch (error) {
@@ -62,6 +112,33 @@ export class AlarmService {
    */
   async scheduleAlarm(alarm: Alarm): Promise<void> {
     try {
+      // Try AlarmKit first if available and authorized
+      if (await this.shouldUseAlarmKit()) {
+        try {
+          console.log(`🚀 Scheduling alarm with AlarmKit: ${alarm.id}`);
+          const nativeAlarmId =
+            await alarmKitService.scheduleNativeAlarm(alarm);
+
+          // Store AlarmKit ID for tracking
+          alarm.nativeAlarmId = nativeAlarmId;
+          alarm.isNativeAlarm = true;
+
+          console.log(
+            `✅ Native alarm scheduled: ${alarm.id} -> ${nativeAlarmId}`
+          );
+          return;
+        } catch (alarmKitError) {
+          console.warn(
+            `⚠️ AlarmKit scheduling failed for ${alarm.id}, falling back to notifications:`,
+            alarmKitError
+          );
+          // Fall through to notification scheduling
+        }
+      }
+
+      // Fallback to expo-notifications
+      console.log(`📱 Scheduling alarm with notifications: ${alarm.id}`);
+
       // Create notification data
       const alarmNotification: AlarmNotification = {
         id: alarm.id,
@@ -78,8 +155,9 @@ export class AlarmService {
 
       // Store notification ID for later cancellation
       alarm.notificationIds = notificationId.split(',');
+      alarm.isNativeAlarm = false;
 
-      console.log(`✅ Alarm scheduled: ${alarm.id}`);
+      console.log(`✅ Notification alarm scheduled: ${alarm.id}`);
     } catch (error) {
       console.error(`❌ Failed to schedule alarm ${alarm.id}:`, error);
       throw error;
@@ -91,11 +169,29 @@ export class AlarmService {
    */
   async cancelAlarm(alarm: Alarm): Promise<void> {
     try {
+      // Cancel native alarm if it exists
+      if (alarm.isNativeAlarm && alarm.nativeAlarmId) {
+        try {
+          console.log(
+            `🗑️ Cancelling native alarm: ${alarm.id} -> ${alarm.nativeAlarmId}`
+          );
+          await alarmKitService.cancelNativeAlarm(alarm.nativeAlarmId);
+          console.log(`✅ Native alarm cancelled: ${alarm.id}`);
+        } catch (alarmKitError) {
+          console.warn(
+            `⚠️ Failed to cancel native alarm ${alarm.id}:`,
+            alarmKitError
+          );
+        }
+      }
+
+      // Cancel notification alarms
       if (alarm.notificationIds) {
         // Cancel all related notifications
         for (const notificationId of alarm.notificationIds) {
           await notificationService.cancelAlarm(notificationId);
         }
+        console.log(`✅ Notification alarm cancelled: ${alarm.id}`);
       }
 
       // If this alarm is currently ringing, stop it

@@ -18,10 +18,12 @@
       "bundleIdentifier": "com.owlee.app",
       "jsEngine": "hermes",
       "buildNumber": "2",
+      "deploymentTarget": "26.0",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to photos for image features",
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
         "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
+        "NSAlarmKitUsageDescription": "This app uses native iOS alarms to provide reliable wake-up notifications that work even in silent mode and focus states, ensuring you never miss an important alarm.",
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
           "audio",

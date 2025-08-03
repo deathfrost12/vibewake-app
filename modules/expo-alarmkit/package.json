@@ -1,0 +1,29 @@
+{
+  "name": "expo-alarmkit",
+  "version": "1.0.0",
+  "description": "Expo local module for iOS 26 AlarmKit integration",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "ios",
+    "alarmkit",
+    "alarm"
+  ],
+  "repository": "https://github.com/expo/expo",
+  "author": "VibeWake Team",
+  "license": "MIT",
+  "devDependencies": {
+    "expo-module-scripts": "*"
+  },
+  "peerDependencies": {
+    "expo": "*"
+  }
+}

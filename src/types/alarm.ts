@@ -10,6 +10,8 @@ export interface BaseAlarm {
   isActive: boolean;
   audioTrack: AudioTrack;
   repeatDays?: number[]; // 0 = Sunday, 1 = Monday, etc.
+  isNativeAlarm?: boolean; // True if using AlarmKit
+  nativeAlarmId?: string; // AlarmKit alarm ID
 }
 
 /**

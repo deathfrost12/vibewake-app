@@ -19,6 +19,7 @@ import {
 } from '../../components/ui/themed-view';
 import { useAlarmStore } from '../../stores/alarm-store';
 import { Alarm } from '../../stores/alarm-store';
+import AlarmKitOnboarding from '../../components/alarmkit/AlarmKitOnboarding';
 
 export default function AlarmsScreen() {
   const { alarms, isLoading, loadAlarms, toggleAlarm, deleteAlarm } =
@@ -480,10 +481,34 @@ export default function AlarmsScreen() {
                             ? APP_COLORS.accent
                             : theme.text.muted,
                           marginLeft: 8,
+                          flex: 1,
                         }}
                       >
                         {alarm.audioTrack.name}
                       </ThemedText>
+
+                      {/* Native Alarm Badge */}
+                      {alarm.isNativeAlarm && (
+                        <View
+                          style={{
+                            paddingHorizontal: 6,
+                            paddingVertical: 2,
+                            borderRadius: 4,
+                            backgroundColor: APP_COLORS.primary,
+                            marginLeft: 8,
+                          }}
+                        >
+                          <ThemedText
+                            style={{
+                              fontSize: 9,
+                              fontWeight: '600',
+                              color: '#000000',
+                            }}
+                          >
+                            Native iOS
+                          </ThemedText>
+                        </View>
+                      )}
                     </View>
 
                     {/* Mission type */}
@@ -569,6 +594,24 @@ export default function AlarmsScreen() {
                   Ready to wake up? ✨
                 </ThemedText>
               </View>
+
+              {/* AlarmKit Onboarding */}
+              <AlarmKitOnboarding
+                onPermissionGranted={() => {
+                  console.log(
+                    '✅ AlarmKit permission granted - existing alarms can be migrated'
+                  );
+                }}
+                onPermissionDenied={() => {
+                  console.log(
+                    '❌ AlarmKit permission denied - continue with notifications'
+                  );
+                }}
+                onDismiss={() => {
+                  console.log('💭 AlarmKit onboarding dismissed');
+                }}
+                style={{ marginBottom: 16 }}
+              />
 
               {/* Next Alarm Hero Card */}
               {nextAlarm ? (
