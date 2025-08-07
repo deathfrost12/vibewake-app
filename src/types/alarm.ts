@@ -12,6 +12,7 @@ export interface BaseAlarm {
   repeatDays?: number[]; // 0 = Sunday, 1 = Monday, etc.
   isNativeAlarm?: boolean; // True if using AlarmKit
   nativeAlarmId?: string; // AlarmKit alarm ID
+  backgroundAudioEnabled?: boolean; // True if using background audio (silent loop)
 }
 
 /**
@@ -42,4 +43,6 @@ export type AlarmUpdateData = Partial<
 /**
  * Alarm notification data (for notification service)
  */
-export type AlarmNotification = BaseAlarm;
+export interface AlarmNotification extends BaseAlarm {
+  useBackgroundAudio?: boolean; // Flag for notification service to use background audio
+}

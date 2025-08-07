@@ -1,9 +1,10 @@
-import { Platform } from 'react-native';
+import { Platform, AppState } from 'react-native';
 import { AudioTrack } from '../audio/types';
 import { Alarm, AlarmNotification } from '../../types/alarm';
 import { notificationService } from '../notifications/notification-service';
 import { AudioManager } from '../audio/AudioManager';
 import { audioService } from '../audio/audio-service';
+import { backgroundAlarmService } from '../background/background-alarm-service';
 import { Audio } from 'expo-av';
 import { safeReplace } from '../../utils/navigation-utils';
 import { alarmKitService } from '../alarmkit/alarmkit-service';
@@ -30,6 +31,8 @@ export class AlarmService {
   private isNavigatingToRingingScreen: boolean = false;
   private isOnRingingScreen: boolean = false;
   private alarmKitAvailable: boolean = false;
+  private backgroundAlarmEnabled: boolean = true; // Enable silent loop background alarms
+  private useHybridMode: boolean = true; // Use both background audio and notifications
 
   static getInstance(): AlarmService {
     if (!AlarmService.instance) {
@@ -69,17 +72,34 @@ export class AlarmService {
   }
 
   /**
-   * Initialize alarm service
+   * Initialize alarm service with new background alarm support
    */
   async initialize(): Promise<void> {
     try {
+      console.log('🚀 Initializing AlarmService with background alarm support...');
+
       // Initialize notification service first
       await notificationService.initialize();
 
       // Configure audio service
       await audioService.configureAudio();
 
-      // Initialize AlarmKit if available
+      // Initialize background alarm service for silent loop support
+      if (this.backgroundAlarmEnabled) {
+        try {
+          await backgroundAlarmService.initialize({
+            enableSilentLoop: true,
+            batteryOptimized: false, // Full power for alarm reliability
+            fallbackToNotifications: true,
+          });
+          console.log('✅ Background alarm service initialized');
+        } catch (backgroundError) {
+          console.warn('⚠️ Failed to initialize background alarms, using notifications only:', backgroundError);
+          this.backgroundAlarmEnabled = false;
+        }
+      }
+
+      // Initialize AlarmKit as additional fallback (if available)
       try {
         await alarmKitService.initialize();
         this.alarmKitAvailable = await this.isAlarmKitAvailable();
@@ -91,18 +111,18 @@ export class AlarmService {
           );
         } else {
           console.log(
-            '💡 AlarmKit not available - using fallback notifications'
+            '💡 AlarmKit not available - using background audio + notifications'
           );
         }
       } catch (alarmKitError) {
         console.warn(
-          '⚠️ Failed to initialize AlarmKit, using fallback:',
+          '⚠️ Failed to initialize AlarmKit, using background audio + notifications:',
           alarmKitError
         );
         this.alarmKitAvailable = false;
       }
 
-      console.log('✅ AlarmService initialized');
+      console.log('✅ AlarmService initialized with hybrid background alarm system');
     } catch (error) {
       console.error('❌ Failed to initialize AlarmService:', error);
       throw error;
@@ -110,27 +130,58 @@ export class AlarmService {
   }
 
   /**
-   * Schedule alarm notification
+   * Schedule alarm with hybrid background audio + notification approach
    */
   async scheduleAlarm(alarm: Alarm): Promise<void> {
     try {
-      // Try AlarmKit first if available and authorized
-      const shouldUse = await this.shouldUseAlarmKit();
-      console.log(`🔍 DEBUG: scheduleAlarm shouldUseAlarmKit = ${shouldUse} for ${alarm.id}`);
+      console.log(`🔔 Scheduling alarm with hybrid approach: ${alarm.id}`);
+
+      // Strategy selection based on availability and configuration
+      let primaryStrategy: 'background-audio' | 'alarmkit' | 'notifications' = 'notifications';
       
-      if (shouldUse) {
+      if (this.backgroundAlarmEnabled && Platform.OS === 'ios') {
+        primaryStrategy = 'background-audio';
+      } else if (await this.shouldUseAlarmKit()) {
+        primaryStrategy = 'alarmkit';
+      }
+
+      console.log(`📋 Using primary strategy: ${primaryStrategy} for alarm ${alarm.id}`);
+
+      // Primary strategy: Background Audio with Silent Loop (iOS only)
+      if (primaryStrategy === 'background-audio') {
+        try {
+          console.log(`🔇 Scheduling background audio alarm: ${alarm.id}`);
+          
+          // For background audio, we still need notifications as triggers
+          // But we'll use silent loop to keep audio session alive
+          await this.scheduleWithBackgroundAudio(alarm);
+          
+          alarm.isNativeAlarm = false;
+          alarm.backgroundAudioEnabled = true;
+          
+          console.log(`✅ Background audio alarm scheduled: ${alarm.id}`);
+          return;
+        } catch (backgroundError) {
+          console.warn(
+            `⚠️ Background audio scheduling failed for ${alarm.id}, trying AlarmKit:`,
+            backgroundError
+          );
+          // Fall through to AlarmKit
+        }
+      }
+
+      // Fallback 1: Try AlarmKit if available and authorized
+      if (primaryStrategy === 'alarmkit' || (primaryStrategy === 'background-audio' && await this.shouldUseAlarmKit())) {
         try {
           console.log(`🚀 Scheduling alarm with AlarmKit: ${alarm.id}`);
-          const nativeAlarmId =
-            await alarmKitService.scheduleNativeAlarm(alarm);
+          const nativeAlarmId = await alarmKitService.scheduleNativeAlarm(alarm);
 
           // Store AlarmKit ID for tracking
           alarm.nativeAlarmId = nativeAlarmId;
           alarm.isNativeAlarm = true;
+          alarm.backgroundAudioEnabled = false;
 
-          console.log(
-            `✅ Native alarm scheduled: ${alarm.id} -> ${nativeAlarmId}`
-          );
+          console.log(`✅ Native alarm scheduled: ${alarm.id} -> ${nativeAlarmId}`);
           return;
         } catch (alarmKitError) {
           console.warn(
@@ -141,32 +192,73 @@ export class AlarmService {
         }
       }
 
-      // Fallback to expo-notifications
+      // Fallback 2: Standard expo-notifications
       console.log(`📱 Scheduling alarm with notifications: ${alarm.id}`);
-
-      // Create notification data
-      const alarmNotification: AlarmNotification = {
-        id: alarm.id,
-        title: alarm.title || 'Alarm',
-        time: alarm.time,
-        isActive: alarm.isActive,
-        audioTrack: alarm.audioTrack,
-        repeatDays: alarm.repeatDays,
-      };
-
-      // Schedule the notification
-      const notificationId =
-        await notificationService.scheduleAlarm(alarmNotification);
-
-      // Store notification ID for later cancellation
-      alarm.notificationIds = notificationId.split(',');
+      await this.scheduleWithNotifications(alarm);
+      
       alarm.isNativeAlarm = false;
+      alarm.backgroundAudioEnabled = false;
 
       console.log(`✅ Notification alarm scheduled: ${alarm.id}`);
     } catch (error) {
       console.error(`❌ Failed to schedule alarm ${alarm.id}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Schedule alarm with background audio support (silent loop method)
+   */
+  private async scheduleWithBackgroundAudio(alarm: Alarm): Promise<void> {
+    // Create notification data with background audio flag
+    const alarmNotification: AlarmNotification = {
+      id: alarm.id,
+      title: alarm.title || 'Alarm',
+      time: alarm.time,
+      isActive: alarm.isActive,
+      audioTrack: alarm.audioTrack,
+      repeatDays: alarm.repeatDays,
+      useBackgroundAudio: true, // Flag for background audio handling
+    };
+
+    // Schedule the notification (this will trigger the background audio system)
+    const notificationId = await notificationService.scheduleAlarm(alarmNotification);
+    alarm.notificationIds = notificationId.split(',');
+
+    // Pre-start silent loop if app is in foreground and alarm is soon
+    if (AppState.currentState === 'active') {
+      const timeUntilAlarm = alarm.time.getTime() - Date.now();
+      const preStartWindow = 10 * 60 * 1000; // 10 minutes before
+
+      if (timeUntilAlarm <= preStartWindow && timeUntilAlarm > 0) {
+        console.log(`🔇 Pre-starting silent loop for imminent alarm: ${alarm.id}`);
+        try {
+          await backgroundAlarmService.startSilentLoop();
+          console.log('✅ Silent loop pre-started for alarm reliability');
+        } catch (error) {
+          console.warn('⚠️ Failed to pre-start silent loop:', error);
+          // Continue without pre-start - alarm will still work
+        }
+      }
+    }
+  }
+
+  /**
+   * Schedule alarm with standard notifications
+   */
+  private async scheduleWithNotifications(alarm: Alarm): Promise<void> {
+    const alarmNotification: AlarmNotification = {
+      id: alarm.id,
+      title: alarm.title || 'Alarm',
+      time: alarm.time,
+      isActive: alarm.isActive,
+      audioTrack: alarm.audioTrack,
+      repeatDays: alarm.repeatDays,
+      useBackgroundAudio: false,
+    };
+
+    const notificationId = await notificationService.scheduleAlarm(alarmNotification);
+    alarm.notificationIds = notificationId.split(',');
   }
 
   /**
@@ -232,11 +324,12 @@ export class AlarmService {
   }
 
   /**
-   * Start ringing alarm with background audio support
+   * Start ringing alarm with enhanced background audio support
    */
   async startRingingAlarm(
     alarmId: string,
-    audioTrack: AudioTrack
+    audioTrack: AudioTrack,
+    useBackgroundAudio: boolean = false
   ): Promise<void> {
     try {
       // Stop any currently ringing alarm
@@ -244,15 +337,21 @@ export class AlarmService {
         await this.stopRingingAlarm();
       }
 
-      console.log(`🎵 Starting alarm with AudioManager: ${alarmId}`);
+      console.log(`🎵 Starting alarm: ${alarmId} (background: ${useBackgroundAudio})`);
 
-      // Use AudioManager for reliable playback with fallback support
+      // If using background audio system and silent loop is available
+      if (useBackgroundAudio && this.backgroundAlarmEnabled && Platform.OS === 'ios') {
+        await this.startRingingAlarmWithBackgroundAudio(alarmId, audioTrack);
+        return;
+      }
+
+      // Standard approach with AudioManager
+      console.log(`🎵 Starting alarm with AudioManager: ${alarmId}`);
       const result = await AudioManager.playAlarmAudio({
         preferredTrack: audioTrack,
         fallbackSoundId: 'alarm-classic',
         onSpotifyPlayerNeeded: track => {
           console.log('🎵 Spotify player needed for:', track.name);
-          // Could trigger UI notification about opening Spotify
         },
         onPlaybackFailed: (error, fallbackUsed) => {
           console.warn(
@@ -265,52 +364,103 @@ export class AlarmService {
       });
 
       if (result.success) {
-        // Enable looping for alarm
         await AudioManager.setIsLoopingAsync(true);
-
-        // Store current ringing state
         this.currentRingingAlarm = {
           alarmId,
-          soundObject: null, // AudioManager handles the sound object internally
+          soundObject: null, // AudioManager handles internally
           isRinging: true,
         };
-
-        console.log(
-          `✅ Alarm started ringing: ${alarmId} (fallback: ${result.usedFallback})`
-        );
+        console.log(`✅ Alarm started ringing: ${alarmId} (fallback: ${result.usedFallback})`);
       } else {
         throw new Error('Failed to start alarm audio');
       }
     } catch (error) {
       console.error(`❌ Failed to start ringing alarm ${alarmId}:`, error);
+      await this.startRingingAlarmFallback(alarmId, audioTrack);
+    }
+  }
 
-      // Fallback to legacy audio system
-      try {
-        console.log('🔄 Attempting fallback to legacy audio system');
-        await audioService.configureAudio();
+  /**
+   * Start ringing alarm with background audio (silent loop method)
+   */
+  private async startRingingAlarmWithBackgroundAudio(
+    alarmId: string,
+    audioTrack: AudioTrack
+  ): Promise<void> {
+    try {
+      console.log(`🔇 Starting background audio alarm: ${alarmId}`);
 
-        let soundObject: Audio.Sound;
-        if (audioTrack.uri) {
-          soundObject = await audioService.loadAudio(audioTrack.uri);
-        } else {
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: 'default' },
-            { shouldPlay: false, isLooping: true, volume: 1.0 }
-          );
-          soundObject = sound;
-        }
-
-        await audioService.playAlarmSound(soundObject);
-        this.currentRingingAlarm = { alarmId, soundObject, isRinging: true };
-
-        console.log(`✅ Alarm started with legacy fallback: ${alarmId}`);
-      } catch (fallbackError) {
-        console.error(
-          `❌ Even fallback failed for alarm ${alarmId}:`,
-          fallbackError
+      // Load alarm audio with enhanced options
+      let alarmSound: Audio.Sound;
+      if (audioTrack.uri) {
+        alarmSound = await audioService.loadAlarmAudio(audioTrack.uri, {
+          volume: 1.0,
+          shouldLoop: true,
+        });
+      } else {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: 'default' },
+          { shouldPlay: false, isLooping: true, volume: 1.0 }
         );
-        throw error;
+        alarmSound = sound;
       }
+
+      // If silent loop is active, switch to alarm sound
+      if (backgroundAlarmService.isSilentLoopActive()) {
+        console.log('🔄 Switching from silent loop to alarm sound');
+        await backgroundAlarmService.switchToAlarmSound(alarmSound);
+      } else {
+        // Start silent loop first, then switch to alarm
+        console.log('🔇 Starting silent loop then alarm sound');
+        await backgroundAlarmService.startSilentLoop();
+        // Small delay to ensure silent loop is established
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await backgroundAlarmService.switchToAlarmSound(alarmSound);
+      }
+
+      this.currentRingingAlarm = {
+        alarmId,
+        soundObject: alarmSound,
+        isRinging: true,
+      };
+
+      console.log(`✅ Background audio alarm started: ${alarmId}`);
+    } catch (error) {
+      console.error(`❌ Failed to start background audio alarm:`, error);
+      // Fallback to standard approach
+      await this.startRingingAlarmFallback(alarmId, audioTrack);
+    }
+  }
+
+  /**
+   * Fallback method for starting alarm with legacy audio system
+   */
+  private async startRingingAlarmFallback(
+    alarmId: string,
+    audioTrack: AudioTrack
+  ): Promise<void> {
+    try {
+      console.log('🔄 Attempting fallback to legacy audio system');
+      await audioService.configureAudio();
+
+      let soundObject: Audio.Sound;
+      if (audioTrack.uri) {
+        soundObject = await audioService.loadAudio(audioTrack.uri);
+      } else {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: 'default' },
+          { shouldPlay: false, isLooping: true, volume: 1.0 }
+        );
+        soundObject = sound;
+      }
+
+      await audioService.playAlarmSound(soundObject);
+      this.currentRingingAlarm = { alarmId, soundObject, isRinging: true };
+
+      console.log(`✅ Alarm started with legacy fallback: ${alarmId}`);
+    } catch (fallbackError) {
+      console.error(`❌ Even fallback failed for alarm ${alarmId}:`, fallbackError);
+      throw fallbackError;
     }
   }
 
@@ -872,8 +1022,9 @@ export class AlarmService {
       );
 
       if (alarmId && audioTrack) {
+        const useBackgroundAudio = data?.useBackgroundAudio === true;
         console.log('🔔 Alarm notification tapped (user action):', alarmId);
-        this.handleAlarmTrigger(String(alarmId), audioTrack as any);
+        this.handleAlarmTrigger(String(alarmId), audioTrack as any, useBackgroundAudio);
       } else {
         console.warn(
           '⚠️ Invalid notification response data - missing alarmId or audioTrack'
@@ -900,9 +1051,11 @@ export class AlarmService {
       });
 
       if (alarmId && audioTrack) {
+        const useBackgroundAudio = data?.useBackgroundAudio === true;
+        
         if (currentAppState === 'active') {
           console.log('🔔 Alarm triggered in FOREGROUND:', alarmId);
-          this.handleAlarmTrigger(String(alarmId), audioTrack as any);
+          this.handleAlarmTrigger(String(alarmId), audioTrack as any, useBackgroundAudio);
         } else {
           console.log(
             '🔔 Alarm notification received in BACKGROUND - starting background audio:',
@@ -911,9 +1064,10 @@ export class AlarmService {
           console.log('📊 Background trigger context:', {
             appState: currentAppState,
             alarmId,
+            useBackgroundAudio,
             currentlyRinging: this.currentRingingAlarm?.alarmId,
           });
-          this.handleBackgroundAlarmTrigger(String(alarmId), audioTrack as any);
+          this.handleBackgroundAlarmTrigger(String(alarmId), audioTrack as any, useBackgroundAudio);
         }
       } else {
         console.warn(
@@ -935,7 +1089,8 @@ export class AlarmService {
    */
   private async handleAlarmTrigger(
     alarmId: string,
-    audioTrack: AudioTrack
+    audioTrack: AudioTrack,
+    useBackgroundAudio: boolean = false
   ): Promise<void> {
     console.log('🎯 Handling alarm trigger (foreground/notification tap):', {
       alarmId,
@@ -972,8 +1127,8 @@ export class AlarmService {
 
       console.log('🚀 Starting alarm ringing and navigation sequence...');
 
-      // Start ringing the alarm
-      await this.startRingingAlarm(alarmId, audioTrack);
+      // Start ringing the alarm with background audio support
+      await this.startRingingAlarm(alarmId, audioTrack, useBackgroundAudio);
       console.log('✅ Alarm audio started successfully');
 
       // Navigate to alarm ringing screen if possible
@@ -993,96 +1148,93 @@ export class AlarmService {
   }
 
   /**
-   * Handle background alarm trigger - focus on audio AND proper state management
+   * Handle background alarm trigger with enhanced background audio support
    * CRITICAL: This must set currentRingingAlarm properly for app activation detection
    */
   private async handleBackgroundAlarmTrigger(
     alarmId: string,
-    audioTrack: AudioTrack
+    audioTrack: AudioTrack,
+    useBackgroundAudio: boolean = false
   ): Promise<void> {
     try {
-      console.log('🔔 Starting background alarm audio:', alarmId);
-      console.log(
-        '📊 Current ringing alarm before background trigger:',
-        this.currentRingingAlarm?.alarmId
-      );
+      console.log(`🔔 Starting background alarm audio: ${alarmId} (background: ${useBackgroundAudio})`);
 
       // Check if this alarm is already ringing - prevent duplicates
       if (this.currentRingingAlarm?.alarmId === alarmId) {
-        console.log(
-          '⚠️ Alarm already ringing in background, ignoring duplicate trigger:',
-          alarmId
-        );
+        console.log('⚠️ Alarm already ringing in background, ignoring duplicate trigger:', alarmId);
         return;
       }
 
       // Stop any currently ringing alarm first
       if (this.currentRingingAlarm) {
-        console.log(
-          '🔄 Stopping current alarm before starting background alarm'
-        );
+        console.log('🔄 Stopping current alarm before starting background alarm');
         await this.stopRingingAlarm();
       }
 
-      // Ensure audio service is configured for background
-      if (!audioService.isAudioConfigured()) {
-        console.log('🎵 Configuring audio for background playback');
-        await audioService.configureAudio();
-      }
-
-      // CRITICAL: Use the same startRingingAlarm method that properly sets currentRingingAlarm
-      // This ensures state consistency between foreground and background triggers
-      await this.startRingingAlarm(alarmId, audioTrack);
-
-      console.log('✅ Background alarm audio started successfully:', alarmId);
-      console.log(
-        '📊 Current ringing alarm after background trigger:',
-        this.currentRingingAlarm?.alarmId
-      );
-      console.log(
-        '🎯 Background alarm state properly set for app activation detection'
-      );
-    } catch (error) {
-      console.error('❌ Failed to handle background alarm trigger:', error);
-
-      // Fallback: try to set basic state even if audio fails
-      try {
-        console.log(
-          '🔄 Setting fallback alarm state for app activation detection'
-        );
-        this.currentRingingAlarm = {
-          alarmId,
-          soundObject: null,
-          isRinging: true,
-        };
-
-        // Attempt system default sound as last resort
-        console.log('🔄 Attempting fallback with system default sound');
-        const { Audio } = await import('expo-av');
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: 'default' },
-          { shouldPlay: true, isLooping: true, volume: 1.0 }
-        );
-
-        // Update state with fallback sound
-        if (this.currentRingingAlarm) {
-          this.currentRingingAlarm.soundObject = sound;
+      // Use enhanced background audio if enabled
+      if (useBackgroundAudio && this.backgroundAlarmEnabled && Platform.OS === 'ios') {
+        console.log('🔇 Using background audio system for alarm trigger');
+        await this.startRingingAlarm(alarmId, audioTrack, true);
+      } else {
+        // Standard background trigger
+        console.log('📱 Using standard audio system for background alarm');
+        
+        // Ensure audio service is configured for background
+        if (!audioService.isAudioConfigured()) {
+          console.log('🎵 Configuring audio for background playback');
+          await audioService.configureAudio();
         }
 
-        console.log('✅ Fallback alarm sound started with basic state');
-      } catch (fallbackError) {
-        console.error('❌ Even fallback alarm failed:', fallbackError);
-
-        // Last resort: set state without audio so navigation still works
-        this.currentRingingAlarm = {
-          alarmId,
-          soundObject: null,
-          isRinging: true,
-        };
-        console.log(
-          '⚠️ Set alarm state without audio - navigation will work, but no sound'
-        );
+        await this.startRingingAlarm(alarmId, audioTrack, false);
       }
+
+      console.log('✅ Background alarm audio started successfully:', alarmId);
+    } catch (error) {
+      console.error('❌ Failed to handle background alarm trigger:', error);
+      await this.handleBackgroundAlarmTriggerFallback(alarmId, audioTrack);
+    }
+  }
+
+  /**
+   * Fallback for background alarm trigger when main method fails
+   */
+  private async handleBackgroundAlarmTriggerFallback(
+    alarmId: string,
+    audioTrack: AudioTrack
+  ): Promise<void> {
+    try {
+      console.log('🔄 Setting fallback alarm state for app activation detection');
+      
+      // Set basic state for navigation to work
+      this.currentRingingAlarm = {
+        alarmId,
+        soundObject: null,
+        isRinging: true,
+      };
+
+      // Attempt system default sound as last resort
+      console.log('🔄 Attempting fallback with system default sound');
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: 'default' },
+        { shouldPlay: true, isLooping: true, volume: 1.0 }
+      );
+
+      // Update state with fallback sound
+      if (this.currentRingingAlarm) {
+        this.currentRingingAlarm.soundObject = sound;
+      }
+
+      console.log('✅ Fallback alarm sound started with basic state');
+    } catch (fallbackError) {
+      console.error('❌ Even fallback alarm failed:', fallbackError);
+
+      // Last resort: set state without audio so navigation still works
+      this.currentRingingAlarm = {
+        alarmId,
+        soundObject: null,
+        isRinging: true,
+      };
+      console.log('⚠️ Set alarm state without audio - navigation will work, but no sound');
     }
   }
 

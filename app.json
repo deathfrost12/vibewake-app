@@ -22,17 +22,14 @@
         "NSPhotoLibraryUsageDescription": "This app needs access to photos for image features",
         "NSCameraUsageDescription": "This app needs access to camera for photo features",
         "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
-        "NSAlarmKitUsageDescription": "This app uses native iOS alarms to provide reliable wake-up notifications that work even in silent mode and focus states, ensuring you never miss an important alarm.",
+        "NSAlarmKitUsageDescription": "This app uses background audio and sleep sounds to provide reliable wake-up notifications and wellness features that work in silent mode, ensuring optimal alarm reliability.",
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
           "audio",
-          "background-processing",
-          "background-fetch",
           "remote-notification"
         ],
         "BGTaskSchedulerPermittedIdentifiers": [
-          "com.owlee.app.alarm-audio",
-          "com.owlee.app.background-fetch"
+          "com.owlee.app.silent-loop-audio"
         ]
       },
     },

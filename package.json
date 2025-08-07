@@ -89,7 +89,8 @@
     "react-native-web": "^0.20.0",
     "zustand": "^5.0.5",
     "react-native-webview": "13.13.5",
-    "expo-task-manager": "~13.1.6"
+    "expo-task-manager": "~13.1.6",
+    "expo-battery": "~9.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

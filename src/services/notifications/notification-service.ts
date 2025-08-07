@@ -139,13 +139,15 @@ class NotificationService {
       try {
         // Auto-schedule for next day if time is in the past
         const now = new Date();
-        if (alarm.time <= now) {
-          const nextDay = new Date(alarm.time);
-          nextDay.setDate(nextDay.getDate() + 1);
-          alarm.time = nextDay;
+        let scheduleTime = new Date(alarm.time);
+        
+        if (scheduleTime <= now) {
+          // Add time to ensure it's definitely in the future
+          scheduleTime = new Date(now.getTime() + 60 * 1000); // 1 minute from now
           console.log(
-            '⏰ Alarm time was in past, rescheduled for next day:',
-            alarm.time
+            '⏰ Alarm time was in past, rescheduled to:',
+            scheduleTime.toISOString(),
+            `(${Math.round((scheduleTime.getTime() - now.getTime()) / 1000)}s from now)`
           );
         }
 
@@ -153,7 +155,7 @@ class NotificationService {
           content,
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: alarm.time,
+            date: scheduleTime,
             channelId: Platform.OS === 'android' ? 'alarms' : undefined,
           },
         });

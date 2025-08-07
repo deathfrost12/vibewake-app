@@ -7,7 +7,7 @@ import type { AudioTrack } from '../audio/types';
 export type NativeAlarm = {
   id: string;
   title: string;
-  date: Date;
+  date: number; // Timestamp in milliseconds
   soundName?: string;
   repeatDays?: number[];
   isActive: boolean;
@@ -102,14 +102,25 @@ class AlarmKitManagementService implements AlarmKitService {
    * Convert our Alarm type to AlarmKit NativeAlarm format
    */
   private convertToNativeAlarm(alarm: Alarm): NativeAlarm {
-    return {
+    const alarmData = {
       id: alarm.id,
       title: alarm.title || 'Alarm',
-      date: alarm.time,
+      date: alarm.time.getTime(), // Convert Date to timestamp (milliseconds)
       soundName: this.getSoundNameFromAudioTrack(alarm.audioTrack),
       repeatDays: alarm.repeatDays,
       isActive: alarm.isActive,
     };
+    
+    console.log(`📱 Converting alarm to native format:`, {
+      id: alarmData.id,
+      title: alarmData.title,
+      timestamp: alarmData.date,
+      scheduledDate: alarm.time.toISOString(),
+      soundName: alarmData.soundName,
+      isActive: alarmData.isActive
+    });
+    
+    return alarmData;
   }
 
   /**

@@ -1,7 +1,7 @@
 import { NativeModulesProxy, EventEmitter } from 'expo-modules-core';
 
-// This will be the actual native module proxy
-const ExpoAlarmkitModule = NativeModulesProxy.ExpoAlarmkit;
+// This will be the actual native module proxy - using correct module name from config
+const ExpoAlarmkitModule = NativeModulesProxy.ExpoAlarmkitModule;
 
 // Basic module functions
 export async function requestAuthorization(): Promise<boolean> {
@@ -13,7 +13,14 @@ export async function getAuthorizationStatus(): Promise<any> {
 }
 
 export async function scheduleAlarm(alarm: any): Promise<string> {
-  return ExpoAlarmkitModule?.scheduleAlarm(alarm);
+  console.log('🔍 JS: ExpoAlarmkitModule.scheduleAlarm called with:', alarm);
+  console.log('🔍 JS: ExpoAlarmkitModule proxy:', ExpoAlarmkitModule ? 'EXISTS' : 'NULL');
+  console.log('🔍 JS: scheduleAlarm function:', typeof ExpoAlarmkitModule?.scheduleAlarm);
+  
+  const result = await ExpoAlarmkitModule?.scheduleAlarm(alarm);
+  console.log('🔍 JS: scheduleAlarm result:', result);
+  
+  return result;
 }
 
 export async function cancelAlarm(alarmId: string): Promise<void> {
