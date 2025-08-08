@@ -74,18 +74,21 @@ export class BreathingExerciseService {
         exhaleSeconds: 5,
         holdOutSeconds: 0,
         cycles: 20,
-        guideSound: 'https://www.soundjay.com/misc/sounds/breath-guide-coherent.wav', // Replace with actual
+        guideSound:
+          'https://www.soundjay.com/misc/sounds/breath-guide-coherent.wav', // Replace with actual
       },
       {
         id: 'extended-exhale',
         name: 'Extended Exhale',
-        description: '4s in, 6s out - for anxiety and nervous system regulation',
+        description:
+          '4s in, 6s out - for anxiety and nervous system regulation',
         inhaleSeconds: 4,
         holdInSeconds: 0,
         exhaleSeconds: 6,
         holdOutSeconds: 0,
         cycles: 15,
-        guideSound: 'https://www.soundjay.com/misc/sounds/breath-guide-extended.wav', // Replace with actual
+        guideSound:
+          'https://www.soundjay.com/misc/sounds/breath-guide-extended.wav', // Replace with actual
       },
       {
         id: 'mindful-breathing',
@@ -96,7 +99,8 @@ export class BreathingExerciseService {
         exhaleSeconds: 6,
         holdOutSeconds: 2,
         cycles: -1, // Continuous
-        guideSound: 'https://www.soundjay.com/misc/sounds/breath-guide-mindful.wav', // Replace with actual
+        guideSound:
+          'https://www.soundjay.com/misc/sounds/breath-guide-mindful.wav', // Replace with actual
       },
     ];
   }
@@ -224,10 +228,10 @@ export class BreathingExerciseService {
       }
 
       this.currentSession.isActive = true;
-      
+
       // Resume breathing cycle from current phase
       await this.continueBreathingCycle();
-      
+
       console.log('▶️ Breathing session resumed');
     } catch (error) {
       console.error('❌ Failed to resume breathing session:', error);
@@ -276,7 +280,7 @@ export class BreathingExerciseService {
 
       this.guideSound = sound;
       await sound.playAsync();
-      
+
       console.log('✅ Breathing guide sound started');
     } catch (error) {
       console.error('❌ Failed to start breathing guide sound:', error);
@@ -323,9 +327,12 @@ export class BreathingExerciseService {
     if (!this.currentSession?.isActive) return;
 
     const pattern = this.currentSession.pattern;
-    
+
     // Check if we've completed all cycles
-    if (pattern.cycles !== -1 && this.currentSession.currentCycle >= pattern.cycles) {
+    if (
+      pattern.cycles !== -1 &&
+      this.currentSession.currentCycle >= pattern.cycles
+    ) {
       console.log('🫁 Breathing session completed!');
       await this.stopBreathingSession();
       return;
@@ -342,7 +349,7 @@ export class BreathingExerciseService {
 
     const session = this.currentSession;
     const pattern = session.pattern;
-    
+
     // Resume from current phase
     switch (session.currentPhase) {
       case 'inhale':
@@ -363,19 +370,22 @@ export class BreathingExerciseService {
   /**
    * Execute breathing phase
    */
-  private async executePhase(phase: BreathingSession['currentPhase'], durationMs: number): Promise<void> {
+  private async executePhase(
+    phase: BreathingSession['currentPhase'],
+    durationMs: number
+  ): Promise<void> {
     if (!this.currentSession?.isActive) return;
 
     this.currentSession.currentPhase = phase;
-    console.log(`🫁 Phase: ${phase} (${durationMs/1000}s)`);
+    console.log(`🫁 Phase: ${phase} (${durationMs / 1000}s)`);
 
     // You could emit events here to update UI visualization
-    
+
     this.phaseTimer = setTimeout(async () => {
       if (!this.currentSession?.isActive) return;
 
       const pattern = this.currentSession.pattern;
-      
+
       switch (phase) {
         case 'inhale':
           if (pattern.holdInSeconds > 0) {
@@ -384,11 +394,11 @@ export class BreathingExerciseService {
             await this.executePhase('exhale', pattern.exhaleSeconds * 1000);
           }
           break;
-          
+
         case 'hold-in':
           await this.executePhase('exhale', pattern.exhaleSeconds * 1000);
           break;
-          
+
         case 'exhale':
           if (pattern.holdOutSeconds > 0) {
             await this.executePhase('hold-out', pattern.holdOutSeconds * 1000);
@@ -398,7 +408,7 @@ export class BreathingExerciseService {
             await this.startBreathingCycle();
           }
           break;
-          
+
         case 'hold-out':
           // Complete cycle
           this.currentSession.currentCycle++;
@@ -426,9 +436,12 @@ export class BreathingExerciseService {
     completionPercent: number;
   } {
     let completionPercent = 0;
-    
+
     if (this.currentSession && this.currentSession.pattern.cycles > 0) {
-      completionPercent = (this.currentSession.currentCycle / this.currentSession.pattern.cycles) * 100;
+      completionPercent =
+        (this.currentSession.currentCycle /
+          this.currentSession.pattern.cycles) *
+        100;
     }
 
     return {

@@ -58,7 +58,9 @@ export class BackgroundAlarmService {
    */
   async startSilentLoop(): Promise<void> {
     if (!this.isInitialized) {
-      throw new Error('BackgroundAlarmService not initialized. Call initialize() first.');
+      throw new Error(
+        'BackgroundAlarmService not initialized. Call initialize() first.'
+      );
     }
 
     if (this.isLoopActive) {
@@ -77,23 +79,23 @@ export class BackgroundAlarmService {
     }
 
     try {
-      console.log('🔇 Starting silent audio loop...');
+      console.log('🔇 Starting long silent audio to keep session alive...');
 
-      // Create audio player for the silent audio file
-      const silentUri = require('../../../assets/silent-1s.wav');
+      // Use 10-minute silent file instead of 1s loop to avoid JS timer issues in background
+      const silentUri = require('../../../assets/silent-10min.wav');
       this.silentPlayer = createAudioPlayer(silentUri);
-      
-      // Configure for silent loop
-      this.silentPlayer.volume = 0.0; // Completely silent
-      
-      // Start playing
+
+      // Configure for silent background audio - use very low but non-zero volume
+      // iOS may optimize away completely silent audio
+      this.silentPlayer.volume = 0.001;
+
+      // Start playing - will run for 10 minutes without needing JS timers
       await this.silentPlayer.play();
-      
-      // Setup manual looping for the silent audio
-      this.setupSilentLoop();
 
       this.isLoopActive = true;
-      console.log('✅ Silent audio loop started - audio session kept alive with expo-audio');
+      console.log(
+        '✅ Long silent audio started - audio session kept alive for 10 minutes without JS timers'
+      );
     } catch (error) {
       console.error('❌ Failed to start silent loop:', error);
       this.isLoopActive = false;
@@ -101,26 +103,8 @@ export class BackgroundAlarmService {
     }
   }
 
-  /**
-   * Setup manual looping for silent audio
-   */
-  private setupSilentLoop(): void {
-    if (!this.silentPlayer) return;
-
-    const checkForLoop = () => {
-      if (!this.isLoopActive || !this.silentPlayer) return;
-      
-      // Check if audio finished and restart it
-      if (this.silentPlayer.currentTime >= this.silentPlayer.duration && this.silentPlayer.duration > 0) {
-        this.silentPlayer.seekTo(0);
-        this.silentPlayer.play();
-      }
-    };
-
-    // Check every 100ms for looping
-    const interval = setInterval(checkForLoop, 100);
-    (this.silentPlayer as any)._loopInterval = interval;
-  }
+  // Note: setupSilentLoop() method removed - we now use long 10-minute silent file
+  // instead of JS timer-based 1s looping to avoid background timer issues
 
   /**
    * Stop silent audio loop
@@ -133,21 +117,15 @@ export class BackgroundAlarmService {
     }
 
     try {
-      console.log('🔇 Stopping silent audio loop...');
+      console.log('🔇 Stopping long silent audio...');
 
-      // Clear the loop interval
-      const interval = (this.silentPlayer as any)._loopInterval;
-      if (interval) {
-        clearInterval(interval);
-        delete (this.silentPlayer as any)._loopInterval;
-      }
-
+      // Simply pause and cleanup - no intervals to clear
       await this.silentPlayer.pause();
-      
+
       this.silentPlayer = null;
       this.isLoopActive = false;
 
-      console.log('✅ Silent audio loop stopped with expo-audio');
+      console.log('✅ Long silent audio stopped');
     } catch (error) {
       console.error('❌ Failed to stop silent loop:', error);
       // Force cleanup even if stop fails
@@ -166,7 +144,7 @@ export class BackgroundAlarmService {
 
       // First, start the alarm player while silent loop is still running
       await alarmPlayer.play();
-      
+
       // Small delay to ensure alarm audio starts playing
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -281,9 +259,9 @@ export class BackgroundAlarmService {
    */
   async cleanup(): Promise<void> {
     console.log('🧹 Cleaning up BackgroundAlarmService...');
-    
+
     await this.emergencyStop();
-    
+
     this.isInitialized = false;
     console.log('✅ BackgroundAlarmService cleanup completed');
   }

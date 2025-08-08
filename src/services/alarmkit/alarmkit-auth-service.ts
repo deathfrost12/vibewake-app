@@ -96,7 +96,9 @@ class AlarmKitAuthorizationService implements AlarmKitAuthService {
     }
 
     if (!ExpoAlarmkit) {
-      console.log('💡 AlarmKit module not loaded, cannot request authorization');
+      console.log(
+        '💡 AlarmKit module not loaded, cannot request authorization'
+      );
       return false;
     }
 

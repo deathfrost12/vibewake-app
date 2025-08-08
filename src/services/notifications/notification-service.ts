@@ -114,9 +114,10 @@ class NotificationService {
     const content: Notifications.NotificationContentInput = {
       title: alarm.title || 'Alarm',
       body: `Wake up! Your alarm is ringing 🔔`,
-      sound: Platform.OS === 'android' ? 'default' : true,
+      sound: Platform.OS === 'android' ? 'default' : true, // iOS: max 30 seconds for notification sound
       priority: Notifications.AndroidNotificationPriority.MAX,
       // iOS-specific high priority configuration
+      // NOTE: iOS notification sounds are limited to 30 seconds max
       ...(Platform.OS === 'ios' && {
         priority: Notifications.AndroidNotificationPriority.HIGH, // Expo uses Android enum for both platforms
         // Note: Critical alerts and interruptionLevel require special Apple entitlements
@@ -140,7 +141,7 @@ class NotificationService {
         // Auto-schedule for next day if time is in the past
         const now = new Date();
         let scheduleTime = new Date(alarm.time);
-        
+
         if (scheduleTime <= now) {
           // Add time to ensure it's definitely in the future
           scheduleTime = new Date(now.getTime() + 60 * 1000); // 1 minute from now

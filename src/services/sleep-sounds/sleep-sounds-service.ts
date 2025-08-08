@@ -96,7 +96,10 @@ export class SleepSoundsService {
    * Start playing sleep sound with background capability
    * This justifies continuous background audio to Apple
    */
-  async startSleepSound(soundId: string, customConfig?: Partial<SleepSoundsConfig>): Promise<void> {
+  async startSleepSound(
+    soundId: string,
+    customConfig?: Partial<SleepSoundsConfig>
+  ): Promise<void> {
     try {
       // Stop current sound if playing
       if (this.isPlaying) {
@@ -105,7 +108,7 @@ export class SleepSoundsService {
 
       const config = { ...this.config, ...customConfig };
       const sound = this.getAvailableSounds().find(s => s.id === soundId);
-      
+
       if (!sound) {
         throw new Error(`Sleep sound not found: ${soundId}`);
       }
@@ -135,9 +138,12 @@ export class SleepSoundsService {
 
       // Set auto-stop timer if configured
       if (config.autoStopAfter) {
-        setTimeout(() => {
-          this.stopSleepSound().catch(console.error);
-        }, config.autoStopAfter * 60 * 1000);
+        setTimeout(
+          () => {
+            this.stopSleepSound().catch(console.error);
+          },
+          config.autoStopAfter * 60 * 1000
+        );
       }
 
       console.log('✅ Sleep sound started:', sound.name);
@@ -166,7 +172,7 @@ export class SleepSoundsService {
       // Stop and cleanup
       await this.currentSound.stopAsync();
       await this.currentSound.unloadAsync();
-      
+
       this.currentSound = null;
       this.isPlaying = false;
 
@@ -214,7 +220,11 @@ export class SleepSoundsService {
   /**
    * Fade in audio over specified duration
    */
-  private async fadeIn(sound: Audio.Sound, targetVolume: number, durationMs: number): Promise<void> {
+  private async fadeIn(
+    sound: Audio.Sound,
+    targetVolume: number,
+    durationMs: number
+  ): Promise<void> {
     const steps = 20;
     const stepDuration = durationMs / steps;
     const volumeStep = targetVolume / steps;
@@ -235,11 +245,11 @@ export class SleepSoundsService {
 
     // Get current volume
     const status = await sound.getStatusAsync();
-    const currentVolume = status.isLoaded ? (status.volume || 0.5) : 0.5;
+    const currentVolume = status.isLoaded ? status.volume || 0.5 : 0.5;
     const volumeStep = currentVolume / steps;
 
     for (let i = 0; i < steps; i++) {
-      const volume = currentVolume - (volumeStep * (i + 1));
+      const volume = currentVolume - volumeStep * (i + 1);
       await sound.setVolumeAsync(Math.max(volume, 0));
       await new Promise(resolve => setTimeout(resolve, stepDuration));
     }

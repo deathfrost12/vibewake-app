@@ -158,7 +158,6 @@ export const useAlarmStore = create<AlarmState>()(
             await notificationService.cancelAlarm(alarm.notificationId);
           }
 
-
           // Only schedule if activating the alarm
           if (newActiveState) {
             try {
@@ -257,9 +256,7 @@ export const useAlarmStore = create<AlarmState>()(
 
               set(state => ({
                 alarms: state.alarms.map(a =>
-                  a.id === alarm.id
-                    ? { ...a, updatedAt: new Date() }
-                    : a
+                  a.id === alarm.id ? { ...a, updatedAt: new Date() } : a
                 ),
               }));
 

@@ -45,7 +45,9 @@ export class AudioService {
       });
 
       this.isConfigured = true;
-      console.log('✅ Audio configured for background playback with expo-audio');
+      console.log(
+        '✅ Audio configured for background playback with expo-audio'
+      );
     } catch (error) {
       console.error('❌ Failed to configure audio:', error);
       throw error;
@@ -66,7 +68,9 @@ export class AudioService {
       });
 
       this.isConfigured = true;
-      console.log('✅ Audio configured for silent loop background mode with expo-audio');
+      console.log(
+        '✅ Audio configured for silent loop background mode with expo-audio'
+      );
     } catch (error) {
       console.error('❌ Failed to configure silent loop audio mode:', error);
       throw error;
@@ -110,10 +114,10 @@ export class AudioService {
 
     try {
       const player = createAudioPlayer({ uri });
-      
+
       // Set initial configuration
       player.volume = 1.0;
-      
+
       return player;
     } catch (error) {
       console.error('❌ Failed to load audio:', error);
@@ -124,26 +128,28 @@ export class AudioService {
   /**
    * Load alarm audio with enhanced options for background playbook
    */
-  async loadAlarmAudio(uri: string, options?: AlarmAudioOptions): Promise<AudioPlayer> {
+  async loadAlarmAudio(
+    uri: string,
+    options?: AlarmAudioOptions
+  ): Promise<AudioPlayer> {
     if (!this.isConfigured) {
       await this.configureAudio();
     }
 
-    const {
-      volume = 1.0,
-      shouldLoop = true,
-    } = options || {};
+    const { volume = 1.0, shouldLoop = true } = options || {};
 
     try {
       const player = createAudioPlayer({ uri });
-      
+
       // Configure player for alarm use
       player.volume = volume;
       // Note: expo-audio handles looping differently - we'll implement this in playback
-      
+
       this.currentAlarmPlayer = player;
-      console.log('✅ Alarm audio loaded and ready for background playback with expo-audio');
-      
+      console.log(
+        '✅ Alarm audio loaded and ready for background playback with expo-audio'
+      );
+
       return player;
     } catch (error) {
       console.error('❌ Failed to load alarm audio:', error);
@@ -153,50 +159,35 @@ export class AudioService {
 
   /**
    * Play alarm sound with background capability
+   * Note: Looping is now handled via longer audio files instead of JS timers
    */
   async playAlarmSound(player: AudioPlayer): Promise<void> {
     try {
       await player.play();
-      console.log('✅ Alarm sound started playing with expo-audio');
-      
-      // Implement looping by listening for end events
-      this.setupAudioLooping(player);
+      console.log(
+        '✅ Alarm sound started playing with expo-audio (looping via long audio files)'
+      );
     } catch (error) {
       console.error('❌ Failed to play alarm sound:', error);
       throw error;
     }
   }
 
-  /**
-   * Setup audio looping for alarms (since expo-audio doesn't have built-in looping)
-   */
-  private setupAudioLooping(player: AudioPlayer): void {
-    // This is a simplified implementation - in practice you'd want to handle this more robustly
-    const checkForEnd = () => {
-      if (player.currentTime >= player.duration && player.duration > 0) {
-        player.seekTo(0);
-        player.play();
-      }
-    };
-
-    // Check every 100ms if we need to loop
-    const interval = setInterval(checkForEnd, 100);
-    
-    // Store interval for cleanup (simplified - you'd want to manage this better)
-    (player as any)._loopInterval = interval;
-  }
+  // Note: setupAudioLooping() method removed - we now use longer audio files
+  // instead of JS timer-based looping to avoid background timer issues
 
   /**
    * Play alarm sound with fade-in effect
+   * Note: Looping is now handled via longer audio files instead of JS timers
    */
-  async playAlarmSoundWithFadeIn(player: AudioPlayer, fadeInMs: number = 2000): Promise<void> {
+  async playAlarmSoundWithFadeIn(
+    player: AudioPlayer,
+    fadeInMs: number = 2000
+  ): Promise<void> {
     try {
       // Start at low volume
       player.volume = 0.1;
       await player.play();
-
-      // Setup looping
-      this.setupAudioLooping(player);
 
       // Gradually increase volume over fadeInMs
       const steps = 20;
@@ -204,12 +195,14 @@ export class AudioService {
       const volumeStep = 0.9 / steps; // From 0.1 to 1.0
 
       for (let i = 0; i < steps; i++) {
-        const volume = 0.1 + (volumeStep * (i + 1));
+        const volume = 0.1 + volumeStep * (i + 1);
         player.volume = Math.min(volume, 1.0);
         await new Promise(resolve => setTimeout(resolve, stepDuration));
       }
 
-      console.log(`✅ Alarm sound started with ${fadeInMs}ms fade-in using expo-audio`);
+      console.log(
+        `✅ Alarm sound started with ${fadeInMs}ms fade-in (looping via long audio files)`
+      );
     } catch (error) {
       console.error('❌ Failed to play alarm sound with fade-in:', error);
       throw error;
@@ -222,20 +215,13 @@ export class AudioService {
   async stopAlarmSound(player: AudioPlayer): Promise<void> {
     try {
       await player.pause();
-      
-      // Clear looping interval if it exists
-      const interval = (player as any)._loopInterval;
-      if (interval) {
-        clearInterval(interval);
-        delete (player as any)._loopInterval;
-      }
-      
+
       // Clear current alarm player reference
       if (this.currentAlarmPlayer === player) {
         this.currentAlarmPlayer = null;
       }
-      
-      console.log('✅ Alarm sound stopped with expo-audio');
+
+      console.log('✅ Alarm sound stopped');
     } catch (error) {
       console.error('❌ Failed to stop alarm sound:', error);
       throw error;

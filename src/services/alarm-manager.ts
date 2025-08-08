@@ -66,7 +66,7 @@ export class AlarmManager {
         backgroundTasks: {
           notificationTask: true,
           alarmTask: false,
-          isInitialized: true
+          isInitialized: true,
         },
         scheduledAlarms: 0, // Will be updated by actual alarm count
         currentlyRinging: stats.alarmService.currentRingingAlarm !== null,
@@ -92,7 +92,7 @@ export class AlarmManager {
     try {
       // Use the new background alarm manager's health check
       const healthStatus = await backgroundAlarmManager.healthCheck();
-      
+
       console.log(
         healthStatus.healthy
           ? '✅ Alarm system health check passed'
@@ -171,8 +171,4 @@ export class AlarmManager {
 export const alarmManager = AlarmManager.getInstance();
 
 // Export individual services for convenience
-export {
-  alarmService,
-  audioService,
-  backgroundAlarmManager,
-};
+export { alarmService, audioService, backgroundAlarmManager };

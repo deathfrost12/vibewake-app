@@ -110,16 +110,16 @@ class AlarmKitManagementService implements AlarmKitService {
       repeatDays: alarm.repeatDays,
       isActive: alarm.isActive,
     };
-    
+
     console.log(`📱 Converting alarm to native format:`, {
       id: alarmData.id,
       title: alarmData.title,
       timestamp: alarmData.date,
       scheduledDate: alarm.time.toISOString(),
       soundName: alarmData.soundName,
-      isActive: alarmData.isActive
+      isActive: alarmData.isActive,
     });
-    
+
     return alarmData;
   }
 

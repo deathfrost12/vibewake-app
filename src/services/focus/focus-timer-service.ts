@@ -115,9 +115,12 @@ export class FocusTimerService {
       }
 
       // Set session timer
-      this.sessionTimer = setTimeout(async () => {
-        await this.handleSessionComplete();
-      }, duration * 60 * 1000);
+      this.sessionTimer = setTimeout(
+        async () => {
+          await this.handleSessionComplete();
+        },
+        duration * 60 * 1000
+      );
 
       this.isRunning = true;
 
@@ -195,7 +198,7 @@ export class FocusTimerService {
     try {
       // Calculate remaining time
       const elapsed = Date.now() - this.currentSession.startTime.getTime();
-      const remaining = (this.currentSession.duration * 60 * 1000) - elapsed;
+      const remaining = this.currentSession.duration * 60 * 1000 - elapsed;
 
       if (remaining > 0) {
         // Resume timer
@@ -263,13 +266,13 @@ export class FocusTimerService {
 
     try {
       console.log('🎵 Stopping ambient sound...');
-      
+
       // Fade out
       await this.fadeOut(this.ambientSound, 1000);
-      
+
       await this.ambientSound.stopAsync();
       await this.ambientSound.unloadAsync();
-      
+
       this.ambientSound = null;
       console.log('✅ Ambient sound stopped');
     } catch (error) {
@@ -287,7 +290,7 @@ export class FocusTimerService {
 
       if (this.currentSession) {
         const sessionType = this.currentSession.sessionType;
-        
+
         // Suggest break if it was a focus session
         if (sessionType === 'focus') {
           console.log('💡 Time for a break!');
@@ -309,11 +312,11 @@ export class FocusTimerService {
       const steps = 10;
       const stepDuration = durationMs / steps;
       const status = await sound.getStatusAsync();
-      const currentVolume = status.isLoaded ? (status.volume || 0.6) : 0.6;
+      const currentVolume = status.isLoaded ? status.volume || 0.6 : 0.6;
       const volumeStep = currentVolume / steps;
 
       for (let i = 0; i < steps; i++) {
-        const volume = currentVolume - (volumeStep * (i + 1));
+        const volume = currentVolume - volumeStep * (i + 1);
         await sound.setVolumeAsync(Math.max(volume, 0));
         await new Promise(resolve => setTimeout(resolve, stepDuration));
       }
@@ -346,10 +349,10 @@ export class FocusTimerService {
     timeRemaining: number | null; // milliseconds
   } {
     let timeRemaining = null;
-    
+
     if (this.currentSession && this.isRunning) {
       const elapsed = Date.now() - this.currentSession.startTime.getTime();
-      timeRemaining = (this.currentSession.duration * 60 * 1000) - elapsed;
+      timeRemaining = this.currentSession.duration * 60 * 1000 - elapsed;
     }
 
     return {

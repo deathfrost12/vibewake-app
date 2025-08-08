@@ -70,7 +70,7 @@ src/types/alarm.ts                       # Updated with backgroundAudioEnabled f
 ### Předpoklady
 
 1. **Development build required** - Silent loop nefunguje v Expo Go
-2. **Real iOS device** - Background audio má omezení v simulátoru  
+2. **Real iOS device** - Background audio má omezení v simulátoru
 3. **iOS Settings configuration**:
    - Background App Refresh: Enabled pro VibeWake
    - Notification permissions: Granted
@@ -87,16 +87,18 @@ npx eas build --profile development --platform ios
 ```
 
 **Test Steps:**
+
 1. Otevři VibeWake na real device
 2. Vytvoř alarm na za 2-3 minuty
 3. Poznamenej v console logu: "🔇 Silent loop started - audio session kept alive"
-4. **Zamkni device** (power button) 
+4. **Zamkni device** (power button)
 5. Počkaj až alarm zvoní
 6. ✅ **Expected:** Alarm hraje i s uzamčeným displejem
 
 #### 2. App Background Test
 
 **Test Steps:**
+
 1. Vytvoř alarm na za 5 minut
 2. Minimalizuj aplikaci (home button - ALT ne swipe away)
 3. Použij jiné aplikace (Safari, Messages)
@@ -107,11 +109,12 @@ npx eas build --profile development --platform ios
 #### 3. App Killed Test (Nejdůležitější)
 
 **Test Steps:**
-1. Vytvoř alarm na za 10 minut  
+
+1. Vytvoř alarm na za 10 minut
 2. Úplně zavři aplikaci (swipe up → swipe away VibeWake)
 3. Zkontroluj v Settings > Battery, že VibeWake neběží v pozadí
 4. Počkaj až alarm zvoní
-5. ✅ **Expected:** 
+5. ✅ **Expected:**
    - Local notification se zobrazí
    - Po tapnuti notification se otevře ringing screen
    - **POZOR**: V tomto scénáři se silent loop nemůže spustit, ale notifications fungují
@@ -119,8 +122,9 @@ npx eas build --profile development --platform ios
 #### 4. Silent Mode Test (iOS Specific)
 
 **Test Steps:**
+
 1. Zapni silent mode (mute switch na boku)
-2. Vytvoř alarm na za 1 minutu  
+2. Vytvoř alarm na za 1 minutu
 3. Zamkni device
 4. Počkaj až alarm zvoní
 5. ✅ **Expected:** Alarm hraje i v silent mode díky `playsInSilentModeIOS: true`
@@ -128,6 +132,7 @@ npx eas build --profile development --platform ios
 #### 5. Battery Impact Test
 
 **Test Steps:**
+
 1. Zaznamenej battery level před testem
 2. Nech background audio běžet 2 hodiny s aktivní aplikaci
 3. Checkni spotřebu v Settings > Battery > Battery Usage by App
@@ -161,7 +166,7 @@ npx eas build --profile development --platform ios
 // Check background alarm manager status
 await backgroundAlarmManager.getSystemStats();
 
-// Check silent loop status  
+// Check silent loop status
 backgroundAlarmService.getDiagnostics();
 
 // Check battery impact
@@ -219,7 +224,7 @@ await backgroundAlarmManager.healthCheck();
 #### Notifications se nezobrazují při app killed
 
 1. **Notification permissions** musí být granted
-2. **Critical alerts** permissions (jen pro enterprise/medical apps)  
+2. **Critical alerts** permissions (jen pro enterprise/medical apps)
 3. **Apple notification server** delays - čekat až 2 minuty
 
 #### Battery draining rychle
@@ -240,7 +245,7 @@ await backgroundAlarmManager.healthCheck();
 #### Android Differences:
 
 - **Battery optimization** musí být disabled pro VibeWake
-- **Doze mode** může ovlivnit background alarms  
+- **Doze mode** může ovlivnit background alarms
 - **Exact alarm scheduling** uses `SCHEDULE_EXACT_ALARM` permission
 
 ### 🎯 Success Criteria
@@ -272,9 +277,9 @@ Silent loop background alarm systém je připraven pro finální testování na 
 **Next Steps:**
 
 1. **Build development version** pro iOS testing
-2. **Test all scenarios** podle výše uvedeného guide  
+2. **Test all scenarios** podle výše uvedeného guide
 3. **Monitor console logs** pro proper lifecycle events
-4. **Measure battery impact** za real-world conditions  
+4. **Measure battery impact** za real-world conditions
 5. **Prepare App Store submission** s wellness features explanation
 
 Tato implementace dodržuje všechny Apple guidelines a poskytuje robustní řešení pro reliable background alarms na iOS.

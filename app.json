@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#6B7280"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owlee.app",
@@ -26,10 +24,7 @@
         "NSUserNotificationsUsageDescription": "This app needs notification permissions to send alarm notifications and wake you up at scheduled times",
         "NSAlarmKitUsageDescription": "This app uses background audio and sleep sounds to provide reliable wake-up notifications and wellness features that work in silent mode, ensuring optimal alarm reliability.",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": [
-          "audio",
-          "remote-notification"
-        ],
+        "UIBackgroundModes": ["audio", "remote-notification"],
         "BGTaskSchedulerPermittedIdentifiers": [
           "com.owlee.app.silent-loop-audio"
         ]

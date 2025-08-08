@@ -14,12 +14,18 @@ export async function getAuthorizationStatus(): Promise<any> {
 
 export async function scheduleAlarm(alarm: any): Promise<string> {
   console.log('🔍 JS: ExpoAlarmkitModule.scheduleAlarm called with:', alarm);
-  console.log('🔍 JS: ExpoAlarmkitModule proxy:', ExpoAlarmkitModule ? 'EXISTS' : 'NULL');
-  console.log('🔍 JS: scheduleAlarm function:', typeof ExpoAlarmkitModule?.scheduleAlarm);
-  
+  console.log(
+    '🔍 JS: ExpoAlarmkitModule proxy:',
+    ExpoAlarmkitModule ? 'EXISTS' : 'NULL'
+  );
+  console.log(
+    '🔍 JS: scheduleAlarm function:',
+    typeof ExpoAlarmkitModule?.scheduleAlarm
+  );
+
   const result = await ExpoAlarmkitModule?.scheduleAlarm(alarm);
   console.log('🔍 JS: scheduleAlarm result:', result);
-  
+
   return result;
 }
 

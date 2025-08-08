@@ -73,7 +73,7 @@ export class BatteryUsageService {
 
       // Calculate estimated battery impact
       let estimatedBatteryImpact: 'low' | 'medium' | 'high' = 'low';
-      
+
       if (backgroundAudioEnabled && silentLoopActive) {
         estimatedBatteryImpact = 'medium'; // Silent loop uses minimal CPU but keeps audio session alive
       } else if (backgroundAudioEnabled) {
@@ -105,7 +105,7 @@ export class BatteryUsageService {
       return stats;
     } catch (error) {
       console.error('❌ Failed to get battery usage stats:', error);
-      
+
       // Return fallback stats
       return {
         backgroundAudioEnabled,
@@ -133,13 +133,16 @@ export class BatteryUsageService {
     const batteryPercent = Math.round(context.batteryLevel * 100);
 
     // Low battery warnings
-    if (batteryPercent < this.config.lowBatteryThreshold && !context.isCharging) {
+    if (
+      batteryPercent < this.config.lowBatteryThreshold &&
+      !context.isCharging
+    ) {
       if (context.backgroundAudioEnabled) {
         recommendations.push(
           `🔋 Low battery (${batteryPercent}%) - Consider disabling background audio for alarms`
         );
       }
-      
+
       if (context.silentLoopActive) {
         recommendations.push(
           '🔇 Silent loop is active - This may drain battery faster when low'
@@ -151,18 +154,24 @@ export class BatteryUsageService {
     switch (context.optimizationLevel) {
       case 'battery-saver':
         if (context.backgroundAudioEnabled) {
-          recommendations.push('⚡ Battery saver mode: Use notification-only alarms to maximize battery life');
+          recommendations.push(
+            '⚡ Battery saver mode: Use notification-only alarms to maximize battery life'
+          );
         }
         break;
-        
+
       case 'balanced':
         if (context.silentLoopActive && batteryPercent < 50) {
-          recommendations.push('⚖️ Balanced mode: Silent loop will auto-disable at 20% battery');
+          recommendations.push(
+            '⚖️ Balanced mode: Silent loop will auto-disable at 20% battery'
+          );
         }
         break;
-        
+
       case 'performance':
-        recommendations.push('🚀 Performance mode: All alarm features enabled for maximum reliability');
+        recommendations.push(
+          '🚀 Performance mode: All alarm features enabled for maximum reliability'
+        );
         break;
     }
 
@@ -200,7 +209,7 @@ export class BatteryUsageService {
     try {
       const batteryLevel = await Battery.getBatteryLevelAsync();
       const batteryPercent = Math.round(batteryLevel * 100);
-      
+
       return batteryPercent < this.config.lowBatteryThreshold;
     } catch (error) {
       console.warn('⚠️ Failed to check battery level for auto-disable:', error);
@@ -248,17 +257,22 @@ export class BatteryUsageService {
   /**
    * Update battery usage configuration
    */
-  async updateConfiguration(newConfig: Partial<BatteryUsageConfig>): Promise<void> {
+  async updateConfiguration(
+    newConfig: Partial<BatteryUsageConfig>
+  ): Promise<void> {
     try {
       this.config = { ...this.config, ...newConfig };
-      
+
       // Save to storage
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.config));
-      
+
       // Update monitoring based on new config
       if (this.config.showBatteryWarnings && !this.batteryCheckInterval) {
         await this.startBatteryMonitoring();
-      } else if (!this.config.showBatteryWarnings && this.batteryCheckInterval) {
+      } else if (
+        !this.config.showBatteryWarnings &&
+        this.batteryCheckInterval
+      ) {
         this.stopBatteryMonitoring();
       }
 
@@ -287,18 +301,23 @@ export class BatteryUsageService {
       }
 
       // Check battery every 5 minutes
-      this.batteryCheckInterval = setInterval(async () => {
-        try {
-          const shouldDisable = await this.shouldDisableBackgroundAudio();
-          
-          if (shouldDisable) {
-            console.log('🔋 Low battery detected - recommending background audio disable');
-            // You could emit an event here for the UI to listen to
+      this.batteryCheckInterval = setInterval(
+        async () => {
+          try {
+            const shouldDisable = await this.shouldDisableBackgroundAudio();
+
+            if (shouldDisable) {
+              console.log(
+                '🔋 Low battery detected - recommending background audio disable'
+              );
+              // You could emit an event here for the UI to listen to
+            }
+          } catch (error) {
+            console.warn('⚠️ Battery check failed:', error);
           }
-        } catch (error) {
-          console.warn('⚠️ Battery check failed:', error);
-        }
-      }, 5 * 60 * 1000); // 5 minutes
+        },
+        5 * 60 * 1000
+      ); // 5 minutes
 
       console.log('✅ Battery monitoring started');
     } catch (error) {
@@ -328,7 +347,10 @@ export class BatteryUsageService {
         console.log('✅ Battery usage configuration loaded');
       }
     } catch (error) {
-      console.warn('⚠️ Failed to load battery configuration, using defaults:', error);
+      console.warn(
+        '⚠️ Failed to load battery configuration, using defaults:',
+        error
+      );
     }
   }
 

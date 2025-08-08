@@ -59,14 +59,16 @@ export class BackgroundAlarmManager {
     }
 
     try {
-      console.log('🚀 Initializing BackgroundAlarmManager with all services...');
+      console.log(
+        '🚀 Initializing BackgroundAlarmManager with all services...'
+      );
 
       // Core services initialization
       console.log('📱 Initializing core alarm services...');
-      
+
       // Initialize audio service first (required by others)
       await audioService.configureAudio();
-      
+
       // Initialize background alarm service for silent loop
       await backgroundAlarmService.initialize({
         enableSilentLoop: Platform.OS === 'ios', // Only on iOS
@@ -82,17 +84,21 @@ export class BackgroundAlarmManager {
       await batteryUsageService.initialize();
 
       // Initialize wellness services for Apple review legitimacy
-      console.log('🧘 Initializing wellness services for background audio justification...');
-      
+      console.log(
+        '🧘 Initializing wellness services for background audio justification...'
+      );
+
       // These are already singleton instances, just verify they're ready
       sleepSoundsService; // Already initialized singleton
-      focusTimerService; // Already initialized singleton  
+      focusTimerService; // Already initialized singleton
       breathingExerciseService; // Already initialized singleton
-      
+
       console.log('✅ All wellness services initialized');
 
       this.isInitialized = true;
-      console.log('✅ BackgroundAlarmManager fully initialized with hybrid background alarm system');
+      console.log(
+        '✅ BackgroundAlarmManager fully initialized with hybrid background alarm system'
+      );
 
       // Log initial system status
       const stats = await this.getSystemStats();
@@ -117,14 +123,22 @@ export class BackgroundAlarmManager {
    * Start background alarm preparation for imminent alarms
    * This is called when user creates an alarm or when app detects alarm within 10 minutes
    */
-  async prepareForAlarm(alarmId: string, timeUntilAlarmMs: number): Promise<void> {
+  async prepareForAlarm(
+    alarmId: string,
+    timeUntilAlarmMs: number
+  ): Promise<void> {
     try {
-      console.log(`🔄 Preparing background alarm system for: ${alarmId} (in ${Math.round(timeUntilAlarmMs / 1000 / 60)}min)`);
+      console.log(
+        `🔄 Preparing background alarm system for: ${alarmId} (in ${Math.round(timeUntilAlarmMs / 1000 / 60)}min)`
+      );
 
       // Check battery status first
-      const shouldDisable = await batteryUsageService.shouldDisableBackgroundAudio();
+      const shouldDisable =
+        await batteryUsageService.shouldDisableBackgroundAudio();
       if (shouldDisable) {
-        console.log('🔋 Low battery detected - skipping background audio preparation');
+        console.log(
+          '🔋 Low battery detected - skipping background audio preparation'
+        );
         return;
       }
 
@@ -207,7 +221,8 @@ export class BackgroundAlarmManager {
         wellnessServices: {
           sleepSounds: sleepSoundsService.isCurrentlyPlaying(),
           focusTimer: focusTimerService.isSessionRunning(),
-          breathingExercise: breathingExerciseService.getSessionStats().isActive,
+          breathingExercise:
+            breathingExerciseService.getSessionStats().isActive,
         },
       };
     } catch (error) {
@@ -243,16 +258,26 @@ export class BackgroundAlarmManager {
 
       // Check battery status
       const batteryStats = await batteryUsageService.getBatteryUsageStats();
-      if (batteryStats.batteryLevel < 20 && batteryStats.backgroundAudioEnabled) {
+      if (
+        batteryStats.batteryLevel < 20 &&
+        batteryStats.backgroundAudioEnabled
+      ) {
         issues.push('Low battery with background audio active');
-        recommendations.push('Consider disabling background audio to conserve battery');
+        recommendations.push(
+          'Consider disabling background audio to conserve battery'
+        );
       }
 
       // Check iOS specific requirements
       if (Platform.OS === 'ios') {
-        if (!backgroundDiagnostics.silentLoopActive && alarmService.isAlarmRinging()) {
+        if (
+          !backgroundDiagnostics.silentLoopActive &&
+          alarmService.isAlarmRinging()
+        ) {
           issues.push('Alarm ringing without silent loop support');
-          recommendations.push('Background audio may stop when device is locked');
+          recommendations.push(
+            'Background audio may stop when device is locked'
+          );
         }
       }
 
@@ -299,7 +324,7 @@ export class BackgroundAlarmManager {
         '📊 Monitor battery usage in iOS Settings > Battery to track actual impact',
       ],
       troubleshooting: [
-        '🔄 If alarms don\'t ring when locked: Check iOS Background App Refresh settings',
+        "🔄 If alarms don't ring when locked: Check iOS Background App Refresh settings",
         '🔊 If audio stops in silent mode: Ensure "Plays in Silent Mode" is enabled',
         '📱 If app seems slow: Restart the app to refresh audio configuration',
         '🪫 If battery drains quickly: Temporarily disable background audio features',
@@ -312,7 +337,9 @@ export class BackgroundAlarmManager {
    */
   async emergencyCleanup(): Promise<void> {
     try {
-      console.log('🚨 Performing emergency cleanup of background alarm system...');
+      console.log(
+        '🚨 Performing emergency cleanup of background alarm system...'
+      );
 
       await Promise.allSettled([
         backgroundAlarmService.cleanup(),
