@@ -90,7 +90,8 @@
     "zustand": "^5.0.5",
     "react-native-webview": "13.13.5",
     "expo-task-manager": "~13.1.6",
-    "expo-battery": "~9.1.4"
+    "expo-battery": "~9.1.4",
+    "expo-audio": "~0.4.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

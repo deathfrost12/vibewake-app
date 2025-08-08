@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer, AudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
 import { audioService } from '../audio/audio-service';
 
@@ -10,7 +10,7 @@ export interface BackgroundAlarmConfig {
 
 export class BackgroundAlarmService {
   private static instance: BackgroundAlarmService;
-  private silentSound: Audio.Sound | null = null;
+  private silentPlayer: AudioPlayer | null = null;
   private isLoopActive = false;
   private isInitialized = false;
   private config: BackgroundAlarmConfig = {
@@ -79,22 +79,21 @@ export class BackgroundAlarmService {
     try {
       console.log('🔇 Starting silent audio loop...');
 
-      // Load the silent audio file
-      const { sound } = await Audio.Sound.createAsync(
-        require('../../../assets/silent-1s.wav'),
-        {
-          shouldPlay: true,
-          isLooping: true,
-          volume: 0.0, // Completely silent
-          positionMillis: 0,
-        },
-        null
-      );
+      // Create audio player for the silent audio file
+      const silentUri = require('../../../assets/silent-1s.wav');
+      this.silentPlayer = createAudioPlayer(silentUri);
+      
+      // Configure for silent loop
+      this.silentPlayer.volume = 0.0; // Completely silent
+      
+      // Start playing
+      await this.silentPlayer.play();
+      
+      // Setup manual looping for the silent audio
+      this.setupSilentLoop();
 
-      this.silentSound = sound;
       this.isLoopActive = true;
-
-      console.log('✅ Silent audio loop started - audio session kept alive');
+      console.log('✅ Silent audio loop started - audio session kept alive with expo-audio');
     } catch (error) {
       console.error('❌ Failed to start silent loop:', error);
       this.isLoopActive = false;
@@ -103,11 +102,32 @@ export class BackgroundAlarmService {
   }
 
   /**
+   * Setup manual looping for silent audio
+   */
+  private setupSilentLoop(): void {
+    if (!this.silentPlayer) return;
+
+    const checkForLoop = () => {
+      if (!this.isLoopActive || !this.silentPlayer) return;
+      
+      // Check if audio finished and restart it
+      if (this.silentPlayer.currentTime >= this.silentPlayer.duration && this.silentPlayer.duration > 0) {
+        this.silentPlayer.seekTo(0);
+        this.silentPlayer.play();
+      }
+    };
+
+    // Check every 100ms for looping
+    const interval = setInterval(checkForLoop, 100);
+    (this.silentPlayer as any)._loopInterval = interval;
+  }
+
+  /**
    * Stop silent audio loop
    * Call this when alarm finishes or app no longer needs background audio
    */
   async stopSilentLoop(): Promise<void> {
-    if (!this.isLoopActive || !this.silentSound) {
+    if (!this.isLoopActive || !this.silentPlayer) {
       console.log('🔇 Silent loop not active, skipping stop');
       return;
     }
@@ -115,31 +135,37 @@ export class BackgroundAlarmService {
     try {
       console.log('🔇 Stopping silent audio loop...');
 
-      await this.silentSound.stopAsync();
-      await this.silentSound.unloadAsync();
+      // Clear the loop interval
+      const interval = (this.silentPlayer as any)._loopInterval;
+      if (interval) {
+        clearInterval(interval);
+        delete (this.silentPlayer as any)._loopInterval;
+      }
+
+      await this.silentPlayer.pause();
       
-      this.silentSound = null;
+      this.silentPlayer = null;
       this.isLoopActive = false;
 
-      console.log('✅ Silent audio loop stopped');
+      console.log('✅ Silent audio loop stopped with expo-audio');
     } catch (error) {
       console.error('❌ Failed to stop silent loop:', error);
       // Force cleanup even if stop fails
-      this.silentSound = null;
+      this.silentPlayer = null;
       this.isLoopActive = false;
     }
   }
 
   /**
-   * Switch from silent loop to alarm playback
+   * Switch from silent loop to alarm playbook
    * This ensures seamless transition without dropping audio session
    */
-  async switchToAlarmSound(alarmSound: Audio.Sound): Promise<void> {
+  async switchToAlarmSound(alarmPlayer: AudioPlayer): Promise<void> {
     try {
-      console.log('🔇 Switching from silent loop to alarm sound...');
+      console.log('🔄 Switching from silent loop to alarm sound...');
 
-      // First, start the alarm sound while silent loop is still running
-      await alarmSound.playAsync();
+      // First, start the alarm player while silent loop is still running
+      await alarmPlayer.play();
       
       // Small delay to ensure alarm audio starts playing
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -149,7 +175,7 @@ export class BackgroundAlarmService {
         await this.stopSilentLoop();
       }
 
-      console.log('✅ Successfully switched to alarm sound');
+      console.log('✅ Successfully switched to alarm sound with expo-audio');
     } catch (error) {
       console.error('❌ Failed to switch to alarm sound:', error);
       throw error;
@@ -193,7 +219,7 @@ export class BackgroundAlarmService {
     } catch (error) {
       console.error('❌ Emergency stop failed:', error);
       // Force cleanup anyway
-      this.silentSound = null;
+      this.silentPlayer = null;
       this.isLoopActive = false;
     }
   }

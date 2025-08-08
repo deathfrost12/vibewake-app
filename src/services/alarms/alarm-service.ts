@@ -5,7 +5,7 @@ import { notificationService } from '../notifications/notification-service';
 import { AudioManager } from '../audio/AudioManager';
 import { audioService } from '../audio/audio-service';
 import { backgroundAlarmService } from '../background/background-alarm-service';
-import { Audio } from 'expo-av';
+import { createAudioPlayer, AudioPlayer } from 'expo-audio';
 import { safeReplace } from '../../utils/navigation-utils';
 import { alarmKitService } from '../alarmkit/alarmkit-service';
 import { alarmKitAuthService } from '../alarmkit/alarmkit-auth-service';
@@ -14,7 +14,7 @@ import { alarmKitAuthService } from '../alarmkit/alarmkit-auth-service';
 
 export interface AlarmRingingState {
   alarmId: string;
-  soundObject: Audio.Sound | null;
+  soundObject: AudioPlayer | null;
   isRinging: boolean;
 }
 
@@ -391,36 +391,34 @@ export class AlarmService {
       console.log(`🔇 Starting background audio alarm: ${alarmId}`);
 
       // Load alarm audio with enhanced options
-      let alarmSound: Audio.Sound;
+      let alarmPlayer: AudioPlayer;
       if (audioTrack.uri) {
-        alarmSound = await audioService.loadAlarmAudio(audioTrack.uri, {
+        alarmPlayer = await audioService.loadAlarmAudio(audioTrack.uri, {
           volume: 1.0,
           shouldLoop: true,
         });
       } else {
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: 'default' },
-          { shouldPlay: false, isLooping: true, volume: 1.0 }
-        );
-        alarmSound = sound;
+        // Create fallback audio player with default uri
+        alarmPlayer = createAudioPlayer({ uri: 'default' });
+        alarmPlayer.volume = 1.0;
       }
 
       // If silent loop is active, switch to alarm sound
       if (backgroundAlarmService.isSilentLoopActive()) {
         console.log('🔄 Switching from silent loop to alarm sound');
-        await backgroundAlarmService.switchToAlarmSound(alarmSound);
+        await backgroundAlarmService.switchToAlarmSound(alarmPlayer);
       } else {
         // Start silent loop first, then switch to alarm
         console.log('🔇 Starting silent loop then alarm sound');
         await backgroundAlarmService.startSilentLoop();
         // Small delay to ensure silent loop is established
         await new Promise(resolve => setTimeout(resolve, 500));
-        await backgroundAlarmService.switchToAlarmSound(alarmSound);
+        await backgroundAlarmService.switchToAlarmSound(alarmPlayer);
       }
 
       this.currentRingingAlarm = {
         alarmId,
-        soundObject: alarmSound,
+        soundObject: alarmPlayer,
         isRinging: true,
       };
 
@@ -443,15 +441,12 @@ export class AlarmService {
       console.log('🔄 Attempting fallback to legacy audio system');
       await audioService.configureAudio();
 
-      let soundObject: Audio.Sound;
+      let soundObject: AudioPlayer;
       if (audioTrack.uri) {
         soundObject = await audioService.loadAudio(audioTrack.uri);
       } else {
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: 'default' },
-          { shouldPlay: false, isLooping: true, volume: 1.0 }
-        );
-        soundObject = sound;
+        soundObject = createAudioPlayer({ uri: 'default' });
+        soundObject.volume = 1.0;
       }
 
       await audioService.playAlarmSound(soundObject);
@@ -1214,14 +1209,13 @@ export class AlarmService {
 
       // Attempt system default sound as last resort
       console.log('🔄 Attempting fallback with system default sound');
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: 'default' },
-        { shouldPlay: true, isLooping: true, volume: 1.0 }
-      );
+      const fallbackPlayer = createAudioPlayer({ uri: 'default' });
+      fallbackPlayer.volume = 1.0;
+      await fallbackPlayer.play();
 
-      // Update state with fallback sound
+      // Update state with fallback player
       if (this.currentRingingAlarm) {
-        this.currentRingingAlarm.soundObject = sound;
+        this.currentRingingAlarm.soundObject = fallbackPlayer;
       }
 
       console.log('✅ Fallback alarm sound started with basic state');

@@ -197,7 +197,7 @@ export class BackgroundAlarmManager {
         },
         audioService: {
           configured: audioStats.configured,
-          hasCurrentAlarm: audioStats.hasCurrentAlarmSound,
+          hasCurrentAlarm: audioStats.hasCurrentAlarmPlayer,
         },
         batteryUsage: {
           estimatedImpact: batteryStats.estimatedBatteryImpact,
